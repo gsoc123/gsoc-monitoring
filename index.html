@@ -1344,34 +1344,6 @@
     color: var(--text-dim);
     margin-top: 4px;
   }
-  .clocks-controls {
-    display: flex;
-    gap: 0;
-    border: 1px solid var(--line-2);
-    background: var(--bg);
-    flex-wrap: wrap;
-  }
-  .clocks-group-btn {
-    background: transparent;
-    border: none;
-    border-right: 1px solid var(--line-2);
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 7px 14px;
-    cursor: pointer;
-  }
-  .clocks-group-btn:last-child { border-right: none; }
-  .clocks-group-btn:hover { color: var(--text); background: var(--panel); }
-  .clocks-group-btn.active {
-    background: var(--accent);
-    color: var(--bg);
-    font-weight: 600;
-  }
-
   .clocks-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1379,49 +1351,103 @@
     background: var(--line);
     border: 1px solid var(--line);
   }
-  .clocks-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-  }
-  .clocks-edit-controls {
-    display: flex;
-    gap: 6px;
-  }
-  .clocks-edit-controls button {
-    background: transparent;
-    border: 1px solid var(--line-2);
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 6px 10px;
-    cursor: pointer;
-    display: inline-flex; align-items: center; gap: 5px;
-  }
-  .clocks-edit-controls button:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-  .clocks-edit-controls button.active {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
-    font-weight: 600;
-  }
-  .clocks-edit-hint {
-    background: var(--info-bg);
-    border: 1px solid var(--accent);
-    padding: 10px 14px;
+  /* New: search bar for adding clocks */
+  .clocks-search-bar {
+    position: relative;
     margin-bottom: 14px;
+    max-width: 600px;
+  }
+  .clocks-search-bar input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+    color: var(--text);
+    padding: 10px 36px 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .clocks-search-bar input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .clocks-search-clear {
+    position: absolute;
+    right: 6px; top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-mute);
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+  .clocks-search-clear:hover { color: var(--accent); }
+
+  .clocks-search-results {
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+    margin-bottom: 14px;
+    max-height: 320px;
+    overflow-y: auto;
+    max-width: 600px;
+  }
+  .clocks-search-results .csr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    gap: 12px;
     font-size: 12px;
-    line-height: 1.6;
+  }
+  .clocks-search-results .csr-row:last-child { border-bottom: none; }
+  .clocks-search-results .csr-row:hover { background: var(--bg-2); }
+  .clocks-search-results .csr-name {
+    flex: 1;
     color: var(--text);
   }
-  .clocks-edit-hint b { color: var(--accent); }
+  .clocks-search-results .csr-name b { color: var(--accent); }
+  .clocks-search-results .csr-meta {
+    color: var(--text-mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+  .clocks-search-results .csr-add {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .clocks-search-results .csr-add:hover { opacity: 0.85; }
+  .clocks-search-results .csr-add.added {
+    background: var(--bg-3);
+    color: var(--text-mute);
+    cursor: default;
+  }
+  .clocks-search-results .csr-empty {
+    padding: 16px 14px;
+    color: var(--text-mute);
+    font-size: 12px;
+    text-align: center;
+  }
+  .clocks-empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 13px;
+    grid-column: 1 / -1;
+  }
+  .clocks-empty-state .lead {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
 
   /* Edit mode: hide/unhide overlay button on each card */
   .clock-card .card-action-btn {
@@ -2065,6 +2091,18 @@
   .personnel-sync-badge.connecting { color: var(--text-mute); border-color: var(--line-2); }
   .personnel-sync-badge.ok         { color: var(--ok);       border-color: var(--ok); }
   .personnel-sync-badge.err        { color: var(--warn);     border-color: var(--warn); }
+
+  .clocks-sync-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 5px 10px;
+    border: 1px solid var(--line);
+    display: inline-block;
+    color: var(--text-mute);
+  }
+  .clocks-sync-badge.ok  { color: var(--ok);   border-color: var(--ok); }
+  .clocks-sync-badge.err { color: var(--warn); border-color: var(--warn); }
 
   .sg-wrap { max-width: 1800px; margin: 0 auto; padding: 0 24px; }
   .sg-header {
@@ -3218,38 +3256,30 @@
     <div class="clocks-wrap">
       <div class="clocks-header">
         <div>
-          <div class="clocks-title">◷ World Clocks — Operational Overview</div>
-          <div class="clocks-sub">Local times across key SAF partner nations, regional neighbours, and HADR coordination centres</div>
+          <div class="clocks-title">◷ World Clocks</div>
+          <div class="clocks-sub">Search for any country or region to add it as a clock. Each clock shows the local time for that location. <b>Shared list</b> — changes sync to all users.</div>
         </div>
-        <div class="clocks-actions">
-          <div class="clocks-controls">
-            <button class="clocks-group-btn active" data-group="all">All</button>
-            <button class="clocks-group-btn" data-group="home">Home</button>
-            <button class="clocks-group-btn" data-group="region">Region</button>
-            <button class="clocks-group-btn" data-group="partners">Partners</button>
-            <button class="clocks-group-btn" data-group="hadr">HADR Hubs</button>
-          </div>
-          <div class="clocks-edit-controls">
-            <button id="clocks-show-hidden-btn" onclick="toggleShowHidden()" title="Show or hide cities that have been hidden">
-              <span class="icon">◌</span> <span id="clocks-hidden-count">0 hidden</span>
-            </button>
-            <button id="clocks-edit-btn" onclick="toggleClocksEditMode()" title="Enter edit mode to hide/unhide cities">
-              ✎ Edit
-            </button>
-          </div>
+        <div>
+          <span class="clocks-sync-badge" id="clocks-sync-badge">◌ CONNECTING</span>
         </div>
       </div>
 
-      <div id="clocks-edit-hint" class="clocks-edit-hint" style="display:none">
-        ✎ <b>Edit mode active</b> — click any clock's <b>✕</b> button to hide it. Hidden clocks can be restored by toggling "Show Hidden" above. Click "Done" to exit edit mode.
+      <div class="clocks-search-bar">
+        <input type="text" id="clocks-search-input"
+               placeholder="🔍 Type a country or region (e.g. Texas, Bavaria, Japan) to add a clock…"
+               autocomplete="off"
+               oninput="handleClocksSearch(this.value)" />
+        <button class="clocks-search-clear" onclick="clearClocksSearch()" title="Clear search">✕</button>
       </div>
+
+      <div id="clocks-search-results" class="clocks-search-results" style="display:none"></div>
 
       <div class="clocks-grid" id="clocks-grid">
         <!-- populated by JS -->
       </div>
 
       <div class="clocks-footnote">
-        <span>Times shown auto-update every second · DST handled via IANA timezone database · Hidden clocks are remembered across sessions</span>
+        <span>Times update every second · DST handled via IANA timezone database · Your selected clocks are remembered across sessions</span>
       </div>
     </div>
   </section>
@@ -5534,111 +5564,239 @@ function tickClock() {
 setInterval(tickClock, 1000); tickClock();
 
 // =============================================================
-//  WORLD CLOCKS
+//  WORLD CLOCKS — search-driven, persisted in localStorage
 // =============================================================
-const WORLD_CITIES = [
-  // Home
-  { city: 'Singapore',       country: 'Singapore',       flag: '🇸🇬', tz: 'Asia/Singapore',     group: 'home' },
+//
+// Each clock has a stable key:
+//   "country:US"   → uses country.timezone (e.g. America/New_York for US)
+//   "state:US-TX"  → uses state.timezone (America/Chicago)
+//
+// userClocks: ordered list of { type, id, label, sublabel, tz } resolved from D1.
 
-  // Regional (ASEAN + near neighbours)
-  { city: 'Kuala Lumpur',    country: 'Malaysia',        flag: '🇲🇾', tz: 'Asia/Kuala_Lumpur',  group: 'region' },
-  { city: 'Jakarta',         country: 'Indonesia',       flag: '🇮🇩', tz: 'Asia/Jakarta',       group: 'region' },
-  { city: 'Bangkok',         country: 'Thailand',        flag: '🇹🇭', tz: 'Asia/Bangkok',       group: 'region' },
-  { city: 'Manila',          country: 'Philippines',     flag: '🇵🇭', tz: 'Asia/Manila',        group: 'region' },
-  { city: 'Hanoi',           country: 'Vietnam',         flag: '🇻🇳', tz: 'Asia/Ho_Chi_Minh',   group: 'region' },
-  { city: 'Bandar Seri B.',  country: 'Brunei',          flag: '🇧🇳', tz: 'Asia/Brunei',        group: 'region' },
-  { city: 'Phnom Penh',      country: 'Cambodia',        flag: '🇰🇭', tz: 'Asia/Phnom_Penh',    group: 'region' },
-  { city: 'Yangon',          country: 'Myanmar',         flag: '🇲🇲', tz: 'Asia/Yangon',        group: 'region' },
-  { city: 'Vientiane',       country: 'Laos',            flag: '🇱🇦', tz: 'Asia/Vientiane',     group: 'region' },
+// ===== Persistence: D1-synced via the Worker bridge =====
+// Shared global list — every user sees the same clocks.
+// localStorage is used as an offline cache, not the source of truth.
+const CLOCKS_LOCAL_CACHE_KEY = 'hadr_user_clocks_cache_v1';
+let userClocks = []; // [{ type:'country'|'state', id, label, sublabel, tz }]
+let clocksSearchTimer = null;
+let clocksSearchQuery = '';
+let clocksSyncOk = false;
+let clocksPollHandle = null;
 
-  // Partners (allies & training partners)
-  { city: 'Canberra',        country: 'Australia',       flag: '🇦🇺', tz: 'Australia/Sydney',   group: 'partners' },
-  { city: 'Brisbane',        country: 'Australia',       flag: '🇦🇺', tz: 'Australia/Brisbane', group: 'partners' },
-  { city: 'Wellington',      country: 'New Zealand',     flag: '🇳🇿', tz: 'Pacific/Auckland',   group: 'partners' },
-  { city: 'Tokyo',           country: 'Japan',           flag: '🇯🇵', tz: 'Asia/Tokyo',         group: 'partners' },
-  { city: 'Seoul',           country: 'South Korea',     flag: '🇰🇷', tz: 'Asia/Seoul',         group: 'partners' },
-  { city: 'Taipei',          country: 'Taiwan',          flag: '🇹🇼', tz: 'Asia/Taipei',        group: 'partners' },
-  { city: 'New Delhi',       country: 'India',           flag: '🇮🇳', tz: 'Asia/Kolkata',       group: 'partners' },
-  { city: 'Washington DC',   country: 'USA',             flag: '🇺🇸', tz: 'America/New_York',   group: 'partners' },
-  { city: 'Honolulu',        country: 'USA (Hawaii)',    flag: '🇺🇸', tz: 'Pacific/Honolulu',   group: 'partners' },
-  { city: 'London',          country: 'United Kingdom',  flag: '🇬🇧', tz: 'Europe/London',      group: 'partners' },
-  { city: 'Paris',           country: 'France',          flag: '🇫🇷', tz: 'Europe/Paris',       group: 'partners' },
-  { city: 'Berlin',          country: 'Germany',         flag: '🇩🇪', tz: 'Europe/Berlin',      group: 'partners' },
-
-  // HADR coordination hubs
-  { city: 'Geneva',          country: 'Switzerland (UN)',flag: '🇨🇭', tz: 'Europe/Zurich',      group: 'hadr' },
-  { city: 'New York',        country: 'USA (UN HQ)',     flag: '🇺🇳', tz: 'America/New_York',   group: 'hadr' },
-  { city: 'Bangkok',         country: 'OCHA ROAP',       flag: '🇺🇳', tz: 'Asia/Bangkok',       group: 'hadr' },
-  { city: 'Nairobi',         country: 'OCHA ROSEA',      flag: '🇺🇳', tz: 'Africa/Nairobi',     group: 'hadr' },
-];
-
-let activeClockGroup = 'all';
-let clocksEditMode = false;
-let clocksShowHidden = false;
-let clocksHiddenSet = new Set(); // cities hidden by user, persisted in localStorage
-
-// Load / save hidden cities to localStorage
-(function loadHiddenClocks() {
+// Boot from cache so the UI has something to render before the first sync lands.
+(function loadClocksCache() {
   try {
-    const raw = localStorage.getItem('hadr_clocks_hidden');
+    const raw = localStorage.getItem(CLOCKS_LOCAL_CACHE_KEY);
     if (raw) {
       const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) clocksHiddenSet = new Set(arr);
+      if (Array.isArray(arr)) userClocks = arr;
     }
-  } catch (e) { /* ignore */ }
+  } catch (e) { userClocks = []; }
 })();
 
-function saveHiddenClocks() {
-  try {
-    localStorage.setItem('hadr_clocks_hidden', JSON.stringify([...clocksHiddenSet]));
-  } catch (e) { /* ignore storage errors */ }
+function saveClocksCache() {
+  try { localStorage.setItem(CLOCKS_LOCAL_CACHE_KEY, JSON.stringify(userClocks)); } catch (e) {}
 }
 
-function clockKey(c) { return `${c.city}|${c.tz}`; }
+function clockUid(type, id) { return `${type}:${id}`; }
+function isClockAdded(type, id) {
+  return userClocks.some(c => c.type === type && c.id === id);
+}
 
-function toggleClocksEditMode() {
-  clocksEditMode = !clocksEditMode;
-  const btn = document.getElementById('clocks-edit-btn');
-  const hint = document.getElementById('clocks-edit-hint');
-  const grid = document.getElementById('clocks-grid');
-  if (btn)  btn.innerHTML = clocksEditMode ? '✓ Done' : '✎ Edit';
-  if (btn)  btn.classList.toggle('active', clocksEditMode);
-  if (hint) hint.style.display = clocksEditMode ? 'block' : 'none';
-  if (grid) grid.classList.toggle('edit-mode', clocksEditMode);
-  // When entering edit mode, temporarily show hidden items so user can unhide
-  if (clocksEditMode && !clocksShowHidden) {
-    clocksShowHidden = true;
-    document.getElementById('clocks-show-hidden-btn')?.classList.add('active');
+function updateClocksSyncBadge() {
+  const el = document.getElementById('clocks-sync-badge');
+  if (!el) return;
+  if (clocksSyncOk) {
+    el.textContent = '● SYNCED';
+    el.className = 'clocks-sync-badge ok';
+  } else {
+    el.textContent = '⚠ OFFLINE';
+    el.className = 'clocks-sync-badge err';
   }
-  renderClocks();
 }
 
-function toggleShowHidden() {
-  clocksShowHidden = !clocksShowHidden;
-  const btn = document.getElementById('clocks-show-hidden-btn');
-  if (btn) btn.classList.toggle('active', clocksShowHidden);
-  renderClocks();
+async function fetchClocksFromBridge() {
+  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
+  try {
+    const r = await fetch(`${TELEGRAM_BRIDGE_URL}/clocks`, {
+      headers: { 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const remote = (data.clocks || []).map(row => ({
+      type:     row.type,
+      id:       row.ref_id,
+      label:    row.label,
+      sublabel: row.sublabel,
+      tz:       row.timezone,
+    }));
+    // Replace local list with remote (source of truth)
+    userClocks = remote;
+    saveClocksCache();
+    clocksSyncOk = true;
+    updateClocksSyncBadge();
+    renderClocks();
+    if (clocksSearchQuery) renderClocksSearchResults(); // refresh added/removed states
+    return true;
+  } catch (e) {
+    console.warn('[clocks-sync] GET error:', e.message);
+    clocksSyncOk = false;
+    updateClocksSyncBadge();
+    return false;
+  }
 }
 
-function hideClock(key) {
-  clocksHiddenSet.add(key);
-  saveHiddenClocks();
-  renderClocks();
+async function pushClockToBridge(clock) {
+  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
+  try {
+    const r = await fetch(`${TELEGRAM_BRIDGE_URL}/clocks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+      body: JSON.stringify({
+        type:     clock.type,
+        ref_id:   clock.id,
+        label:    clock.label,
+        sublabel: clock.sublabel,
+        timezone: clock.tz,
+      }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    clocksSyncOk = true;
+    updateClocksSyncBadge();
+    return true;
+  } catch (e) {
+    console.warn('[clocks-sync] POST error:', e.message);
+    clocksSyncOk = false;
+    updateClocksSyncBadge();
+    return false;
+  }
 }
 
-function unhideClock(key) {
-  clocksHiddenSet.delete(key);
-  saveHiddenClocks();
-  renderClocks();
+async function deleteClockFromBridge(type, id) {
+  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
+  try {
+    const uid = encodeURIComponent(`${type}:${id}`);
+    const r = await fetch(`${TELEGRAM_BRIDGE_URL}/clocks?uid=${uid}`, {
+      method: 'DELETE',
+      headers: { 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    clocksSyncOk = true;
+    updateClocksSyncBadge();
+    return true;
+  } catch (e) {
+    console.warn('[clocks-sync] DELETE error:', e.message);
+    clocksSyncOk = false;
+    updateClocksSyncBadge();
+    return false;
+  }
 }
 
-function updateHiddenCount() {
-  const el = document.getElementById('clocks-hidden-count');
-  if (el) el.textContent = `${clocksHiddenSet.size} hidden`;
+function startClocksPolling() {
+  if (clocksPollHandle) return;
+  clocksPollHandle = setInterval(() => {
+    // Only poll while the World Clocks tab is active
+    if (document.getElementById('clocks-view')?.classList.contains('active')) {
+      fetchClocksFromBridge();
+    }
+  }, 5000);
 }
+
+function addClock(type, id, label, sublabel, tz) {
+  if (isClockAdded(type, id)) return;
+  if (!tz) {
+    console.warn(`[clocks] No timezone for ${type}/${id} — clock not added`);
+    return;
+  }
+  // Optimistic UI: append locally and render immediately
+  const clock = { type, id, label, sublabel, tz };
+  userClocks.push(clock);
+  saveClocksCache();
+  renderClocks();
+  if (clocksSearchQuery) renderClocksSearchResults();
+  // Fire-and-forget commit to D1
+  pushClockToBridge(clock);
+}
+
+function removeClock(type, id) {
+  userClocks = userClocks.filter(c => !(c.type === type && c.id === id));
+  saveClocksCache();
+  renderClocks();
+  if (clocksSearchQuery) renderClocksSearchResults();
+  // Fire-and-forget delete from D1
+  deleteClockFromBridge(type, id);
+}
+
+function handleClocksSearch(q) {
+  const query = (q || '').trim();
+  clocksSearchQuery = query;
+  if (clocksSearchTimer) clearTimeout(clocksSearchTimer);
+  if (!query) {
+    document.getElementById('clocks-search-results').style.display = 'none';
+    return;
+  }
+  clocksSearchTimer = setTimeout(() => renderClocksSearchResults(), 250);
+}
+
+function clearClocksSearch() {
+  clocksSearchQuery = '';
+  const input = document.getElementById('clocks-search-input');
+  if (input) input.value = '';
+  document.getElementById('clocks-search-results').style.display = 'none';
+}
+
+async function renderClocksSearchResults() {
+  const resultsEl = document.getElementById('clocks-search-results');
+  if (!resultsEl) return;
+  if (!clocksSearchQuery) {
+    resultsEl.style.display = 'none';
+    return;
+  }
+  resultsEl.style.display = '';
+  resultsEl.innerHTML = `<div class="csr-empty">◌ Searching "${clocksSearchQuery.replace(/</g,'&lt;')}"…</div>`;
+
+  // Use the same /geo/search endpoint the Personnel tab uses — already returns timezones
+  const data = await searchGeo(clocksSearchQuery);
+  // Filter out any results without a timezone (shouldn't happen post-load, but defensive)
+  const countries = (data.countries || []).filter(c => c.timezone);
+  const states    = (data.states    || []).filter(s => s.timezone);
+
+  if (!countries.length && !states.length) {
+    resultsEl.innerHTML = `<div class="csr-empty">No matches for "${clocksSearchQuery.replace(/</g,'&lt;')}". Try the country or region name.</div>`;
+    return;
+  }
+
+  const rows = [];
+  countries.forEach(c => {
+    const added = isClockAdded('country', c.iso2);
+    rows.push(`
+      <div class="csr-row">
+        <div class="csr-name"><b>${c.name}</b> ${c.capital ? `· ${c.capital}` : ''}</div>
+        <div class="csr-meta">${c.timezone}</div>
+        ${added
+          ? `<button class="csr-add added" disabled>Added</button>`
+          : `<button class="csr-add" onclick="addClock('country', '${c.iso2}', '${escSql(c.name)}', '${escSql(c.capital || c.iso2)}', '${escSql(c.timezone)}')">+ Add</button>`}
+      </div>`);
+  });
+  states.forEach(s => {
+    const country = getCountryByISO2(s.country_iso2);
+    const added = isClockAdded('state', s.id);
+    rows.push(`
+      <div class="csr-row">
+        <div class="csr-name"><b>${s.name}</b> · ${country?.name || s.country_iso2}</div>
+        <div class="csr-meta">${s.timezone}</div>
+        ${added
+          ? `<button class="csr-add added" disabled>Added</button>`
+          : `<button class="csr-add" onclick="addClock('state', '${s.id}', '${escSql(s.name)}', '${escSql(country?.name || s.country_iso2)}', '${escSql(s.timezone)}')">+ Add</button>`}
+      </div>`);
+  });
+  resultsEl.innerHTML = rows.join('');
+}
+
+// Helper: escape strings for safe inline JS in inserted HTML
+function escSql(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
 
 function getTimezoneOffset(tz) {
-  // Compute UTC offset for a timezone, as "+08:00" etc.
   try {
     const now = new Date();
     const utc = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
@@ -5648,9 +5806,7 @@ function getTimezoneOffset(tz) {
     const h = Math.abs(Math.floor(offsetMin / 60)).toString().padStart(2, '0');
     const m = Math.abs(offsetMin % 60).toString().padStart(2, '0');
     return `UTC${sign}${h}:${m}`;
-  } catch (e) {
-    return '';
-  }
+  } catch (e) { return ''; }
 }
 
 function isNightTime(tz) {
@@ -5659,55 +5815,38 @@ function isNightTime(tz) {
       timeZone: tz, hour: '2-digit', hour12: false
     }).format(new Date()), 10);
     return hour >= 19 || hour < 7;
-  } catch (e) {
-    return false;
-  }
+  } catch (e) { return false; }
 }
 
 function renderClocks() {
   const grid = document.getElementById('clocks-grid');
   if (!grid) return;
-  updateHiddenCount();
 
-  // Start with group filter
-  let cities = activeClockGroup === 'all'
-    ? WORLD_CITIES.slice()
-    : WORLD_CITIES.filter(c => c.group === activeClockGroup);
-
-  // Apply hidden filter
-  if (!clocksShowHidden && !clocksEditMode) {
-    cities = cities.filter(c => !clocksHiddenSet.has(clockKey(c)));
-  }
-
-  if (!cities.length) {
-    grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-mute);grid-column:1/-1;font-size:13px">No clocks to show. ' +
-      (clocksHiddenSet.size > 0 ? 'Toggle "Show Hidden" above to see hidden clocks.' : '') + '</div>';
+  if (!userClocks.length) {
+    grid.innerHTML = `
+      <div class="clocks-empty-state">
+        <div class="lead">No clocks added yet</div>
+        <div>Use the search bar above to find a country or region and add it as a clock.</div>
+      </div>`;
     return;
   }
 
-  grid.innerHTML = cities.map(c => {
-    const key = clockKey(c);
-    const isHidden = clocksHiddenSet.has(key);
-    const night = isNightTime(c.tz);
+  grid.innerHTML = userClocks.map(c => {
+    const night  = isNightTime(c.tz);
     const offset = getTimezoneOffset(c.tz);
-    const actionBtn = isHidden
-      ? `<button class="card-action-btn unhide-btn" onclick="unhideClock('${key.replace(/'/g,"\\'")}')" title="Restore this clock">✓</button>`
-      : `<button class="card-action-btn hide-btn" onclick="hideClock('${key.replace(/'/g,"\\'")}')" title="Hide this clock">✕</button>`;
+    const idEsc  = escSql(c.id);
     return `
-      <div class="clock-card ${c.group === 'home' ? 'home' : ''} ${isHidden ? 'hidden-state' : ''}" data-tz="${c.tz}">
-        ${actionBtn}
+      <div class="clock-card" data-tz="${c.tz}">
+        <button class="card-action-btn hide-btn" onclick="removeClock('${c.type}', '${idEsc}')" title="Remove this clock" style="display:flex">✕</button>
         <span class="offset">${offset}</span>
-        <div class="flag">${c.flag}</div>
         <div>
-          <div class="city">${c.city}</div>
-          <div class="country-code">${c.country}</div>
+          <div class="city">${c.label}</div>
+          <div class="country-code">${c.sublabel}</div>
         </div>
         <div class="time" data-role="time">—</div>
         <div class="date" data-role="date">—</div>
         ${night ? '<span class="night-indicator" title="Local night time">🌙</span>' : ''}
-        ${isHidden ? '<span class="hidden-badge">HIDDEN</span>' : ''}
-      </div>
-    `;
+      </div>`;
   }).join('');
   tickWorldClocks();
 }
@@ -5731,28 +5870,18 @@ function tickWorldClocks() {
       }).format(now);
       if (timeEl) timeEl.textContent = timeStr;
       if (dateEl) dateEl.textContent = dateStr;
-    } catch (e) { /* ignore invalid tz */ }
+    } catch (e) { /* invalid tz */ }
   });
 }
 
-// Tick all clocks every second while the view is active
 setInterval(() => {
   if (document.getElementById('clocks-view')?.classList.contains('active')) {
     tickWorldClocks();
   }
 }, 1000);
 
-// Wire up group filter buttons
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.clocks-group-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.clocks-group-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeClockGroup = btn.dataset.group;
-      renderClocks();
-    });
-  });
-});
+// Render initial state on boot
+renderClocks();
 
 function updateStats() {
   const counts = { crit:0, warn:0, watch:0, info:0, ok:0 };
@@ -5803,9 +5932,10 @@ document.querySelectorAll('.views button').forEach(b => {
         renderSGMap();
       }, 100);
     }
-    // Render clocks when clocks tab is opened
+    // Render clocks when clocks tab is opened, plus fetch fresh state from D1
     if (b.dataset.view === 'clocks') {
       renderClocks();
+      if (typeof fetchClocksFromBridge === 'function') fetchClocksFromBridge();
     }
     // Refresh personnel state from D1 immediately when entering Personnel tab —
     // user shouldn't have to wait up to 5s for the next poll
@@ -8551,6 +8681,9 @@ async function bootApp() {
   // the Personnel tab is active to pick up changes from other users
   fetchPersonnelStateFromBridge();
   startPersonnelPolling();
+  // World Clocks sync (shared global) — fetch on boot, poll while tab is active
+  if (typeof fetchClocksFromBridge === 'function') fetchClocksFromBridge();
+  if (typeof startClocksPolling === 'function')    startClocksPolling();
   // Eager-load the country list so it's ready when user unlocks the Personnel tab
   if (typeof loadGeoCountries === 'function') loadGeoCountries();
   // Check for personnel × incident cross-refs after boot

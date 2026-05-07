@@ -241,33 +241,6 @@
     min-height: 580px;
     background: #080c11;
   }
-  #map-status {
-    position: absolute;
-    top: 16px; left: 16px;
-    background: rgba(17,24,33,0.95);
-    border: 1px solid var(--line-2);
-    padding: 8px 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    z-index: 500;
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  #map-status.success { color: var(--ok); border-color: var(--ok); }
-  #map-status.fallback { color: var(--warn); border-color: var(--warn); }
-  #upload-label {
-    cursor: pointer;
-    color: var(--accent);
-    border: 1px solid var(--line-2);
-    padding: 3px 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 9px;
-  }
-  #upload-label:hover { border-color: var(--accent); }
   .country-shape {
     fill: #1a2636;
     stroke: #2a3a4f;
@@ -277,10 +250,6 @@
     transition: fill 0.15s;
   }
   .country-shape.has-personnel { fill: #1f2d40; }
-  .country-shape.has-alert-crit { fill: rgba(255,77,77,0.18); stroke: #ff4d4d; stroke-width: 1.4; vector-effect: non-scaling-stroke; }
-  .country-shape.has-alert-warn { fill: rgba(255,163,54,0.15); stroke: #ffa336; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
-  .country-shape.has-alert-watch { fill: rgba(255,216,61,0.12); stroke: #ffd83d; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
-  .country-shape.has-alert-info { fill: rgba(79,209,197,0.10); stroke: #4fd1c5; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
   .graticule {
     fill: none;
     stroke: #152030;
@@ -1349,9 +1318,9 @@
   /* Singapore Focus view */
   /* World Clocks View */
   .clocks-wrap {
-    max-width: 1200px;
+    max-width: 1800px;
     margin: 0 auto;
-    padding: 10px 0;
+    padding: 10px 24px;
   }
   .clocks-header {
     display: flex;
@@ -1705,9 +1674,9 @@
   }
 
   .personnel-content {
-    max-width: 1200px;
+    max-width: 1800px;
     margin: 0 auto;
-    padding: 10px 0;
+    padding: 10px 24px;
   }
   .personnel-header {
     display: flex;
@@ -1786,10 +1755,15 @@
 
   .personnel-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 1px;
     background: var(--line);
     border: 1px solid var(--line);
+  }
+  /* When the grid is showing terminal cards (with checkboxes/meta), use
+     wider min so the right-side checkboxes don't squeeze the name */
+  .personnel-grid.terminal-mode {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   }
   .pnl-card {
     background: var(--bg-2);
@@ -1893,6 +1867,61 @@
   }
   .personnel-search-clear:hover { color: var(--accent); }
 
+  /* Filter row: All / Others / Exercises */
+  .personnel-filter-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .personnel-filter-row .pf-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .personnel-filter-btn {
+    background: var(--bg);
+    color: var(--text-dim);
+    border: 1px solid var(--line-2);
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .personnel-filter-btn:hover { color: var(--text); border-color: var(--accent); }
+  .personnel-filter-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .personnel-filter-btn .pf-count {
+    font-size: 9px;
+    padding: 1px 5px;
+    background: var(--bg-3);
+    color: var(--text-mute);
+    border: 1px solid var(--line);
+  }
+  .personnel-filter-btn.active .pf-count {
+    background: var(--bg);
+    color: var(--accent);
+    border-color: var(--bg);
+  }
+  /* Color the Others/Exercises button accents to match the existing scheme */
+  .personnel-filter-btn.others.active   { background: var(--accent); border-color: var(--accent); }
+  .personnel-filter-btn.exercises.active { background: #ff6fb5; border-color: #ff6fb5; color: var(--bg); }
+  .personnel-filter-btn.exercises.active .pf-count { color: #ff6fb5; }
+
   /* Search results helper label */
   .personnel-search-results-label {
     font-family: 'JetBrains Mono', monospace;
@@ -1913,6 +1942,19 @@
     flex-direction: column;
     gap: 4px;
     z-index: 2;
+    align-items: flex-end;
+    pointer-events: auto;
+  }
+  /* When checkboxes are present, leave room for them on the right.
+     Smaller padding now that the layout grid keeps terminal cards wider. */
+  .pnl-card.terminal {
+    padding-right: 95px;
+  }
+  /* Long names wrap on word boundaries; fall back to breaking only if a
+     single word is too long for the container (overflow-wrap not break-word). */
+  .pnl-card .name {
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   .pnl-card .pnl-checkbox {
     position: static;
@@ -2024,7 +2066,7 @@
   .personnel-sync-badge.ok         { color: var(--ok);       border-color: var(--ok); }
   .personnel-sync-badge.err        { color: var(--warn);     border-color: var(--warn); }
 
-  .sg-wrap { max-width: 1100px; margin: 0 auto; }
+  .sg-wrap { max-width: 1800px; margin: 0 auto; padding: 0 24px; }
   .sg-header {
     display: flex; justify-content: space-between; align-items: flex-start;
     padding-bottom: 18px;
@@ -2062,6 +2104,8 @@
     font-size: 11px;
     flex-wrap: wrap;
   }
+  .sg-nea-reading.stale      { border-left-color: var(--warn); }
+  .sg-nea-reading.very-stale { border-left-color: var(--crit); }
   .sg-nea-reading .nrt-label {
     color: var(--text-mute);
     font-size: 10px;
@@ -2072,6 +2116,13 @@
     color: var(--text);
     font-weight: 600;
   }
+  .sg-nea-reading .nrt-warning {
+    color: var(--warn);
+    font-size: 10px;
+    padding-left: 8px;
+    border-left: 1px solid var(--line);
+  }
+  .sg-nea-reading.very-stale .nrt-warning { color: var(--crit); }
   .sg-nea-reading .nrt-source {
     color: var(--text-mute);
     font-size: 10px;
@@ -2959,19 +3010,28 @@
 
       <div id="personnel-breadcrumb" class="personnel-breadcrumb"></div>
 
+      <div id="personnel-filter-row" class="personnel-filter-row" style="display:none">
+        <span class="pf-label">Filter:</span>
+        <button class="personnel-filter-btn active" data-filter="all"
+                onclick="setPersonnelFilter('all')">
+          All <span class="pf-count" id="pf-count-all">0</span>
+        </button>
+        <button class="personnel-filter-btn others" data-filter="others"
+                onclick="setPersonnelFilter('others')">
+          Others <span class="pf-count" id="pf-count-others">0</span>
+        </button>
+        <button class="personnel-filter-btn exercises" data-filter="exercises"
+                onclick="setPersonnelFilter('exercises')">
+          Exercises <span class="pf-count" id="pf-count-exercises">0</span>
+        </button>
+      </div>
+
       <div id="personnel-grid" class="personnel-grid">
         <!-- populated by JS -->
       </div>
     </div>
   </section>
   <section class="view active" id="map-view">
-    <div id="map-status">
-      <span id="map-status-text">⬡ Loading high-resolution map…</span>
-      <label id="upload-label">
-        <input type="file" id="geojson-upload" accept=".json,.geojson" style="display:none" />
-        ⬆ Upload countries-110m.json
-      </label>
-    </div>
     <svg id="worldmap" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
       <g id="worldmap-content">
         <g id="graticule"></g>
@@ -3048,7 +3108,6 @@
           <th class="sortable" data-sort-key="name"      onclick="sortTableBy('name')">Country <span class="sort-ind"></span></th>
           <th class="sortable" data-sort-key="event"     onclick="sortTableBy('event')">Hazard <span class="sort-ind"></span></th>
           <th class="sortable" data-sort-key="severity"  onclick="sortTableBy('severity')">Severity <span class="sort-ind"></span></th>
-          <th class="sortable" data-sort-key="threshold" onclick="sortTableBy('threshold')">Threshold <span class="sort-ind"></span></th>
           <th class="sortable active desc" data-sort-key="updated" onclick="sortTableBy('updated')">Incident Time <span class="sort-ind">▼</span></th>
           <th class="sortable" data-sort-key="source"    onclick="sortTableBy('source')">Source <span class="sort-ind"></span></th>
           <th class="sortable" data-sort-key="updated"   onclick="sortTableBy('updated')">Age <span class="sort-ind"></span></th>
@@ -3072,6 +3131,7 @@
           <div class="sg-nea-reading" id="sg-nea-reading">
             <span class="nrt-label">NEA READING:</span>
             <span class="nrt-time" id="sg-nrt-time">—</span>
+            <span class="nrt-warning" id="sg-nrt-warning" style="display:none"></span>
             <span class="nrt-source">via data.gov.sg</span>
           </div>
         </div>
@@ -3148,7 +3208,7 @@
       </div>
 
       <div class="sg-section">
-        <div class="sg-section-title">Threshold Assessment</div>
+        <div class="sg-section-title">Risk Assessment</div>
         <div id="sg-thresholds"></div>
       </div>
     </div>
@@ -3200,9 +3260,9 @@
 </footer>
 
 <!-- Chat popup - floating assistant -->
-<button id="chat-bubble" title="Ask Claude" aria-label="Open chat">
+<button id="chat-bubble" title="Open Staff Assistant" aria-label="Open chat">
   <span class="chat-icon">⬢</span>
-  <span class="chat-label">ASK CLAUDE</span>
+  <span class="chat-label">STAFF ASSIST</span>
 </button>
 
 <div id="chat-window" class="closed">
@@ -3210,7 +3270,7 @@
     <div class="chat-title">
       <span class="chat-title-icon">⬢</span>
       <div>
-        <div class="chat-title-main">CLAUDE · STAFF ASSIST</div>
+        <div class="chat-title-main">⬢ STAFF ASSISTANT</div>
         <div class="chat-title-sub">Ask anything about HADR, weather, or thresholds</div>
       </div>
     </div>
@@ -3847,6 +3907,32 @@ async function fetchGDACS() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     const features = data.features || [];
+
+    // ===== DIAGNOSTIC: dump every GDACS event so we can see what's actually returned =====
+    console.group(`[GDACS DEBUG] ${features.length} events returned from API`);
+    const summary = features.map((f, i) => ({
+      idx: i,
+      type: f.properties?.eventtype,
+      country: f.properties?.country,
+      iso3: f.properties?.iso3,
+      alert: f.properties?.alertlevel,
+      name: f.properties?.name || f.properties?.eventname,
+      from: f.properties?.fromdate,
+      to: f.properties?.todate,
+    }));
+    console.table(summary);
+    // Highlight events from countries you care about
+    const interesting = summary.filter(s =>
+      /japan|jpn|new zealand|nzl/i.test(`${s.country || ''} ${s.iso3 || ''}`)
+    );
+    if (interesting.length) {
+      console.log('[GDACS DEBUG] Japan/NZ events found:', interesting);
+    } else {
+      console.log('[GDACS DEBUG] No Japan or NZ events in this batch — source likely missing them');
+    }
+    console.groupEnd();
+    // ===== END DIAGNOSTIC =====
+
     const HAZARD_MAP = {
       'TC':'weather', 'EQ':'quake', 'FL':'flood', 'VO':'volcano',
       'DR':'flood', 'WF':'flood', 'TS':'quake'
@@ -4212,25 +4298,110 @@ async function fetchSingaporeData() {
   setStatus('◌ Fetching from NEA…');
   const today = new Date().toISOString().split('T')[0];
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  try {
-    const [psiToday, psiYest, pmToday, pmYest, tempToday, tempYest] = await Promise.all([
-      fetchWithCORS(`https://api.data.gov.sg/v1/environment/psi?date=${today}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-      fetchWithCORS(`https://api.data.gov.sg/v1/environment/psi?date=${yesterday}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-      fetchWithCORS(`https://api.data.gov.sg/v1/environment/pm25?date=${today}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-      fetchWithCORS(`https://api.data.gov.sg/v1/environment/pm25?date=${yesterday}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-      fetchWithCORS(`https://api.data.gov.sg/v1/environment/air-temperature?date=${today}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-      fetchWithCORS(`https://api.data.gov.sg/v1/environment/air-temperature?date=${yesterday}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
+
+  const v2 = 'https://api-open.data.gov.sg/v2/real-time/api';
+  const v1 = 'https://api.data.gov.sg/v1/environment';
+
+  // Pull v2 history with pagination — v2 returns one page at a time and we
+  // walk backward via paginationToken until we have ~24 hours.
+  async function fetchV2History(path, hours = 26) {
+    const items = [];
+    const cutoff = Date.now() - hours * 3600 * 1000;
+    let token = null;
+    let pages = 0;
+    const maxPages = 5;
+    // Fetch today first, then yesterday (most-recent first to ensure we get
+    // the freshest data even if the API is paginated weirdly).
+    const dates = [today, yesterday];
+    for (const date of dates) {
+      token = null;
+      pages = 0;
+      do {
+        // v2 needs a date= parameter to return historical items, otherwise
+        // it returns just the most recent snapshot (which may be empty mid-publish).
+        const params = new URLSearchParams();
+        params.set('date', date);
+        if (token) params.set('paginationToken', token);
+        const url = `${v2}/${path}?${params.toString()}`;
+        try {
+          const r = await fetchWithCORS(url);
+          if (!r.ok) {
+            console.warn(`[SG data] v2 ${path} ${date}: HTTP ${r.status}`);
+            break;
+          }
+          const data = await r.json();
+          const pageItems = data?.data?.items || [];
+          // First-page diagnostic so we can see what v2 is actually returning
+          if (pages === 0) {
+            console.log(`[SG data] v2 ${path} ${date}: ${pageItems.length} items on first page (errorMsg=${data?.errorMsg || 'none'}, code=${data?.code})`);
+          }
+          if (!pageItems.length) break;
+          items.push(...pageItems);
+          const oldestTs = new Date(pageItems[pageItems.length - 1]?.timestamp || 0).getTime();
+          if (oldestTs && oldestTs < cutoff) break;
+          token = data?.data?.paginationToken || null;
+          pages++;
+        } catch (e) {
+          console.warn(`[SG data] v2 ${path} ${date}: ${e.message}`);
+          break;
+        }
+      } while (token && pages < maxPages);
+    }
+    // Dedupe by timestamp (today + yesterday calls might overlap)
+    const seen = new Set();
+    return items.filter(it => {
+      if (seen.has(it.timestamp)) return false;
+      seen.add(it.timestamp);
+      return true;
+    });
+  }
+
+  // v1 history fetcher — original approach
+  async function fetchV1History(path) {
+    const [t, y] = await Promise.all([
+      fetchWithCORS(`${v1}/${path}?date=${today}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
+      fetchWithCORS(`${v1}/${path}?date=${yesterday}`).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
     ]);
-    const items = [...(psiYest.items||[]), ...(psiToday.items||[])]
-      .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).slice(-25);
-    const pm25Items = [...(pmYest.items||[]), ...(pmToday.items||[])]
-      .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).slice(-25);
+    return [...(y.items||[]), ...(t.items||[])];
+  }
+
+  // Race v2 against v1 for each stream — keep whichever has the freshest newest sample
+  async function fetchBest(path) {
+    const [v2res, v1res] = await Promise.allSettled([
+      fetchV2History(path),
+      fetchV1History(path),
+    ]);
+    const v2items = v2res.status === 'fulfilled' ? v2res.value : [];
+    const v1items = v1res.status === 'fulfilled' ? v1res.value : [];
+    const newestOf = arr => arr.length ? Math.max(...arr.map(i => new Date(i.timestamp).getTime() || 0)) : 0;
+    const v2newest = newestOf(v2items);
+    const v1newest = newestOf(v1items);
+    console.log(`[SG data] ${path}: v2 ${v2items.length} items (newest ${v2newest ? new Date(v2newest).toISOString() : '—'}); v1 ${v1items.length} items (newest ${v1newest ? new Date(v1newest).toISOString() : '—'})`);
+    if (v2newest > v1newest) return v2items;
+    if (v1newest > 0) return v1items;
+    return v2items; // best we have
+  }
+
+  try {
+    const [psiHistory, pmHistory, tempHistory] = await Promise.all([
+      fetchBest('psi'),
+      fetchBest('pm25'),
+      fetchBest('air-temperature'),
+    ]);
+
+    const items = psiHistory
+      .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp))
+      .slice(-25);
+    const pm25Items = pmHistory
+      .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp))
+      .slice(-25);
+
     // Temperature: average all stations per timestamp, sample hourly
-    const tempRaw = [...(tempYest.items||[]), ...(tempToday.items||[])]
+    const tempRaw = tempHistory
       .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
     const tempByHour = {};
     tempRaw.forEach(item => {
-      const hourKey = item.timestamp.substring(0, 13); // group by hour
+      const hourKey = item.timestamp.substring(0, 13);
       const vals = (item.readings || []).map(r => r.value).filter(v => v != null);
       if (!vals.length) return;
       const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
@@ -4241,9 +4412,22 @@ async function fetchSingaporeData() {
     const tempItems = Object.values(tempByHour)
       .map(b => ({ timestamp: b.ts, value: +(b.sum / b.n).toFixed(1) }))
       .slice(-25);
+
+    const newest = Math.max(
+      items.length     ? new Date(items[items.length-1].timestamp).getTime()     : 0,
+      pm25Items.length ? new Date(pm25Items[pm25Items.length-1].timestamp).getTime() : 0,
+      tempItems.length ? new Date(tempItems[tempItems.length-1].timestamp).getTime() : 0,
+    );
+    const ageHours = (Date.now() - newest) / 3600000;
+    if (newest > 0 && ageHours > 2) {
+      console.warn(`[SG data] Newest timestamp is ${ageHours.toFixed(1)}h old — NEA is publishing stale data upstream`);
+    }
+    console.log(`[SG data] FINAL: ${items.length} PSI, ${pm25Items.length} PM2.5, ${tempItems.length} temp samples; newest = ${newest > 0 ? new Date(newest).toISOString() : 'none'}`);
+
     sgData = { live: true, items, pm25Items, tempItems, lastFetch: new Date(), error: null };
     setStatus('◉ LIVE');
   } catch (e) {
+    console.warn('[SG data] fetch failed, using mock:', e);
     const mock = generateMockSGData();
     sgData = { live: false, items: mock.items, pm25Items: mock.pm25Items, tempItems: mock.tempItems, lastFetch: new Date(), error: String(e) };
     setStatus('✗ MOCK (NEA blocked or offline)');
@@ -4286,17 +4470,29 @@ function renderTrendChart(svgId, dataPoints, opts) {
   let xLabels = '';
   const labelStep = Math.max(1, Math.floor(dataPoints.length / 5));
   const fmt = opts.timeFmt || 'hour';
+  // Format hour labels in SGT explicitly. `t.getHours()` returns hours in the
+  // browser's local timezone, which can differ from Singapore time if the
+  // user's device is set to a different region.
+  const sgtHourFmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Singapore', hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  const sgtDayFmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Singapore', month: 'short', day: 'numeric',
+  });
+  const sgtMonthFmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Singapore', month: 'short', year: '2-digit',
+  });
   dataPoints.forEach((d, i) => {
     if (i % labelStep === 0 || i === dataPoints.length - 1) {
       const x = pad.left + i * xStep;
       const t = new Date(d.timestamp);
       let lbl;
       if (fmt === 'month') {
-        lbl = t.toLocaleDateString('en', { month:'short', year:'2-digit' });
+        lbl = sgtMonthFmt.format(t);
       } else if (fmt === 'day') {
-        lbl = t.toLocaleDateString('en', { month:'short', day:'numeric' });
+        lbl = sgtDayFmt.format(t);
       } else {
-        lbl = String(t.getHours()).padStart(2,'0') + ':00';
+        lbl = sgtHourFmt.format(t).split(':')[0] + ':00';
       }
       xLabels += `<text x="${x}" y="${H - 8}" fill="#5a6b7e" font-size="9" font-family="JetBrains Mono" text-anchor="middle">${lbl}</text>`;
     }
@@ -4519,6 +4715,8 @@ function generateMockTempHistory(lat, lng, range) {  const days = AQ_RANGES[rang
 // more useful than "fetched 3 minutes ago" since NEA publishes hourly.
 function updateSGLastUpdated() {
   const timeEl = document.getElementById('sg-nrt-time');
+  const warnEl = document.getElementById('sg-nrt-warning');
+  const wrapEl = document.getElementById('sg-nea-reading');
   if (!timeEl) return;
 
   // Find the most recent NEA-published timestamp across all loaded streams
@@ -4534,7 +4732,6 @@ function updateSGLastUpdated() {
 
   const latest = new Date(Math.max(...candidates.map(d => d.getTime())));
 
-  // Format: "16:00 SGT · Mon 27 Apr 2026"
   const hourMin = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Singapore',
     hour: '2-digit',
@@ -4551,8 +4748,26 @@ function updateSGLastUpdated() {
 
   let display = `${hourMin} SGT · ${dateStr}`;
   if (!sgData.live) display += ' · MOCK';
-
   timeEl.textContent = display;
+
+  // Stale-data warning. PSI/PM2.5 publish hourly, so >2h stale is unusual,
+  // >4h is very unusual and probably means an upstream API problem at NEA.
+  if (warnEl && wrapEl) {
+    const ageHours = (Date.now() - latest.getTime()) / 3600000;
+    wrapEl.classList.remove('stale', 'very-stale');
+    if (ageHours > 4) {
+      wrapEl.classList.add('very-stale');
+      warnEl.style.display = '';
+      warnEl.textContent = `⚠ DATA IS ${ageHours.toFixed(1)}H OLD — API LAG`;
+    } else if (ageHours > 2) {
+      wrapEl.classList.add('stale');
+      warnEl.style.display = '';
+      warnEl.textContent = `⚠ ${ageHours.toFixed(1)}h since last update`;
+    } else {
+      warnEl.style.display = 'none';
+      warnEl.textContent = '';
+    }
+  }
 }
 
 // Tick the relative time every 15s so "X ago" stays fresh even without re-render
@@ -4959,11 +5174,23 @@ async function initSGMap() {
   sgMap = L.map('sg-leaflet-map', {
     center: [1.3521, 103.8198],
     zoom: 11,
-    minZoom: 10,
+    minZoom: 3,
     maxZoom: 16,
     zoomControl: true,
     attributionControl: true,
+    worldCopyJump: true,
   });
+
+  // World-coverage base layer — drawn underneath the OneMap tiles. When the
+  // user zooms out beyond OneMap's coverage area (Singapore + immediate
+  // surroundings), this layer fills in the rest of the world so the map
+  // doesn't go blank. CARTO Dark matches our dark theme.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+    subdomains: 'abcd',
+    maxZoom: 19,
+    minZoom: 0,
+  }).addTo(sgMap);
 
   // Step 3: try tile providers in order. First one whose tiles actually load wins.
   const tileProviders = [
@@ -5669,17 +5896,12 @@ function drawCountriesFromGeoJSON(geoFeatures) {
   g.selectAll('*').remove();
   const path = d3.geoPath().projection(d3Projection);
 
-  // Map our country codes → severity from active alerts
-  const codeToSeverity = {};
+  // Country shapes are drawn with default styling only — no severity-based
+  // outlines or fills. Severity is conveyed by the dot/triangle markers placed
+  // on top, which is enough signal without making the underlying countries
+  // visually noisy.
   const codeToPersonnel = {};
   DATA.forEach(d => {
-    if (!d.nominal) {
-      // Higher severity wins
-      const order = { crit:0, warn:1, watch:2, info:3 };
-      if (!codeToSeverity[d.code] || order[d.severity] < order[codeToSeverity[d.code]]) {
-        codeToSeverity[d.code] = d.severity;
-      }
-    }
     if (d.personnel) codeToPersonnel[d.code] = true;
   });
 
@@ -5692,8 +5914,7 @@ function drawCountriesFromGeoJSON(geoFeatures) {
       const isoNum = String(d.id || d.properties?.ISO_N3 || '').padStart(3,'0');
       const code = ISO_NUM_TO_CODE[isoNum] || d.properties?.ISO_A2;
       let cls = 'country-shape';
-      if (codeToSeverity[code]) cls += ` has-alert-${codeToSeverity[code]}`;
-      else if (codeToPersonnel[code]) cls += ' has-personnel';
+      if (codeToPersonnel[code]) cls += ' has-personnel';
       return cls;
     });
 }
@@ -6209,7 +6430,6 @@ function showMapPopup(evt, code, hazard, pin) {
   } else {
     const sevColor = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5', ok:'#5ed67b' }[d.severity];
     const sevLabel = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory', ok:'Nominal' }[d.severity];
-    const threshColor = d.threshold === 'EXCEEDED' ? 'var(--crit)' : d.threshold === 'APPROACHING' ? 'var(--warn)' : 'var(--text-dim)';
     const timeAgo = d.updated ? fmtTime(d.updated) : '—';
     const fullTime = d.updated ? fmtFullTime(d.updated) : '—';
     // Summarise description to 2 sentences max for the tooltip
@@ -6237,8 +6457,7 @@ function showMapPopup(evt, code, hazard, pin) {
       </div>
       <div class="popup-desc">${descText}</div>
       <div class="popup-grid">
-        <div><span class="popup-k">Threshold</span><span class="popup-v" style="color:${threshColor}">${d.threshold || '—'}</span></div>
-        <div><span class="popup-k">Personnel</span><span class="popup-v">${d.personnel ? 'Yes' : 'None'}</span></div>
+        <div><span class="popup-k">Personnel</span><span class="popup-v">${hasPersonnelInCountry(d.code) ? 'Yes' : 'None'}</span></div>
         <div><span class="popup-k">Source</span><span class="popup-v">${d.source || '—'}</span></div>
         <div><span class="popup-k">Age</span><span class="popup-v">${timeAgo}</span></div>
       </div>
@@ -6274,15 +6493,11 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// setMapStatus was used to update an on-page diagnostic banner during world-data
+// loading. Banner removed for visual cleanliness; keep this as a no-op so the
+// existing call sites don't error.
 function setMapStatus(text, mode) {
-  const el = document.getElementById('map-status');
-  const txt = document.getElementById('map-status-text');
-  if (txt) txt.textContent = text;
-  if (el) {
-    el.classList.remove('success', 'fallback');
-    if (mode === 'success') el.classList.add('success');
-    if (mode === 'fallback') el.classList.add('fallback');
-  }
+  // intentionally no-op; logs were noisy and the badge added no operational value
 }
 
 // Try multiple CDN sources for the world atlas data
@@ -6294,7 +6509,6 @@ async function tryLoadWorldData() {
   ];
   for (const url of sources) {
     try {
-      setMapStatus(`⬡ Trying ${new URL(url).hostname}…`, 'loading');
       const resp = await fetch(url);
       if (resp.ok) {
         const data = await resp.json();
@@ -6313,7 +6527,6 @@ function renderAccurateMap(topoData, sourceName) {
     drawCountriesFromGeoJSON(features);
     buildGraticule();
     renderMap();
-    setMapStatus(`◉ Real geography loaded (${sourceName})`, 'success');
     mapMode = 'accurate';
     return true;
   } catch (e) {
@@ -6322,39 +6535,7 @@ function renderAccurateMap(topoData, sourceName) {
   }
 }
 
-// Manual upload handler — works fully offline
-function setupUpload() {
-  const input = document.getElementById('geojson-upload');
-  if (!input) return;
-  input.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setMapStatus('⬡ Reading uploaded file…', 'loading');
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (data.type === 'Topology') {
-          renderAccurateMap(data, 'uploaded file');
-        } else if (data.type === 'FeatureCollection') {
-          drawCountriesFromGeoJSON(data.features);
-          buildGraticule();
-          renderMap();
-          setMapStatus('◉ Real geography loaded (uploaded GeoJSON)', 'success');
-          mapMode = 'accurate';
-        } else {
-          throw new Error('Unrecognised format');
-        }
-      } catch (err) {
-        setMapStatus('✗ Invalid file: ' + err.message, 'fallback');
-      }
-    };
-    reader.readAsText(file);
-  });
-}
-
 async function initMap() {
-  setupUpload();
   setupMapZoomHandlers();
 
   // Wait briefly for D3/topojson to load
@@ -6383,7 +6564,7 @@ async function initMap() {
   drawSchematicContinents();
   buildGraticule();
   renderMap();
-  setMapStatus('⚠ Schematic map (network blocked CDN). Upload countries-110m.json for real geography →', 'fallback');
+  setMapStatus('⚠ Schematic map fallback (network blocked CDN)', 'fallback');
   mapMode = 'schematic';
 }
 
@@ -6433,12 +6614,6 @@ function compareTableRows(a, b, key) {
       av = a.updated ? new Date(a.updated).getTime() : 0;
       bv = b.updated ? new Date(b.updated).getTime() : 0;
       break;
-    case 'threshold':
-      // EXCEEDED > APPROACHING > BELOW > —
-      const tOrder = { 'EXCEEDED': 0, 'APPROACHING': 1, 'BELOW': 2, '—': 3 };
-      av = tOrder[a.threshold] ?? 9;
-      bv = tOrder[b.threshold] ?? 9;
-      break;
     case 'name':    av = (a.name || '').toLowerCase();  bv = (b.name || '').toLowerCase();  break;
     case 'event':   av = (a.event || '').toLowerCase(); bv = (b.event || '').toLowerCase(); break;
     case 'source':  av = (a.source || '').toLowerCase();bv = (b.source || '').toLowerCase();break;
@@ -6452,7 +6627,7 @@ function compareTableRows(a, b, key) {
 function rowMatchesSearch(d, q) {
   if (!q) return true;
   const haystack = [
-    d.name, d.code, d.event, d.subtype, d.threshold, d.source,
+    d.name, d.code, d.event, d.subtype, d.source,
     SEV_LABEL[d.severity], HAZ_LABEL[d.hazard],
     d.desc, (d.actions || []).join(' '),
   ].filter(Boolean).join(' ').toLowerCase();
@@ -6518,13 +6693,11 @@ function renderTable() {
          <td class="mono" style="color:var(--text-mute)">—</td>
          <td class="mono" style="color:var(--text-mute)">—</td>
          <td class="mono" style="color:var(--text-mute)">—</td>
-         <td class="mono" style="color:var(--text-mute)">—</td>
          <td class="mono" style="color:var(--text-mute)">—</td>`
       : `<td><div class="country-cell"><div class="flag">${d.code}</div>${d.name}</div></td>
          <td><div style="font-weight:500">${d.event}</div>
              <div class="mono" style="font-size:10px;color:var(--text-mute);margin-top:2px">${HAZ_LABEL[d.hazard]} · ${d.subtype}</div></td>
          <td><span class="sev ${d.severity}"><span class="dot"></span>${SEV_LABEL[d.severity]}</span></td>
-         <td class="mono" style="font-size:11px;color:${d.threshold==='EXCEEDED'?'var(--crit)':d.threshold==='APPROACHING'?'var(--warn)':'var(--text-dim)'}">${d.threshold}</td>
          <td class="mono" style="font-size:11px;color:var(--text);font-weight:500">${fmtFullTime(d.updated)}</td>
          <td class="mono" style="font-size:11px;color:var(--text-dim)">${d.source}</td>
          <td class="mono" style="font-size:11px;color:var(--text-dim)">${fmtTime(d.updated)}</td>
@@ -6557,9 +6730,7 @@ function renderCards() {
       // Auto-generate basic summary from the event data (live events)
       preset = {
         situation: d.desc || 'No additional details available.',
-        exposure: d.personnel
-          ? 'SAF personnel presence in-country confirmed (country-level).'
-          : 'No known SAF personnel presence in this country.',
+        exposure: '__PLACEHOLDER__', // overridden below from live state
         threshold: d.threshold === 'EXCEEDED'
           ? `EXCEEDED — ${HAZ_LABEL[d.hazard]} threshold reached.`
           : d.threshold === 'APPROACHING'
@@ -6567,13 +6738,24 @@ function renderCards() {
             : `BELOW — sub-threshold event.`,
         actions: (d.actions || ['MONITOR']).map(a => '• ' + a).join('\n')
       };
+    } else {
+      // Clone so we can override exposure without mutating the shared PRESET object
+      preset = { ...preset };
     }
+    const hasSAF = hasPersonnelInCountry(d.code);
+    // Override the exposure line to reflect the *current* personnel state.
+    // This catches both the auto-generated case (live events) AND the static
+    // PRESET_SUMMARIES case — both should accurately mirror what the user has
+    // ticked in the Personnel tab, not a hardcoded "presence confirmed" string.
+    preset.exposure = hasSAF
+      ? 'SAF personnel presence in-country confirmed (country-level).'
+      : 'No known SAF personnel presence in this country.';
     card.innerHTML = `
       <div class="top">
         <div>
           <div class="country">${d.code} · ${d.name}
             <span class="src-badge ${d.live ? 'live' : 'mock'}">${d.live ? '◉ LIVE · ' + (d.source || 'API') : '◌ MOCK'}</span>
-            ${d.personnel ? '<span class="saf-flag">⬢ SAF PRESENCE</span>' : ''}
+            ${hasSAF ? '<span class="saf-flag">⬢ SAF PRESENCE</span>' : ''}
           </div>
           <div class="title">${d.event}</div>
         </div>
@@ -6581,18 +6763,17 @@ function renderCards() {
       </div>
       <div class="meta">
         <span>Hazard: <b>${HAZ_LABEL[d.hazard]} / ${d.subtype}</b></span>
-        <span>Threshold: <b style="color:${d.threshold==='EXCEEDED'?'var(--crit)':d.threshold==='APPROACHING'?'var(--warn)':'var(--text-dim)'}">${d.threshold}</b></span>
         <span>Incident Time: <b>${fmtFullTime(d.updated)}</b> <span style="color:var(--accent)">(${fmtTime(d.updated)})</span></span>
         <span>Source: <b>${d.source}</b></span>
-        <span>Personnel: <b>${d.personnel ? 'Yes (country-level)' : 'None known'}</b></span>
+        <span>Personnel: <b>${hasSAF ? 'Yes (country-level)' : 'None known'}</b></span>
       </div>
       <div class="desc">${d.desc}</div>
       <div class="ai">
         <div class="ai-head">
           <span>⬡ AI STAFF-ASSIST SUMMARY</span>
-          <button class="regen" onclick="regenerateSummary('${d.code}', '${d.hazard}')">↻ Regenerate w/ Claude</button>
+          <button class="regen" onclick="regenerateSummary('${d.code}', '${d.hazard}', {force: true})">↻ Regenerate</button>
         </div>
-        <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Personnel Exposure</span>${preset.exposure}<span class="label">Threshold Assessment</span>${preset.threshold}<span class="label">Recommended Actions</span>${preset.actions}</div>
+        <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Personnel Exposure</span>${preset.exposure}<span class="label">Risk Assessment</span>${preset.threshold}<span class="label">Recommended Actions</span>${preset.actions}</div>
       </div>
       ${d.hazard === 'haze' ? `
       <div class="aq-history">
@@ -6644,11 +6825,47 @@ function renderAll() {
 // ============================================================
 //  LIVE AI REGENERATION — calls Claude API
 // ============================================================
-async function regenerateSummary(code, hazard) {
+// AI summary cache — per incident, 6h TTL. Avoids re-hitting Gemini for the
+// same incident on every render and protects against the 1,000/day RPD limit.
+const AI_SUMMARY_CACHE_KEY = 'hadr_ai_summary_cache_v1';
+const AI_SUMMARY_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+function loadAISummaryCache() {
+  try {
+    const raw = localStorage.getItem(AI_SUMMARY_CACHE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) { return {}; }
+}
+function saveAISummaryCache(cache) {
+  try {
+    // Trim entries older than TTL before saving
+    const now = Date.now();
+    const trimmed = {};
+    for (const [k, v] of Object.entries(cache)) {
+      if (v?.ts && now - v.ts < AI_SUMMARY_TTL_MS) trimmed[k] = v;
+    }
+    localStorage.setItem(AI_SUMMARY_CACHE_KEY, JSON.stringify(trimmed));
+  } catch (e) { /* ignore */ }
+}
+
+async function regenerateSummary(code, hazard, opts = {}) {
+  const force = !!opts.force; // bypass cache
   const d = DATA.find(x => x.code===code && x.hazard===hazard);
   if (!d) return;
   const bodyEl = document.getElementById(`ai-${code}-${hazard}`);
-  bodyEl.innerHTML = '<span class="spinner"></span> <span style="color:var(--text-dim)">Generating with Claude…</span>';
+  if (!bodyEl) return;
+
+  const cacheKey = `${code}|${hazard}|${d.updated || ''}`;
+  if (!force) {
+    const cache = loadAISummaryCache();
+    const hit = cache[cacheKey];
+    if (hit?.html && (Date.now() - hit.ts) < AI_SUMMARY_TTL_MS) {
+      bodyEl.innerHTML = hit.html;
+      return;
+    }
+  }
+
+  bodyEl.innerHTML = '<span class="spinner"></span> <span style="color:var(--text-dim)">Generating with Gemini…</span>';
 
   const prompt = `You are an AI staff-assist for a military HADR monitoring cell. Produce a concise, professional summary for the duty officer.
 
@@ -6657,38 +6874,40 @@ ALERT DATA:
 - Event: ${d.event}
 - Hazard type: ${HAZ_LABEL[d.hazard]} / ${d.subtype}
 - Severity: ${SEV_LABEL[d.severity]}
-- Threshold status: ${d.threshold}
 - Source: ${d.source}
 - Description: ${d.desc}
-- Personnel presence (country-level only): ${d.personnel ? 'Yes' : 'No'}
+- Personnel presence (country-level only): ${hasPersonnelInCountry(d.code) ? 'Yes' : 'No'}
 - Pre-approved mitigating measures: ${d.actions?.join(', ')}
 
 Produce output in EXACTLY this format (plain text, no markdown):
 Situation: <2 sentences max>
 Personnel Exposure: <1 sentence, country-level only — never suggest specific numbers or locations>
-Threshold Assessment: <1 sentence on whether thresholds are met and which>
+Risk Assessment: <1 sentence on the operational risk level and key drivers>
 Recommended Actions: <3-5 short bullets, each on its own line starting with "• ">
 
 Be concise, factual, military-professional. No speculation beyond the data.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) {
+      throw new Error('AI bridge not configured');
+    }
+    const resp = await fetch(TELEGRAM_BRIDGE_URL + '/ai-chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': TELEGRAM_SHARED_SECRET,
+      },
+      body: JSON.stringify({ prompt }),
     });
     const data = await resp.json();
-    const text = data.content.map(c => c.text || '').join('');
+    if (!data?.ok || !data?.text) throw new Error(data?.error || 'AI returned no text');
+    const text = data.text;
 
     // Parse sections
     const sections = {
       situation:  /Situation:\s*(.+?)(?=\n\s*Personnel Exposure:|$)/s,
-      exposure:   /Personnel Exposure:\s*(.+?)(?=\n\s*Threshold Assessment:|$)/s,
-      threshold:  /Threshold Assessment:\s*(.+?)(?=\n\s*Recommended Actions:|$)/s,
+      exposure:   /Personnel Exposure:\s*(.+?)(?=\n\s*Risk Assessment:|$)/s,
+      threshold:  /Risk Assessment:\s*(.+?)(?=\n\s*Recommended Actions:|$)/s,
       actions:    /Recommended Actions:\s*(.+)/s
     };
     const parsed = {};
@@ -6697,14 +6916,21 @@ Be concise, factual, military-professional. No speculation beyond the data.`;
       parsed[k] = m ? m[1].trim() : '—';
     }
 
-    bodyEl.innerHTML =
+    const html =
       `<span class="label">Situation</span>${parsed.situation}` +
       `<span class="label">Personnel Exposure</span>${parsed.exposure}` +
-      `<span class="label">Threshold Assessment</span>${parsed.threshold}` +
+      `<span class="label">Risk Assessment</span>${parsed.threshold}` +
       `<span class="label">Recommended Actions</span>${parsed.actions}` +
       `<div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-mute);letter-spacing:0.1em">⬡ LIVE · GENERATED ${new Date().toISOString().substring(11,19)}Z · REVIEW REQUIRED</div>`;
+
+    bodyEl.innerHTML = html;
+    // Cache the rendered HTML so a re-render restores it instantly
+    const cache = loadAISummaryCache();
+    cache[cacheKey] = { html, ts: Date.now() };
+    saveAISummaryCache(cache);
   } catch (err) {
-    bodyEl.innerHTML = `<span style="color:var(--crit)">Could not reach Claude API. Using cached summary.</span>`;
+    console.warn('[ai-summary] failed:', err.message);
+    bodyEl.innerHTML = `<span style="color:var(--warn)">⚠ AI unavailable (${err.message}) — showing baseline summary.</span>`;
   }
 }
 
@@ -6926,7 +7152,7 @@ function addCmdMessage(role, text, opts = {}) {
   if (!hist) return null;
   const msg = document.createElement('div');
   msg.className = 'msg ' + role + (opts.loading ? ' loading' : '');
-  const labelMap = { user: 'YOU', ai: 'CLAUDE', err: 'ERROR' };
+  const labelMap = { user: 'YOU', ai: 'AI', err: 'ERROR' };
   msg.innerHTML = `<span class="role">${labelMap[role] || role}</span><span class="text"></span>`;
   msg.querySelector('.text').textContent = text;
   hist.appendChild(msg);
@@ -6964,19 +7190,28 @@ Guidelines:
 - If asked about data shown on the dashboard, explain what it means generally rather than reading specific values`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) {
+      throw new Error('AI bridge not configured');
+    }
+    // Build the conversation as a single prompt — Gemini doesn't have a native
+    // multi-turn message format like Anthropic; we concatenate history into the
+    // user prompt with role tags. The system instruction goes in `system`.
+    const historyText = cmdHistory.length
+      ? cmdHistory.map(m => `${m.role === 'assistant' ? 'Assistant' : 'User'}: ${m.content}`).join('\n\n') + '\n\n'
+      : '';
+    const fullPrompt = historyText + `User: ${question}\n\nAssistant:`;
+
+    const resp = await fetch(TELEGRAM_BRIDGE_URL + '/ai-chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: cmdHistory.concat([{ role: 'user', content: question }])
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': TELEGRAM_SHARED_SECRET,
+      },
+      body: JSON.stringify({ prompt: fullPrompt, system: systemPrompt }),
     });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
-    const answer = (data.content || []).map(c => c.text || '').join('').trim() || '(No response)';
+    if (!data?.ok || !data?.text) throw new Error(data?.error || `HTTP ${resp.status}`);
+    const answer = data.text.trim() || '(No response)';
 
     loadingMsg.classList.remove('loading');
     loadingMsg.querySelector('.text').textContent = answer;
@@ -6990,7 +7225,7 @@ Guidelines:
     loadingMsg.classList.remove('ai');
     loadingMsg.classList.add('err');
     loadingMsg.querySelector('.role').textContent = 'ERROR';
-    loadingMsg.querySelector('.text').textContent = '⚠ AI unavailable — Claude API unreachable on this network. Error: ' + (err.message || err);
+    loadingMsg.querySelector('.text').textContent = '⚠ AI unavailable. Error: ' + (err.message || err);
   } finally {
     sendBtn.disabled = false;
     input.disabled = false;
@@ -7082,7 +7317,9 @@ let personnelUnlocked = false;
 let personnelPath = []; // breadcrumb path
 
 // Per-sub-unit presence state, persisted to localStorage.
-// Shape: { "usa|CA": { others: true, othersWhen: "...", exercises: true, exercisesWhen: "...", by: "..." } }
+// Shape: { "US|US-TX": { others, othersWhen, exercises, exercisesWhen, by } }
+//   keys are either bare ISO2 ("US") for country-level ticks
+//   or "ISO2|state-id" ("US|US-TX") for state-level ticks.
 // Source of truth: Cloudflare D1 (via PERSONNEL_BRIDGE_URL). localStorage is
 // used only as a fallback cache when the bridge is unreachable.
 let personnelPresence = {};
@@ -7167,6 +7404,11 @@ async function fetchPersonnelStateFromBridge() {
       personnelAlertsDismissed = false;
       renderPersonnelAlertBanner();
     }
+    // Cards/Table/Map show SAF Presence flags driven by live personnel state.
+    // Re-render them so changes from other users propagate visually.
+    if (typeof renderCards === 'function') renderCards();
+    if (typeof renderTable === 'function') renderTable();
+    if (typeof renderMap === 'function') renderMap();
     return true;
   } catch (e) {
     console.warn('[personnel-sync] GET error:', e.message);
@@ -7270,12 +7512,32 @@ function togglePersonnelPresence(unitKey, kind, checked) {
   renderPersonnelView();
   updatePersonnelSummary();
   renderPersonnelAlertBanner();
+  // SAF Presence flag in Cards/Table/Map is computed from live personnel state,
+  // so re-render those views so they pick up the change.
+  if (typeof renderCards === 'function') renderCards();
+  if (typeof renderTable === 'function') renderTable();
+  if (typeof renderMap === 'function') renderMap();
 }
 
 // Back-compat helper used elsewhere: any presence at all counts as "present"
 function isAnyPresence(unitKey) {
   const v = personnelPresence[unitKey];
   return !!(v && (v.others || v.exercises));
+}
+
+// Returns true if any personnel is checked for the given ISO2 country.
+// New key shape: 'US' (country-level) or 'US|US-TX' (state-level).
+// Both count as "presence in US".
+function hasPersonnelInCountry(iso2) {
+  if (!iso2) return false;
+  const target = String(iso2).toUpperCase();
+  for (const presKey of Object.keys(personnelPresence)) {
+    if (!isAnyPresence(presKey)) continue;
+    // presKey is either an ISO2 directly or "ISO2|state-id"
+    const country = presKey.split('|')[0];
+    if (country === target) return true;
+  }
+  return false;
 }
 
 function updatePersonnelSummary() {
@@ -7303,23 +7565,33 @@ function updatePersonnelSummary() {
 //  is active in that country within the last 24h, raise an alert.
 // ============================================================
 function getCheckedCategoryISO2Codes() {
-  // Build a map: ISO2 -> [{category, subUnit, kinds:['others','exercises']}...]
+  // Build a map: ISO2 -> [{country, subUnit, kinds:['others','exercises']}, ...]
+  // New key shape: presKey is either "US" (country-level) or "US|US-TX" (state-level)
   const result = {};
   Object.keys(personnelPresence).forEach(key => {
     const v = personnelPresence[key];
     if (!v || (!v.others && !v.exercises)) return;
-    const [catKey, subAbbr] = key.split('|');
-    const isoList = PERSONNEL_CATEGORY_ISO2[catKey] || [];
-    const cat = PERSONNEL_DATA[catKey];
-    if (!cat) return;
-    const sub = cat.children.find(c => c.abbr === subAbbr);
-    if (!sub) return;
+    const [iso2, stateId] = key.split('|');
+    if (!iso2) return;
+    const country = getCountryByISO2(iso2);
+    // Sub-unit label: state name if state, country name if country-level
+    let subUnitLabel;
+    if (stateId) {
+      const states = GEO_STATES_BY_COUNTRY[iso2] || [];
+      const st = states.find(s => s.id === stateId);
+      subUnitLabel = st ? { name: st.name, abbr: st.code } : { name: stateId, abbr: '' };
+    } else {
+      subUnitLabel = { name: country?.name || iso2, abbr: iso2 };
+    }
     const kinds = [];
     if (v.others) kinds.push('others');
     if (v.exercises) kinds.push('exercises');
-    isoList.forEach(iso => {
-      if (!result[iso]) result[iso] = [];
-      result[iso].push({ categoryKey: catKey, categoryName: cat.name, subUnit: sub, kinds });
+    if (!result[iso2]) result[iso2] = [];
+    result[iso2].push({
+      categoryKey: iso2,
+      categoryName: country?.name || iso2,
+      subUnit: subUnitLabel,
+      kinds,
     });
   });
   return result;
@@ -7412,203 +7684,75 @@ renderPersonnelAlertBanner = function() {
 // This interval is cheap and covers: new incidents arriving, old incidents aging out of 24h window.
 setInterval(renderPersonnelAlertBanner, 30 * 1000);
 
-// Top-level categories and their sub-units
-// Map each personnel category to the ISO2 country code(s) it covers.
-// When a sub-unit of that category is checked AND a critical incident is active
-// in any of those countries within the last 24h, the map alert fires.
-const PERSONNEL_CATEGORY_ISO2 = {
-  usa:        ['US'],
-  canada:     ['CA'],
-  uk:         ['GB'],
-  germany:    ['DE'],
-  europe:     ['FR','NL','BE','IT','ES','PT','SE','NO','FI','DK','PL','CH','AT','IE','GR'],
-  middleeast: ['SA','AE','IL','JO','LB','OM','QA','KW','BH','IQ','IR','YE','SY','EG'],
-  taiwan:     ['TW'],
-  asia:       ['JP','KR','CN','PH','VN','KH','LA','MM','IN','LK','BD','NP','PK','MV','MN','PG'],
-  thailand:   ['TH'],
-  malaysia:   ['MY'],
-  indonesia:  ['ID'],
-  brunei:     ['BN'],
-  australia:  ['AU'],
-  newzealand: ['NZ'],
-};
+// ============================================================
+//  GEO DATA — countries + states (loaded from Cloudflare Worker)
+// ============================================================
+// GEO_COUNTRIES: array of {iso2, name, continent}
+// GEO_STATES_BY_COUNTRY: { 'US': [{id, country_iso2, code, name}, ...], ... }
+//   Lazy-loaded: a country's states are fetched the first time the user drills
+//   into that country.
+let GEO_COUNTRIES = [];
+let GEO_STATES_BY_COUNTRY = {};
+let GEO_LOADED = false;
 
-const PERSONNEL_DATA = {
-  usa: {
-    name: 'United States', flag: '🇺🇸', abbr: 'USA',
-    children: [
-      { name:'Alabama', abbr:'AL' }, { name:'Alaska', abbr:'AK' }, { name:'Arizona', abbr:'AZ' },
-      { name:'Arkansas', abbr:'AR' }, { name:'California', abbr:'CA' }, { name:'Colorado', abbr:'CO' },
-      { name:'Connecticut', abbr:'CT' }, { name:'Delaware', abbr:'DE' }, { name:'Florida', abbr:'FL' },
-      { name:'Georgia', abbr:'GA' }, { name:'Hawaii', abbr:'HI' }, { name:'Idaho', abbr:'ID' },
-      { name:'Illinois', abbr:'IL' }, { name:'Indiana', abbr:'IN' }, { name:'Iowa', abbr:'IA' },
-      { name:'Kansas', abbr:'KS' }, { name:'Kentucky', abbr:'KY' }, { name:'Louisiana', abbr:'LA' },
-      { name:'Maine', abbr:'ME' }, { name:'Maryland', abbr:'MD' }, { name:'Massachusetts', abbr:'MA' },
-      { name:'Michigan', abbr:'MI' }, { name:'Minnesota', abbr:'MN' }, { name:'Mississippi', abbr:'MS' },
-      { name:'Missouri', abbr:'MO' }, { name:'Montana', abbr:'MT' }, { name:'Nebraska', abbr:'NE' },
-      { name:'Nevada', abbr:'NV' }, { name:'New Hampshire', abbr:'NH' }, { name:'New Jersey', abbr:'NJ' },
-      { name:'New Mexico', abbr:'NM' }, { name:'New York', abbr:'NY' }, { name:'North Carolina', abbr:'NC' },
-      { name:'North Dakota', abbr:'ND' }, { name:'Ohio', abbr:'OH' }, { name:'Oklahoma', abbr:'OK' },
-      { name:'Oregon', abbr:'OR' }, { name:'Pennsylvania', abbr:'PA' }, { name:'Rhode Island', abbr:'RI' },
-      { name:'South Carolina', abbr:'SC' }, { name:'South Dakota', abbr:'SD' }, { name:'Tennessee', abbr:'TN' },
-      { name:'Texas', abbr:'TX' }, { name:'Utah', abbr:'UT' }, { name:'Vermont', abbr:'VT' },
-      { name:'Virginia', abbr:'VA' }, { name:'Washington', abbr:'WA' }, { name:'West Virginia', abbr:'WV' },
-      { name:'Wisconsin', abbr:'WI' }, { name:'Wyoming', abbr:'WY' }, { name:'District of Columbia', abbr:'DC' },
-    ],
-  },
-  canada: {
-    name: 'Canada', flag: '🇨🇦', abbr: 'CAN',
-    children: [
-      { name:'Alberta', abbr:'AB' }, { name:'British Columbia', abbr:'BC' }, { name:'Manitoba', abbr:'MB' },
-      { name:'New Brunswick', abbr:'NB' }, { name:'Newfoundland & Labrador', abbr:'NL' },
-      { name:'Nova Scotia', abbr:'NS' }, { name:'Ontario', abbr:'ON' }, { name:'Prince Edward Island', abbr:'PE' },
-      { name:'Quebec', abbr:'QC' }, { name:'Saskatchewan', abbr:'SK' },
-      { name:'Northwest Territories', abbr:'NT' }, { name:'Nunavut', abbr:'NU' }, { name:'Yukon', abbr:'YT' },
-    ],
-  },
-  uk: {
-    name: 'United Kingdom', flag: '🇬🇧', abbr: 'UK',
-    children: [
-      { name:'England', abbr:'ENG' }, { name:'Scotland', abbr:'SCT' },
-      { name:'Wales', abbr:'WLS' }, { name:'Northern Ireland', abbr:'NIR' },
-      { name:'London', abbr:'LDN' }, { name:'Manchester', abbr:'MAN' }, { name:'Birmingham', abbr:'BHM' },
-      { name:'Edinburgh', abbr:'EDI' }, { name:'Glasgow', abbr:'GLA' },
-    ],
-  },
-  germany: {
-    name: 'Germany', flag: '🇩🇪', abbr: 'DEU',
-    children: [
-      { name:'Baden-Württemberg', abbr:'BW' }, { name:'Bavaria', abbr:'BY' }, { name:'Berlin', abbr:'BE' },
-      { name:'Brandenburg', abbr:'BB' }, { name:'Bremen', abbr:'HB' }, { name:'Hamburg', abbr:'HH' },
-      { name:'Hesse', abbr:'HE' }, { name:'Lower Saxony', abbr:'NI' }, { name:'Mecklenburg-Vorpommern', abbr:'MV' },
-      { name:'North Rhine-Westphalia', abbr:'NW' }, { name:'Rhineland-Palatinate', abbr:'RP' },
-      { name:'Saarland', abbr:'SL' }, { name:'Saxony', abbr:'SN' }, { name:'Saxony-Anhalt', abbr:'ST' },
-      { name:'Schleswig-Holstein', abbr:'SH' }, { name:'Thuringia', abbr:'TH' },
-    ],
-  },
-  europe: {
-    name: 'Europe', flag: '🇪🇺', abbr: 'EU', note: 'Region — click for key SAF partner countries',
-    children: [
-      { name:'France', flag:'🇫🇷', abbr:'FRA' }, { name:'Netherlands', flag:'🇳🇱', abbr:'NLD' },
-      { name:'Belgium', flag:'🇧🇪', abbr:'BEL' }, { name:'Italy', flag:'🇮🇹', abbr:'ITA' },
-      { name:'Spain', flag:'🇪🇸', abbr:'ESP' }, { name:'Portugal', flag:'🇵🇹', abbr:'PRT' },
-      { name:'Sweden', flag:'🇸🇪', abbr:'SWE' }, { name:'Norway', flag:'🇳🇴', abbr:'NOR' },
-      { name:'Finland', flag:'🇫🇮', abbr:'FIN' }, { name:'Denmark', flag:'🇩🇰', abbr:'DNK' },
-      { name:'Poland', flag:'🇵🇱', abbr:'POL' }, { name:'Switzerland', flag:'🇨🇭', abbr:'CHE' },
-      { name:'Austria', flag:'🇦🇹', abbr:'AUT' }, { name:'Ireland', flag:'🇮🇪', abbr:'IRL' },
-      { name:'Greece', flag:'🇬🇷', abbr:'GRC' },
-    ],
-  },
-  middleeast: {
-    name: 'Middle East', flag: '🌙', abbr: 'ME', note: 'Region — click for member countries',
-    children: [
-      { name:'Saudi Arabia', flag:'🇸🇦', abbr:'SAU' }, { name:'United Arab Emirates', flag:'🇦🇪', abbr:'UAE' },
-      { name:'Israel', flag:'🇮🇱', abbr:'ISR' }, { name:'Jordan', flag:'🇯🇴', abbr:'JOR' },
-      { name:'Lebanon', flag:'🇱🇧', abbr:'LBN' }, { name:'Oman', flag:'🇴🇲', abbr:'OMN' },
-      { name:'Qatar', flag:'🇶🇦', abbr:'QAT' }, { name:'Kuwait', flag:'🇰🇼', abbr:'KWT' },
-      { name:'Bahrain', flag:'🇧🇭', abbr:'BHR' }, { name:'Iraq', flag:'🇮🇶', abbr:'IRQ' },
-      { name:'Iran', flag:'🇮🇷', abbr:'IRN' }, { name:'Yemen', flag:'🇾🇪', abbr:'YEM' },
-      { name:'Syria', flag:'🇸🇾', abbr:'SYR' }, { name:'Egypt', flag:'🇪🇬', abbr:'EGY' },
-    ],
-  },
-  taiwan: {
-    name: 'Taiwan', flag: '🇹🇼', abbr: 'TWN',
-    children: [
-      { name:'Taipei', abbr:'TPE' }, { name:'New Taipei City', abbr:'NTP' },
-      { name:'Taoyuan', abbr:'TYN' }, { name:'Taichung', abbr:'TCH' },
-      { name:'Tainan', abbr:'TNN' }, { name:'Kaohsiung', abbr:'KHH' },
-      { name:'Hsinchu', abbr:'HSC' }, { name:'Keelung', abbr:'KEE' },
-      { name:'Hualien County', abbr:'HUA' }, { name:'Yilan County', abbr:'ILA' },
-    ],
-  },
-  asia: {
-    name: 'Asia Region', flag: '🌏', abbr: 'AP', note: 'Region — click for countries in Asia-Pacific',
-    children: [
-      { name:'Japan', flag:'🇯🇵', abbr:'JPN' }, { name:'South Korea', flag:'🇰🇷', abbr:'KOR' },
-      { name:'China', flag:'🇨🇳', abbr:'CHN' }, { name:'Philippines', flag:'🇵🇭', abbr:'PHL' },
-      { name:'Vietnam', flag:'🇻🇳', abbr:'VNM' }, { name:'Cambodia', flag:'🇰🇭', abbr:'KHM' },
-      { name:'Laos', flag:'🇱🇦', abbr:'LAO' }, { name:'Myanmar', flag:'🇲🇲', abbr:'MMR' },
-      { name:'India', flag:'🇮🇳', abbr:'IND' }, { name:'Sri Lanka', flag:'🇱🇰', abbr:'LKA' },
-      { name:'Bangladesh', flag:'🇧🇩', abbr:'BGD' }, { name:'Nepal', flag:'🇳🇵', abbr:'NPL' },
-      { name:'Pakistan', flag:'🇵🇰', abbr:'PAK' }, { name:'Maldives', flag:'🇲🇻', abbr:'MDV' },
-      { name:'Mongolia', flag:'🇲🇳', abbr:'MNG' }, { name:'Papua New Guinea', flag:'🇵🇬', abbr:'PNG' },
-    ],
-  },
-  thailand: {
-    name: 'Thailand', flag: '🇹🇭', abbr: 'THA',
-    children: [
-      { name:'Bangkok', abbr:'BKK' }, { name:'Northern Region', abbr:'TH-N' },
-      { name:'Northeastern Region', abbr:'TH-NE' }, { name:'Central Region', abbr:'TH-C' },
-      { name:'Eastern Region', abbr:'TH-E' }, { name:'Southern Region', abbr:'TH-S' },
-      { name:'Western Region', abbr:'TH-W' },
-      { name:'Chiang Mai', abbr:'CNX' }, { name:'Phuket', abbr:'HKT' },
-      { name:'Pattaya', abbr:'PTY' }, { name:'Hat Yai', abbr:'HDY' },
-    ],
-  },
-  malaysia: {
-    name: 'Malaysia', flag: '🇲🇾', abbr: 'MYS',
-    children: [
-      { name:'Johor', abbr:'JHR' }, { name:'Kedah', abbr:'KDH' }, { name:'Kelantan', abbr:'KTN' },
-      { name:'Melaka', abbr:'MLK' }, { name:'Negeri Sembilan', abbr:'NSN' }, { name:'Pahang', abbr:'PHG' },
-      { name:'Penang', abbr:'PNG' }, { name:'Perak', abbr:'PRK' }, { name:'Perlis', abbr:'PLS' },
-      { name:'Selangor', abbr:'SGR' }, { name:'Terengganu', abbr:'TRG' },
-      { name:'Sabah', abbr:'SBH' }, { name:'Sarawak', abbr:'SWK' },
-      { name:'Kuala Lumpur (FT)', abbr:'KUL' }, { name:'Labuan (FT)', abbr:'LBN' },
-      { name:'Putrajaya (FT)', abbr:'PJY' },
-    ],
-  },
-  indonesia: {
-    name: 'Indonesia', flag: '🇮🇩', abbr: 'IDN',
-    children: [
-      { name:'Jakarta', abbr:'JKT' }, { name:'West Java', abbr:'JB' }, { name:'Central Java', abbr:'JT' },
-      { name:'East Java', abbr:'JI' }, { name:'Yogyakarta', abbr:'YO' }, { name:'Banten', abbr:'BT' },
-      { name:'Aceh', abbr:'AC' }, { name:'North Sumatra', abbr:'SU' }, { name:'West Sumatra', abbr:'SB' },
-      { name:'Riau', abbr:'RI' }, { name:'Jambi', abbr:'JA' }, { name:'South Sumatra', abbr:'SS' },
-      { name:'Bengkulu', abbr:'BE' }, { name:'Lampung', abbr:'LA' }, { name:'Bangka Belitung', abbr:'BB' },
-      { name:'Riau Islands', abbr:'KR' }, { name:'Bali', abbr:'BA' },
-      { name:'West Nusa Tenggara', abbr:'NB' }, { name:'East Nusa Tenggara', abbr:'NT' },
-      { name:'West Kalimantan', abbr:'KB' }, { name:'Central Kalimantan', abbr:'KT' },
-      { name:'South Kalimantan', abbr:'KS' }, { name:'East Kalimantan', abbr:'KI' },
-      { name:'North Kalimantan', abbr:'KU' }, { name:'North Sulawesi', abbr:'SA' },
-      { name:'Central Sulawesi', abbr:'ST' }, { name:'South Sulawesi', abbr:'SN' },
-      { name:'Southeast Sulawesi', abbr:'SG' }, { name:'Gorontalo', abbr:'GO' },
-      { name:'West Sulawesi', abbr:'SR' }, { name:'Maluku', abbr:'MA' },
-      { name:'North Maluku', abbr:'MU' }, { name:'Papua', abbr:'PA' },
-      { name:'West Papua', abbr:'PB' }, { name:'South Papua', abbr:'PS' },
-      { name:'Central Papua', abbr:'PT' }, { name:'Highland Papua', abbr:'PE' },
-      { name:'Southwest Papua', abbr:'PD' },
-    ],
-  },
-  brunei: {
-    name: 'Brunei', flag: '🇧🇳', abbr: 'BRN',
-    children: [
-      { name:'Brunei-Muara', abbr:'BM' }, { name:'Belait', abbr:'BL' },
-      { name:'Tutong', abbr:'TU' }, { name:'Temburong', abbr:'TE' },
-    ],
-  },
-  australia: {
-    name: 'Australia', flag: '🇦🇺', abbr: 'AUS',
-    children: [
-      { name:'New South Wales', abbr:'NSW' }, { name:'Victoria', abbr:'VIC' },
-      { name:'Queensland', abbr:'QLD' }, { name:'Western Australia', abbr:'WA' },
-      { name:'South Australia', abbr:'SA' }, { name:'Tasmania', abbr:'TAS' },
-      { name:'Australian Capital Territory', abbr:'ACT' }, { name:'Northern Territory', abbr:'NT' },
-    ],
-  },
-  newzealand: {
-    name: 'New Zealand', flag: '🇳🇿', abbr: 'NZL',
-    children: [
-      { name:'Northland', abbr:'NTL' }, { name:'Auckland', abbr:'AKL' },
-      { name:'Waikato', abbr:'WKO' }, { name:'Bay of Plenty', abbr:'BOP' },
-      { name:'Gisborne', abbr:'GIS' }, { name:"Hawke's Bay", abbr:'HKB' },
-      { name:'Taranaki', abbr:'TKI' }, { name:'Manawatū-Whanganui', abbr:'MWT' },
-      { name:'Wellington', abbr:'WGN' }, { name:'Tasman', abbr:'TAS' },
-      { name:'Nelson', abbr:'NSN' }, { name:'Marlborough', abbr:'MBH' },
-      { name:'West Coast', abbr:'WTC' }, { name:'Canterbury', abbr:'CAN' },
-      { name:'Otago', abbr:'OTA' }, { name:'Southland', abbr:'STL' },
-    ],
-  },
-};
+const GEO_BRIDGE_URL = TELEGRAM_BRIDGE_URL || '';
+
+async function loadGeoCountries() {
+  if (!GEO_BRIDGE_URL) {
+    console.warn('[geo] No bridge URL configured');
+    return false;
+  }
+  try {
+    const r = await fetch(GEO_BRIDGE_URL + '/geo/countries');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    GEO_COUNTRIES = data.countries || [];
+    GEO_LOADED = true;
+    console.log(`[geo] Loaded ${GEO_COUNTRIES.length} countries from D1`);
+    return true;
+  } catch (e) {
+    console.warn('[geo] Failed to load countries:', e.message);
+    return false;
+  }
+}
+
+async function loadGeoStates(iso2) {
+  if (!iso2) return [];
+  if (GEO_STATES_BY_COUNTRY[iso2]) return GEO_STATES_BY_COUNTRY[iso2];
+  if (!GEO_BRIDGE_URL) return [];
+  try {
+    const r = await fetch(GEO_BRIDGE_URL + '/geo/states?country=' + encodeURIComponent(iso2));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    GEO_STATES_BY_COUNTRY[iso2] = data.states || [];
+    return GEO_STATES_BY_COUNTRY[iso2];
+  } catch (e) {
+    console.warn(`[geo] Failed to load states for ${iso2}:`, e.message);
+    GEO_STATES_BY_COUNTRY[iso2] = [];
+    return [];
+  }
+}
+
+async function searchGeo(q) {
+  if (!q || q.length < 2) return { countries: [], states: [] };
+  if (!GEO_BRIDGE_URL) return { countries: [], states: [] };
+  try {
+    const r = await fetch(GEO_BRIDGE_URL + '/geo/search?q=' + encodeURIComponent(q));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    return { countries: data.countries || [], states: data.states || [] };
+  } catch (e) {
+    console.warn('[geo] Search failed:', e.message);
+    return { countries: [], states: [] };
+  }
+}
+
+// Helper to get country object by ISO2 from the loaded list
+function getCountryByISO2(iso2) {
+  if (!iso2) return null;
+  return GEO_COUNTRIES.find(c => c.iso2 === iso2) || null;
+}
+
 
 function attemptUnlock(event) {
   if (event && event.preventDefault) event.preventDefault();
@@ -7647,71 +7791,139 @@ function lockPersonnelTab() {
 }
 
 let personnelSearchQuery = '';
+let personnelSearchResults = null; // {countries, states} from /geo/search; null = not in search mode
+let personnelSearchPending = false;
+let personnelSearchTimer = null;
+
+// Filter for top-level country list: 'all' | 'others' | 'exercises'
+// Session-only — defaults to 'all' on every page load.
+let personnelFilter = 'all';
+
+function setPersonnelFilter(filter) {
+  personnelFilter = filter;
+  // Update active state on buttons
+  document.querySelectorAll('.personnel-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderPersonnelView();
+}
+
+// Returns true if any state-or-country-level personnel record under this country
+// matches the filter ('others' / 'exercises' / 'all')
+function countryMatchesFilter(iso2, filter) {
+  if (filter === 'all') return true;
+  for (const key of Object.keys(personnelPresence)) {
+    const country = key.split('|')[0];
+    if (country !== iso2) continue;
+    const v = personnelPresence[key];
+    if (!v) continue;
+    if (filter === 'others'    && v.others)    return true;
+    if (filter === 'exercises' && v.exercises) return true;
+  }
+  return false;
+}
+
+// Update the count badges on the filter buttons
+function updatePersonnelFilterCounts() {
+  if (!GEO_LOADED) return;
+  let nAll = GEO_COUNTRIES.length;
+  let nOthers = 0, nExercises = 0;
+  GEO_COUNTRIES.forEach(c => {
+    if (countryMatchesFilter(c.iso2, 'others'))    nOthers++;
+    if (countryMatchesFilter(c.iso2, 'exercises')) nExercises++;
+  });
+  const elAll       = document.getElementById('pf-count-all');
+  const elOthers    = document.getElementById('pf-count-others');
+  const elExercises = document.getElementById('pf-count-exercises');
+  if (elAll)       elAll.textContent       = nAll;
+  if (elOthers)    elOthers.textContent    = nOthers;
+  if (elExercises) elExercises.textContent = nExercises;
+}
 
 function handlePersonnelSearch(q) {
-  personnelSearchQuery = (q || '').trim().toLowerCase();
+  const query = (q || '').trim();
+  personnelSearchQuery = query.toLowerCase();
+  // Debounce server hit so we don't fire on every keystroke
+  if (personnelSearchTimer) clearTimeout(personnelSearchTimer);
+  if (!query) {
+    personnelSearchResults = null;
+    renderPersonnelView();
+    return;
+  }
+  personnelSearchPending = true;
   renderPersonnelView();
+  personnelSearchTimer = setTimeout(async () => {
+    if (!personnelSearchQuery) return;
+    const results = await searchGeo(query);
+    // Only render if user hasn't moved on to another query
+    if (personnelSearchQuery === query.toLowerCase()) {
+      personnelSearchResults = results;
+      personnelSearchPending = false;
+      renderPersonnelView();
+    }
+  }, 250);
 }
 
 function clearPersonnelSearch() {
   personnelSearchQuery = '';
+  personnelSearchResults = null;
+  personnelSearchPending = false;
   const input = document.getElementById('personnel-search');
   if (input) input.value = '';
   renderPersonnelView();
 }
 
-function renderPersonnelView() {
+async function renderPersonnelView() {
   if (!personnelUnlocked) return;
   renderPersonnelBreadcrumb();
   const grid = document.getElementById('personnel-grid');
   if (!grid) return;
 
-  // --- SEARCH MODE: flat list across every sub-unit in every category ---
-  if (personnelSearchQuery) {
-    const q = personnelSearchQuery;
-    const results = [];
-    Object.keys(PERSONNEL_DATA).forEach(catKey => {
-      const cat = PERSONNEL_DATA[catKey];
-      // Match category name/abbr itself
-      if (cat.name.toLowerCase().includes(q) || (cat.abbr || '').toLowerCase().includes(q)) {
-        cat.children.forEach(ch => results.push({ catKey, cat, ch }));
-      }
-      // Match sub-unit name/abbr
-      cat.children.forEach(ch => {
-        if (ch.name.toLowerCase().includes(q) || (ch.abbr || '').toLowerCase().includes(q)) {
-          // Avoid duplicates if already pushed via category match
-          if (!results.some(r => r.catKey === catKey && r.ch.abbr === ch.abbr)) {
-            results.push({ catKey, cat, ch });
-          }
-        }
-      });
-    });
-
-    let resultHtml = `<div class="personnel-search-results-label">Showing <b>${results.length}</b> result${results.length === 1 ? '' : 's'} for "${q.replace(/</g,'&lt;')}"</div>`;
-    if (!results.length) {
-      resultHtml += '<div class="personnel-search-results-label" style="color:var(--text-mute)">No matches — try another term.</div>';
-      grid.innerHTML = '';
-      const wrap = document.createElement('div');
-      wrap.innerHTML = resultHtml;
-      grid.insertAdjacentHTML('beforebegin', '');
-      // Show label above grid
-      document.getElementById('personnel-grid').innerHTML = resultHtml;
+  // Lazy-load countries on first render
+  if (!GEO_LOADED) {
+    grid.innerHTML = '<div class="personnel-search-results-label" style="color:var(--text-mute)">◌ Loading geo data from D1…</div>';
+    await loadGeoCountries();
+    if (!GEO_LOADED) {
+      grid.innerHTML = '<div class="personnel-search-results-label" style="color:var(--crit)">⚠ Failed to load geo data — check Worker connection</div>';
       return;
     }
-    // Render header above the grid
-    grid.innerHTML = '';
-    // Insert label into its own element above the grid, one time
+  }
+
+  // --- SEARCH MODE ---
+  if (personnelSearchQuery) {
+    const filterRow = document.getElementById('personnel-filter-row');
+    if (filterRow) filterRow.style.display = 'none';
     let labelEl = document.getElementById('personnel-search-label');
     if (!labelEl) {
       labelEl = document.createElement('div');
       labelEl.id = 'personnel-search-label';
       grid.parentElement.insertBefore(labelEl, grid);
     }
-    labelEl.innerHTML = resultHtml;
 
-    grid.innerHTML = results.map(({ catKey, cat, ch }) =>
-      buildSubUnitCard(catKey, cat, ch, /*showCategory*/true)
-    ).join('');
+    if (personnelSearchPending && !personnelSearchResults) {
+      labelEl.innerHTML = `<div class="personnel-search-results-label">◌ Searching "${personnelSearchQuery.replace(/</g,'&lt;')}"…</div>`;
+      grid.innerHTML = '';
+      return;
+    }
+
+    const r = personnelSearchResults || { countries: [], states: [] };
+    const totalHits = r.countries.length + r.states.length;
+    labelEl.innerHTML = `<div class="personnel-search-results-label">Showing <b>${totalHits}</b> result${totalHits === 1 ? '' : 's'} for "${personnelSearchQuery.replace(/</g,'&lt;')}"</div>`;
+
+    if (totalHits === 0) {
+      grid.innerHTML = '<div class="personnel-search-results-label" style="color:var(--text-mute)">No matches — try another term.</div>';
+      return;
+    }
+
+    const cards = [];
+    r.countries.forEach(c => cards.push(buildCountryCard(c)));
+    r.states.forEach(s => {
+      const country = getCountryByISO2(s.country_iso2);
+      cards.push(buildStateCard(country, s, /*showCountry*/true));
+    });
+    // Search may include states (terminal cards) so use wider grid
+    grid.classList.toggle('terminal-mode', r.states.length > 0);
+    grid.innerHTML = cards.join('');
     return;
   }
 
@@ -7719,39 +7931,76 @@ function renderPersonnelView() {
   const labelEl = document.getElementById('personnel-search-label');
   if (labelEl) labelEl.innerHTML = '';
 
+  // Filter row only relevant on the top-level country list
+  const filterRow = document.getElementById('personnel-filter-row');
+  if (filterRow) {
+    filterRow.style.display = (personnelPath.length === 0) ? '' : 'none';
+  }
+  updatePersonnelFilterCounts();
+
   if (personnelPath.length === 0) {
-    // Show top-level categories
-    const keys = Object.keys(PERSONNEL_DATA);
-    grid.innerHTML = keys.map(k => {
-      const it = PERSONNEL_DATA[k];
-      const presentCount = it.children.filter(ch => isAnyPresence(`${k}|${ch.abbr}`)).length;
-      return `
-        <div class="pnl-card has-children ${presentCount > 0 ? 'personnel-present-others' : ''}" onclick="personnelDrillDown('${k}')">
-          <div>
-            <div class="flag">${it.flag}</div>
-            <div class="name">${it.name}</div>
-            <div class="abbr">${it.abbr}</div>
-          </div>
-          ${presentCount > 0
-            ? `<span class="count-badge" style="color:var(--ok);border-color:var(--ok)">${presentCount}/${it.children.length}</span>`
-            : `<span class="count-badge">${it.children.length}</span>`}
-        </div>
-      `;
-    }).join('');
+    // Top level — list all countries (compact cards), apply filter
+    grid.classList.remove('terminal-mode');
+    let countries = GEO_COUNTRIES;
+    if (personnelFilter !== 'all') {
+      countries = countries.filter(c => countryMatchesFilter(c.iso2, personnelFilter));
+    }
+    if (countries.length === 0) {
+      grid.innerHTML = `<div class="personnel-search-results-label" style="color:var(--text-mute);grid-column:1/-1">No countries with ${personnelFilter === 'others' ? '"Others"' : '"Exercises"'} personnel ticked yet.</div>`;
+    } else {
+      grid.innerHTML = countries.map(c => buildCountryCard(c)).join('');
+    }
   } else {
-    const cat = PERSONNEL_DATA[personnelPath[0]];
-    if (!cat) return;
-    const parentKey = personnelPath[0];
-    grid.innerHTML = cat.children.map(ch =>
-      buildSubUnitCard(parentKey, cat, ch, /*showCategory*/false)
-    ).join('');
+    // Inside a country — list its states (terminal cards with checkboxes)
+    grid.classList.add('terminal-mode');
+    const iso2 = personnelPath[0];
+    const country = getCountryByISO2(iso2);
+    if (!country) return;
+    let states = GEO_STATES_BY_COUNTRY[iso2];
+    if (!states) {
+      grid.innerHTML = '<div class="personnel-search-results-label" style="color:var(--text-mute)">◌ Loading states for ' + country.name + '…</div>';
+      states = await loadGeoStates(iso2);
+    }
+    // Country-level "tick whole country" card always at top
+    const cards = [buildStateCard(country, null, /*showCountry*/false)];
+    states.forEach(s => cards.push(buildStateCard(country, s, /*showCountry*/false)));
+    if (states.length === 0) {
+      cards.push('<div class="personnel-search-results-label" style="color:var(--text-mute);grid-column:1/-1">No state/province subdivisions for this country.</div>');
+    }
+    grid.innerHTML = cards.join('');
   }
 }
 
-// Build one sub-unit card — used in normal drill-down view and search results
-function buildSubUnitCard(catKey, cat, ch, showCategory) {
-  const flag = ch.flag ? `<div class="flag">${ch.flag}</div>` : '';
-  const unitKey = `${catKey}|${ch.abbr}`;
+// Country card — appears in top-level list and as a search hit
+function buildCountryCard(country) {
+  const iso2 = country.iso2;
+  // Count personnel ticks across this country (country-level + any state)
+  let presentCount = 0;
+  for (const key of Object.keys(personnelPresence)) {
+    if (!isAnyPresence(key)) continue;
+    if (key === iso2 || key.startsWith(iso2 + '|')) presentCount++;
+  }
+  const hasAny = presentCount > 0;
+  return `
+    <div class="pnl-card has-children ${hasAny ? 'personnel-present-others' : ''}" onclick="personnelDrillDown('${iso2}')">
+      <div>
+        <div class="flag">${iso2}</div>
+        <div class="name">${country.name}</div>
+        <div class="abbr">${country.continent || ''}</div>
+      </div>
+      ${hasAny
+        ? `<span class="count-badge" style="color:var(--ok);border-color:var(--ok)">${presentCount} ✓</span>`
+        : `<span class="count-badge">›</span>`}
+    </div>
+  `;
+}
+
+// State card — used inside a country drilldown and in search results.
+// Pass `state=null` to render the country-level "tick whole country" card.
+function buildStateCard(country, state, showCountry) {
+  const iso2 = country.iso2;
+  const isCountryLevel = !state;
+  const unitKey = isCountryLevel ? iso2 : `${iso2}|${state.id}`;
   const rec = personnelPresence[unitKey] || {};
   const hasOthers    = !!rec.others;
   const hasExercises = !!rec.exercises;
@@ -7765,7 +8014,6 @@ function buildSubUnitCard(catKey, cat, ch, showCategory) {
   const whenStr = updatedWhen ? fmtFullTime(updatedWhen) : '—';
   const updatedBy = rec.by || '—';
 
-  // Status line shows either, both, or none
   let statusHtml;
   if (hasOthers && hasExercises) {
     statusHtml = `<span class="unit-status on-others">◉ Personnel</span> <span class="unit-status on-exercises">◉ Exercises</span>`;
@@ -7777,8 +8025,13 @@ function buildSubUnitCard(catKey, cat, ch, showCategory) {
     statusHtml = `<span class="unit-status pending">○ No Personnel</span>`;
   }
 
-  const categoryLabel = showCategory
-    ? `<div class="mono" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${cat.flag} ${cat.name}</div>`
+  const displayName = isCountryLevel
+    ? `${country.name} (Country-level)`
+    : state.name;
+  const displayAbbr = isCountryLevel ? iso2 : (state.code || '');
+
+  const countryLabel = showCountry
+    ? `<div class="mono" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${iso2} ${country.name}</div>`
     : '';
 
   return `
@@ -7797,11 +8050,10 @@ function buildSubUnitCard(catKey, cat, ch, showCategory) {
           <span class="lbl">Others</span>
         </label>
       </div>
-      ${flag}
       <div>
-        <div class="name">${ch.name}</div>
-        <div class="abbr">${ch.abbr}</div>
-        ${categoryLabel}
+        <div class="name">${displayName}</div>
+        <div class="abbr">${displayAbbr}</div>
+        ${countryLabel}
       </div>
       <div class="unit-meta">
         <div><span class="mk">Status:</span> ${statusHtml}</div>
@@ -7812,8 +8064,20 @@ function buildSubUnitCard(catKey, cat, ch, showCategory) {
   `;
 }
 
-function personnelDrillDown(key) {
-  personnelPath = [key];
+async function personnelDrillDown(iso2) {
+  personnelPath = [iso2];
+  // Clear any active search — clicking a result navigates *to* that country,
+  // and we want to show its states/drilldown view, not stay in search mode.
+  if (personnelSearchQuery) {
+    personnelSearchQuery = '';
+    personnelSearchResults = null;
+    personnelSearchPending = false;
+    const input = document.getElementById('personnel-search');
+    if (input) input.value = '';
+  }
+  // Trigger background fetch of states (renderPersonnelView also handles it,
+  // but starting it here lets the spinner show without the rendering delay).
+  if (!GEO_STATES_BY_COUNTRY[iso2]) loadGeoStates(iso2);
   renderPersonnelView();
 }
 
@@ -7826,15 +8090,16 @@ function renderPersonnelBreadcrumb() {
   const el = document.getElementById('personnel-breadcrumb');
   if (!el) return;
   let html = personnelPath.length === 0
-    ? `<span class="crumb current">All Categories</span>`
-    : `<span class="crumb" onclick="personnelGoTo(0)">All Categories</span>`;
-  personnelPath.forEach((k, i) => {
-    const item = PERSONNEL_DATA[k];
+    ? `<span class="crumb current">All Countries</span>`
+    : `<span class="crumb" onclick="personnelGoTo(0)">All Countries</span>`;
+  personnelPath.forEach((iso2, i) => {
+    const country = getCountryByISO2(iso2);
+    const label = country ? country.name : iso2;
     html += `<span class="sep">›</span>`;
     if (i === personnelPath.length - 1) {
-      html += `<span class="crumb current">${item.flag} ${item.name}</span>`;
+      html += `<span class="crumb current">${label}</span>`;
     } else {
-      html += `<span class="crumb" onclick="personnelGoTo(${i+1})">${item.flag} ${item.name}</span>`;
+      html += `<span class="crumb" onclick="personnelGoTo(${i+1})">${label}</span>`;
     }
   });
   el.innerHTML = html;
@@ -8286,6 +8551,8 @@ async function bootApp() {
   // the Personnel tab is active to pick up changes from other users
   fetchPersonnelStateFromBridge();
   startPersonnelPolling();
+  // Eager-load the country list so it's ready when user unlocks the Personnel tab
+  if (typeof loadGeoCountries === 'function') loadGeoCountries();
   // Check for personnel × incident cross-refs after boot
   setTimeout(renderPersonnelAlertBanner, 1500);
 }

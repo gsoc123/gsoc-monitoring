@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>HADR Environmental Monitoring — Staff Assist Prototype</title>
 
+<!-- Favicon: simple globe icon, inline SVG so no external request needed. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8F%3C/text%3E%3C/svg%3E">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -95,7 +98,8 @@
     color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 24px;
+    line-height: 1;
     background: var(--info-bg);
   }
   header.app h1 {
@@ -463,109 +467,136 @@
   }
   #map-popup button:hover { opacity: 0.9; }
   /* Personnel × Incident cross-reference alert banner */
-  .personnel-alert-banner {
+  /* SAF Exposure Panel — collapsible, top-left of map */
+  .personnel-exposure-panel {
     position: absolute;
     top: 16px;
     left: 16px;
     z-index: 650;
-    width: 420px;
-    max-width: 40vw;
+    width: 360px;
+    max-width: 38vw;
     background: var(--bg-2);
-    border: 1px solid var(--crit);
-    border-left: 5px solid var(--crit);
-    box-shadow: 0 8px 28px rgba(255,77,77,0.25);
-    animation: pab-slide-in 0.35s ease-out;
+    border: 1px solid var(--line-2);
+    border-left: 3px solid var(--warn);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    animation: pep-slide-in 0.3s ease-out;
   }
-  @keyframes pab-slide-in {
+  @keyframes pep-slide-in {
     from { transform: translateX(-20px); opacity: 0; }
     to   { transform: translateX(0); opacity: 1; }
   }
-  .personnel-alert-banner .pab-header {
+  .personnel-exposure-panel .pep-toggle {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 12px;
-    background: rgba(255,77,77,0.15);
-    border-bottom: 1px solid var(--crit);
-  }
-  .personnel-alert-banner .pab-hdr-label {
-    flex: 1;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: var(--crit);
-  }
-  .personnel-alert-banner .pab-count {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    background: var(--crit);
-    color: var(--bg);
-    padding: 2px 8px;
-    min-width: 20px;
-    text-align: center;
-  }
-  .personnel-alert-banner .pab-close {
-    background: transparent;
-    border: 1px solid rgba(255,77,77,0.5);
-    color: var(--crit);
-    width: 22px; height: 22px;
-    font-size: 11px;
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255,77,77,0.08);
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--text);
     cursor: pointer;
-    display: grid; place-items: center;
+    text-align: left;
+    font-family: inherit;
   }
-  .personnel-alert-banner .pab-close:hover { background: var(--crit); color: var(--bg); }
-  .personnel-alert-banner .pab-item {
+  .personnel-exposure-panel .pep-toggle:hover {
+    background: rgba(255,77,77,0.14);
+  }
+  .personnel-exposure-panel .pep-icon {
+    font-size: 18px;
+    color: var(--warn);
+    flex-shrink: 0;
+    animation: pep-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pep-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  .personnel-exposure-panel .pep-summary {
+    flex: 1;
+    min-width: 0;
+  }
+  .personnel-exposure-panel .pep-headline {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .personnel-exposure-panel .pep-headline b { color: var(--warn); }
+  .personnel-exposure-panel .pep-subline {
+    margin-top: 4px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .personnel-exposure-panel .pep-sev {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+  }
+  .personnel-exposure-panel .pep-sev.crit { background: var(--crit); color: var(--bg); }
+  .personnel-exposure-panel .pep-sev.warn { background: var(--warn); color: var(--bg); }
+  .personnel-exposure-panel .pep-chevron {
+    color: var(--text-mute);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .personnel-exposure-panel .pep-list {
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .personnel-exposure-panel .pep-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
+    gap: 10px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--line);
     cursor: pointer;
     transition: background 0.15s;
   }
-  .personnel-alert-banner .pab-item:last-child { border-bottom: none; }
-  .personnel-alert-banner .pab-item:hover { background: var(--panel); }
-  .personnel-alert-banner .pab-icon {
-    font-size: 20px;
-    color: var(--crit);
+  .personnel-exposure-panel .pep-item:last-child { border-bottom: none; }
+  .personnel-exposure-panel .pep-item:hover { background: var(--panel); }
+  .personnel-exposure-panel .pep-item.crit { border-left: 3px solid var(--crit); }
+  .personnel-exposure-panel .pep-item.warn { border-left: 3px solid var(--warn); }
+  .personnel-exposure-panel .pep-item-sev {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
     flex-shrink: 0;
-    animation: pab-pulse 1.4s ease-in-out infinite;
   }
-  @keyframes pab-pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.15); opacity: 0.75; }
-  }
-  .personnel-alert-banner .pab-body {
+  .personnel-exposure-panel .pep-item-sev.sev-crit { background: var(--crit); color: var(--bg); }
+  .personnel-exposure-panel .pep-item-sev.sev-warn { background: var(--warn); color: var(--bg); }
+  .personnel-exposure-panel .pep-item-body {
     flex: 1;
     min-width: 0;
   }
-  .personnel-alert-banner .pab-title {
-    font-size: 12px;
+  .personnel-exposure-panel .pep-item-title {
+    font-size: 11px;
     color: var(--text);
-    line-height: 1.35;
-    margin-bottom: 3px;
+    line-height: 1.3;
+    text-transform: capitalize;
   }
-  .personnel-alert-banner .pab-title b { color: var(--crit); }
-  .personnel-alert-banner .pab-detail {
+  .personnel-exposure-panel .pep-item-title b { color: var(--text); font-weight: 600; }
+  .personnel-exposure-panel .pep-item-detail {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-dim);
-    line-height: 1.4;
+    margin-top: 2px;
   }
-  .personnel-alert-banner .pab-detail b { color: var(--text); }
-  .personnel-alert-banner .pab-action {
+  .personnel-exposure-panel .pep-item-action {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
     font-weight: 600;
-    color: var(--crit);
-    letter-spacing: 0.12em;
+    color: var(--accent);
+    letter-spacing: 0.1em;
     flex-shrink: 0;
   }
 
   @media (max-width: 700px) {
-    .personnel-alert-banner {
+    .personnel-exposure-panel {
       width: calc(100vw - 32px);
       max-width: none;
       top: 12px; left: 12px; right: 12px;
@@ -1453,23 +1484,26 @@
   .clock-card .card-action-btn {
     position: absolute;
     top: 8px;
-    left: 8px;
-    width: 24px; height: 24px;
+    right: 8px;
+    width: 22px; height: 22px;
     background: var(--bg);
     border: 1px solid var(--line-2);
     color: var(--text-dim);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 5;
     transition: all 0.15s;
+    opacity: 0.4;
   }
+  .clock-card:hover .card-action-btn { opacity: 1; }
   .clocks-grid.edit-mode .clock-card .card-action-btn {
     display: flex;
+    opacity: 1;
   }
   .clock-card .card-action-btn.hide-btn:hover {
     background: var(--crit);
@@ -1517,24 +1551,27 @@
   }
   .clock-card.home:hover { background: rgba(79,209,197,0.14); }
 
-  .clock-card .flag {
-    font-size: 22px;
-    line-height: 1;
-    margin-bottom: 2px;
+  .clock-card .clock-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Reserve right space for the X button */
+    padding-right: 36px;
   }
   .clock-card .city {
     font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text);
     line-height: 1.2;
+    word-break: break-word;
   }
   .clock-card .country-code {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.1em;
-    margin-top: -2px;
+    margin-top: 2px;
   }
   .clock-card .time {
     font-family: 'JetBrains Mono', monospace;
@@ -1552,7 +1589,7 @@
   }
   .clock-card .offset {
     position: absolute;
-    top: 12px;
+    bottom: 12px;
     right: 12px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
@@ -1567,8 +1604,8 @@
   }
   .clock-card .night-indicator {
     position: absolute;
-    bottom: 10px;
-    right: 12px;
+    bottom: 12px;
+    left: 18px;
     font-size: 11px;
     opacity: 0.6;
   }
@@ -1827,6 +1864,26 @@
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.1em;
+  }
+  /* "View cities" link on state cards that have curated cities */
+  .pnl-cities-link {
+    margin-top: 10px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.12s;
+    align-self: flex-start;
+  }
+  .pnl-cities-link:hover {
+    background: var(--accent);
+    color: var(--bg);
   }
   .pnl-card .count-badge {
     position: absolute;
@@ -2566,6 +2623,110 @@
   .sg-thresh.warn .status { color: var(--warn); }
   .sg-thresh.crit .status { color: var(--crit); }
 
+  /* SAF doctrine-driven analysis */
+  .sg-ra-block {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    margin-top: 16px;
+    padding: 14px 16px;
+  }
+  .sg-ra-block.crit { border-left: 3px solid var(--crit); background: rgba(255,77,77,0.06); }
+  .sg-ra-block.warn { border-left: 3px solid var(--warn); background: rgba(255,163,54,0.05); }
+  .sg-ra-block.ok   { border-left: 3px solid var(--ok); }
+  .sg-ra-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .sg-ra-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .sg-ra-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .sg-ra-badge.crit { background: var(--crit); color: var(--bg); }
+  .sg-ra-badge.warn { background: var(--warn); color: var(--bg); }
+  .sg-ra-badge.ok   { background: var(--ok); color: var(--bg); }
+  .sg-ra-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  @media (max-width: 700px) {
+    .sg-ra-grid { grid-template-columns: 1fr; }
+  }
+  .sg-ra-pop {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+  }
+  .sg-ra-pop-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .sg-ra-pop-rule {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .sg-ra-trends {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .sg-ra-trend {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .sg-ra-trend .ti {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    flex-shrink: 0;
+    width: 14px;
+  }
+  .sg-ra-trend.alert .ti { color: var(--crit); }
+  .sg-ra-trend.warn  .ti { color: var(--warn); }
+  .sg-ra-trend.info  .ti { color: var(--accent); }
+  .sg-ra-trend.ok    .ti { color: var(--ok); }
+  .sg-ra-trend b { color: var(--text); font-weight: 600; }
+  .sg-ra-foot {
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .sg-ra-aeg {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(255,77,77,0.12);
+    border: 1px solid var(--crit);
+    border-left: 4px solid var(--crit);
+    font-size: 12px;
+    color: var(--text);
+  }
+  .sg-ra-aeg b { color: var(--crit); }
+
   @media (max-width: 1000px) and (min-width: 701px) {
     .sg-current { grid-template-columns: 1fr 1fr; }
   }
@@ -2976,7 +3137,7 @@
 
 <header class="app">
   <div class="brand">
-    <div class="logo">HADR</div>
+    <div class="logo">🌏</div>
     <div>
       <h1>Global Environmental Monitoring &amp; HADR Advisory Dashboard</h1>
       <div class="sub">Country-level personnel data</div>
@@ -3478,7 +3639,9 @@ const MOCK_DATA = [
 
 // Pre-baked "AI" summaries for each active alert.
 // Structure mimics what a Claude call would produce.
-let DATA = MOCK_DATA.slice();
+// Initial DATA holds only nominal country-status entries until the first
+// live fetch lands. No mock alerts/incidents are seeded.
+let DATA = MOCK_DATA.filter(d => d.nominal);
 
 const PRESET_SUMMARIES = {
   'PH-weather': {
@@ -4063,32 +4226,20 @@ async function fetchAirQuality() {
   }
 }
 
-// Recompute DATA from mock + live sources
+// Recompute DATA from live sources only.
+// Mock incident data was previously merged here as a fallback when live APIs
+// failed; that's been removed at the user's request. Only live alerts now
+// populate the dashboard. NOMINAL country-status entries (the green
+// "country OK" markers on the world map) are preserved from MOCK_DATA since
+// those aren't incidents — they represent baseline country status, not events.
 function rebuildDATA() {
   const NOMINAL = MOCK_DATA.filter(d => d.nominal);
-  const MOCK_ALERTS = MOCK_DATA.filter(d => !d.nominal);
-
-  // Per-source: if live succeeded, use live; if failed, fall back to mock for that hazard
-  const useLive = {
-    quake: dataSourceStatus.usgs.status === 'ok',
-    weather: dataSourceStatus.gdacs.status === 'ok',
-    flood: dataSourceStatus.gdacs.status === 'ok',
-    volcano: dataSourceStatus.gdacs.status === 'ok',
-    disease: false, // GDACS doesn't cover disease — keep mock
-    haze: dataSourceStatus.airquality.status === 'ok',
-  };
-
-  const alerts = [];
-  // Live alerts (only for hazards where live succeeded)
-  liveAlerts.forEach(a => { if (useLive[a.hazard]) alerts.push(a); });
-  // Mock alerts as fallback for hazards with no live data
-  MOCK_ALERTS.forEach(a => { if (!useLive[a.hazard]) alerts.push({ ...a, mock: true }); });
 
   // 30-day window: drop incidents older than 30 days. Nominal entries are
   // never time-bound — they represent country status, not events — so they
   // pass through unfiltered.
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-  const recentAlerts = alerts.filter(a => {
+  const recentAlerts = liveAlerts.filter(a => {
     if (!a.updated) return false; // no timestamp = drop
     const t = new Date(a.updated).getTime();
     return !isNaN(t) && t >= cutoff;
@@ -4133,7 +4284,6 @@ async function refreshAllLiveData(opts = {}) {
   renderAll();
   update24hButton();
   // Re-evaluate personnel × incident alerts after new data arrives
-  personnelAlertsDismissed = false;
   if (typeof renderPersonnelAlertBanner === 'function') renderPersonnelAlertBanner();
   // Telegram alerts (silent if bridge URL is empty)
   if (typeof maybeSendTelegramAlerts === 'function') maybeSendTelegramAlerts();
@@ -4236,6 +4386,74 @@ function setSourceStatusUI(refreshing) {
 //  SINGAPORE FOCUS — NEA PSI & PM2.5 with 24h trend
 // =============================================================
 let sgData = { live: false, items: [], pm25Items: [], tempItems: [], lastFetch: null, error: null };
+
+// 7-day historical data — fetched once per session (or on manual refresh) to
+// enable medium-term trend analysis in the Risk Assessment panel. We fetch
+// each day's archive from data.gov.sg v1 (which supports a `date=` parameter).
+// Each metric returns ~288 records/day (every 5 min), so 7 days ≈ 2000 rows
+// per stream. Total payload ~6KB/day after dedupe — fits comfortably.
+let sgWeekData = { psi: [], pm25: [], temp: [], lastFetch: null, fetching: false };
+
+async function fetchSingapore7DayHistory() {
+  // Don't run two concurrent fetches; reuse the existing promise if one is in-flight.
+  if (sgWeekData.fetching) return sgWeekData;
+  // Honor a 1-hour cache — 7 days of data doesn't change quickly.
+  if (sgWeekData.lastFetch && (Date.now() - sgWeekData.lastFetch) < 60 * 60 * 1000) {
+    return sgWeekData;
+  }
+  sgWeekData.fetching = true;
+
+  const v1 = 'https://api.data.gov.sg/v1/environment';
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(Date.now() - i * 86400000);
+    dates.push(d.toISOString().split('T')[0]);
+  }
+
+  async function fetchDay(path, date) {
+    try {
+      const r = await fetchWithCORS(`${v1}/${path}?date=${date}`);
+      if (!r.ok) return [];
+      const data = await r.json();
+      return data?.items || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async function fetchPathAcrossDays(path) {
+    const results = await Promise.all(dates.map(d => fetchDay(path, d)));
+    // Flatten + dedupe by timestamp
+    const seen = new Set();
+    const out = [];
+    for (const day of results) {
+      for (const item of day) {
+        if (!item.timestamp || seen.has(item.timestamp)) continue;
+        seen.add(item.timestamp);
+        out.push(item);
+      }
+    }
+    return out.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  }
+
+  try {
+    const [psi, pm25, temp] = await Promise.all([
+      fetchPathAcrossDays('psi'),
+      fetchPathAcrossDays('pm25'),
+      fetchPathAcrossDays('air-temperature'),
+    ]);
+    sgWeekData = { psi, pm25, temp, lastFetch: Date.now(), fetching: false };
+    console.log(`[SG 7-day] PSI: ${psi.length}, PM2.5: ${pm25.length}, Temp: ${temp.length} records`);
+    // Re-render the risk assessment to pick up the new data
+    if (typeof renderSingaporeView === 'function') {
+      try { renderSingaporeView(); } catch (e) { console.warn('[SG 7-day] re-render failed:', e.message); }
+    }
+  } catch (e) {
+    console.warn('[SG 7-day] fetch error:', e.message);
+    sgWeekData.fetching = false;
+  }
+  return sgWeekData;
+}
 
 function psiBand(v) {
   if (v == null) return { name: '—', sev: 'info', color: '#5a6b7e' };
@@ -4892,37 +5110,459 @@ function renderSingaporeView() {
       : '<span class="mock">◌ MOCK PATTERN</span>';
   }
   const threshEl = document.getElementById('sg-thresholds');
-  const psiThresh = psiVal == null ? null
-    : psiVal > 200 ? { sev:'crit', txt:'PSI in VERY UNHEALTHY band — issue advisory, restrict outdoor activity, N95 guidance' }
-    : psiVal > 100 ? { sev:'warn', txt:'PSI in UNHEALTHY band — monitor, advise sensitive personnel' }
-    : psiVal > 50  ? { sev:'ok',   txt:'PSI in MODERATE band — within healthy range' }
-    :                { sev:'ok',   txt:'PSI in GOOD band — no action required' };
-  const pmThresh = pmVal == null ? null
-    : pmVal >= 251 ? { sev:'crit',  txt:'PM2.5 VERY HIGH (Band 4) — minimise outdoor activity, mandatory protective measures' }
-    : pmVal >= 151 ? { sev:'warn',  txt:'PM2.5 HIGH (Band 3) — limit prolonged outdoor exertion, brief on respiratory risks' }
-    : pmVal >=  56 ? { sev:'watch', txt:'PM2.5 ELEVATED (Band 2) — monitor sensitive personnel' }
-    :                { sev:'ok',    txt:'PM2.5 NORMAL (Band 1) — no special action required' };
-  const tempThresh = tempVal == null ? null
-    : tempVal >= 38 ? { sev:'crit', txt:'EXTREME HEAT — suspend non-essential outdoor activity, mandatory cooling/hydration' }
-    : tempVal >= 36 ? { sev:'warn', txt:'Heat advisory — modify outdoor training, frequent water breaks, watch for heat injury' }
-    : tempVal >= 34 ? { sev:'warn', txt:'Heat caution — increased heat-injury risk, brief on hydration' }
-    : tempVal >= 32 ? { sev:'watch', txt:'Hot conditions — monitor for heat stress' }
-    :                  { sev:'ok',   txt:'Air temperature within normal range for outdoor activity' };
-  threshEl.innerHTML = `
-    <div class="sg-thresh ${psiThresh?.sev || 'ok'}">
-      <span class="label">PSI 24-Hour</span>
-      <span class="status">${psiThresh?.txt || '—'}</span>
-    </div>
-    <div class="sg-thresh ${pmThresh?.sev || 'ok'}">
-      <span class="label">PM2.5 1-Hour</span>
-      <span class="status">${pmThresh?.txt || '—'}</span>
-    </div>
-    <div class="sg-thresh ${tempThresh?.sev || 'ok'}">
-      <span class="label">Air Temperature</span>
-      <span class="status">${tempThresh?.txt || '—'}</span>
-    </div>`;
+  // Build SAF doctrine-driven analysis (Section 9, dated 29 Sep 23).
+  // Output is fully deterministic: re-runs on every data refresh.
+  threshEl.innerHTML = buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData);
   // If map is initialised, re-render with fresh data
   if (sgMap) renderSGMap();
+}
+
+// ============================================================
+//  SAF Risk Assessment — Section 9 Doctrine Application
+// ============================================================
+// Implements SAF PSI-Activity Guidelines (Table 6-9-3, dated 29 Sep 23)
+// and adds deterministic trend detection from the 24h chart history.
+// Updates automatically on every data refresh — no AI calls.
+
+// Returns the SAF activity band for a given 24h PSI value.
+//   gen   = guidance for SAF General Population
+//   susc  = guidance for SAF Susceptible (PES B4↓ asthma/heart/lung)
+//   sev   = visual severity for the panel
+function safPsiActivityBand(psi) {
+  if (psi == null) return null;
+  if (psi > 300) return {
+    sev: 'crit',
+    label: 'Hazardous (>300)',
+    gen:  'Minimise outdoor activities. Don PPE (N95) when performing essential outdoor duties.',
+    susc: 'Avoid all outdoor activities. Don PPE (N95) for any essential outdoor duty.',
+    pft:  'All physical activities to be avoided.',
+  };
+  if (psi > 200) return {
+    sev: 'crit',
+    label: 'Very Unhealthy (201–300)',
+    gen:  'Avoid prolonged or strenuous outdoor physical activities. Avoid prolonged essential outdoor duties.',
+    susc: 'Avoid outdoor activities. Don PPE (N95) for essential outdoor duties. Reassign to indoor duties.',
+    pft:  'Physical fitness tests must be conducted in air-conditioned facilities.',
+  };
+  if (psi > 100) return {
+    sev: 'warn',
+    label: 'Unhealthy (101–200)',
+    gen:  'Reduce prolonged or strenuous outdoor physical activities.',
+    susc: 'Avoid prolonged or strenuous outdoor physical activities. Reassign to indoor duties.',
+    pft:  'Outdoor activities limited to: one prolonged + one strenuous, or two prolonged per day.',
+  };
+  if (psi > 50) return {
+    sev: 'ok',
+    label: 'Moderate (51–100)',
+    gen:  'Normal activities.',
+    susc: 'Normal activities.',
+    pft:  'No restrictions on training or outdoor duties.',
+  };
+  return {
+    sev: 'ok',
+    label: 'Good (0–50)',
+    gen:  'Normal activities.',
+    susc: 'Normal activities.',
+    pft:  'No restrictions on training or outdoor duties.',
+  };
+}
+
+function safPm25Band(pm) {
+  if (pm == null) return null;
+  if (pm >= 251) return { sev: 'crit', label: 'Very High (≥251 µg/m³)' };
+  if (pm >= 151) return { sev: 'crit', label: 'High (151–250 µg/m³)' };
+  if (pm >=  56) return { sev: 'warn', label: 'Elevated (56–150 µg/m³)' };
+  return { sev: 'ok', label: 'Normal (0–55 µg/m³)' };
+}
+
+// Air temperature is NOT part of SAF Section 9 (which only covers haze).
+// These bands are derived from common SAF/MOH heat-injury guidance for
+// outdoor training in tropical conditions — used here as supporting context
+// for unit commanders.
+function safTempBand(t) {
+  if (t == null) return null;
+  if (t >= 38) return {
+    sev: 'crit',
+    label: 'Extreme Heat (≥38°C)',
+    gen:  'Suspend non-essential outdoor activity. Mandatory cooling and active hydration. Cancel strenuous training.',
+    susc: 'No outdoor activity. Remain indoors / air-conditioned spaces.',
+    pft:  'All physical fitness assessments to be deferred or moved indoors.',
+  };
+  if (t >= 36) return {
+    sev: 'warn',
+    label: 'Heat Advisory (36–37.9°C)',
+    gen:  'Modify outdoor training: shorter durations, frequent water breaks, watch for signs of heat injury.',
+    susc: 'Avoid strenuous outdoor activity. Limit exposure during peak heat hours.',
+    pft:  'IPPT / strenuous PT in shaded or air-conditioned facilities where possible.',
+  };
+  if (t >= 34) return {
+    sev: 'warn',
+    label: 'Heat Caution (34–35.9°C)',
+    gen:  'Increase rest cycles. Brief personnel on hydration. Monitor for heat stress symptoms.',
+    susc: 'Reduce intensity. Increase rest-to-work ratio.',
+    pft:  'Cater additional rest between activities and prior to runs.',
+  };
+  if (t >= 32) return {
+    sev: 'ok',
+    label: 'Hot (32–33.9°C)',
+    gen:  'Normal activities. Standard hydration protocols apply.',
+    susc: 'Normal activities with awareness of heat exposure.',
+    pft:  'No restrictions; standard heat-injury precautions in effect.',
+  };
+  return {
+    sev: 'ok',
+    label: 'Normal (<32°C)',
+    gen:  'Normal activities.',
+    susc: 'Normal activities.',
+    pft:  'No restrictions.',
+  };
+}
+
+// Trend detector: takes a sorted timeseries (oldest → newest, hourly-ish)
+// and returns an array of {sev, txt} insights.
+function detectTrends(series, opts) {
+  if (!Array.isArray(series) || series.length < 3) return [];
+  const out = [];
+  const values = series.map(p => p.value).filter(v => v != null && !isNaN(v));
+  if (!values.length) return [];
+  const latest = values[values.length - 1];
+  const mean = values.reduce((a,b) => a + b, 0) / values.length;
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+
+  // 1. Spike: latest is >50% above 24h average
+  if (mean > 0 && latest > mean * 1.5 && latest - mean > opts.spikeAbs) {
+    const pctAbove = Math.round(((latest - mean) / mean) * 100);
+    out.push({
+      sev: 'alert',
+      txt: `<b>Spike detected.</b> Current ${opts.unit}${latest.toFixed(opts.dec)} is ${pctAbove}% above the 24h average (${mean.toFixed(opts.dec)} ${opts.unit}).`,
+    });
+  }
+
+  // 2. Rapid rise: latest vs reading from ~3h ago
+  // For ~hourly readings, look back ~3 points; otherwise look back about 25% of history.
+  const lookback = Math.max(3, Math.floor(values.length * 0.25));
+  if (values.length > lookback) {
+    const past = values[values.length - 1 - lookback];
+    const delta = latest - past;
+    if (Math.abs(delta) >= opts.rapidDelta) {
+      const dir = delta > 0 ? 'rising' : 'falling';
+      const sev = (delta > 0 && delta >= opts.rapidDelta * 1.5) ? 'warn' : 'info';
+      out.push({
+        sev,
+        txt: `<b>Rapid ${dir}.</b> ${opts.unit} changed by ${delta > 0 ? '+' : ''}${delta.toFixed(opts.dec)} over the last ~${lookback}h (was ${past.toFixed(opts.dec)}, now ${latest.toFixed(opts.dec)}).`,
+      });
+    }
+  }
+
+  // 3. Sustained elevation: any threshold crossed consistently in recent half
+  if (opts.warnThreshold != null) {
+    const recent = values.slice(-Math.max(3, Math.floor(values.length / 2)));
+    const aboveCount = recent.filter(v => v >= opts.warnThreshold).length;
+    if (aboveCount === recent.length && aboveCount >= 3) {
+      out.push({
+        sev: 'warn',
+        txt: `<b>Sustained elevation.</b> ${opts.unit} has remained at or above ${opts.warnThreshold} ${opts.unit} for the last ${recent.length} readings.`,
+      });
+    }
+  }
+
+  // 4. Threshold crossing in last 3 points
+  if (opts.crossThreshold != null && values.length >= 4) {
+    const tail = values.slice(-4);
+    const tailLatest = tail[tail.length - 1];
+    const tailEarlier = tail.slice(0, -1);
+    const wasAllBelow = tailEarlier.every(v => v < opts.crossThreshold);
+    const wasAllAbove = tailEarlier.every(v => v >= opts.crossThreshold);
+    if (wasAllBelow && tailLatest >= opts.crossThreshold) {
+      out.push({
+        sev: 'warn',
+        txt: `<b>Threshold crossed.</b> ${opts.unit} just crossed the ${opts.crossThreshold} ${opts.unit} mark (was consistently below).`,
+      });
+    } else if (wasAllAbove && tailLatest < opts.crossThreshold) {
+      out.push({
+        sev: 'ok',
+        txt: `<b>Threshold recovered.</b> ${opts.unit} dropped back below ${opts.crossThreshold} ${opts.unit}.`,
+      });
+    }
+  }
+
+  // 5. Range — for context only, no severity
+  if (max - min >= opts.rangeNote) {
+    out.push({
+      sev: 'info',
+      txt: `24h range: ${min.toFixed(opts.dec)}–${max.toFixed(opts.dec)} ${opts.unit} (mean ${mean.toFixed(opts.dec)}).`,
+    });
+  }
+
+  return out;
+}
+
+// Generate a short prose paragraph synthesizing 24h and 7-day trends.
+// Fully deterministic; produces 2-4 sentences explaining what the data shows
+// without making clinical/operational recommendations (those live in the
+// doctrine blocks above).
+function buildTrendParagraph(metricName, unit, dec, current, series24h, series7d, opts) {
+  const sentences = [];
+  const fmt = v => (v == null || isNaN(v)) ? '—' : v.toFixed(dec);
+
+  // ---- 24h analysis ----
+  const vals24 = series24h.map(p => p.value).filter(v => v != null && !isNaN(v));
+  if (vals24.length >= 3) {
+    const mean24 = vals24.reduce((a, b) => a + b, 0) / vals24.length;
+    const max24  = Math.max(...vals24);
+    const min24  = Math.min(...vals24);
+    const latest = vals24[vals24.length - 1];
+
+    // Peak vs current
+    if (max24 - latest >= opts.peakSignificance) {
+      const peakIdx = vals24.indexOf(max24);
+      const peakPt  = series24h[peakIdx];
+      const peakTime = peakPt?.timestamp
+        ? new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Singapore', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(peakPt.timestamp))
+        : 'earlier';
+      sentences.push(`In the past 24 hours, ${metricName.toLowerCase()} peaked at ${fmt(max24)}${unit} (${peakTime} SGT) before easing to the current ${fmt(latest)}${unit}.`);
+    } else if (latest - min24 >= opts.peakSignificance && latest >= max24 - 1) {
+      sentences.push(`${metricName} has been rising over the past 24 hours, climbing from a low of ${fmt(min24)}${unit} to the current ${fmt(latest)}${unit}.`);
+    } else {
+      // Stable 24h
+      const range = max24 - min24;
+      if (range < opts.peakSignificance) {
+        sentences.push(`${metricName} has been stable over the past 24 hours, averaging ${fmt(mean24)}${unit} within a narrow ${fmt(min24)}–${fmt(max24)}${unit} range.`);
+      } else {
+        sentences.push(`Over the past 24 hours ${metricName.toLowerCase()} ranged from ${fmt(min24)} to ${fmt(max24)}${unit}, averaging ${fmt(mean24)}${unit}.`);
+      }
+    }
+
+    // Threshold crossings in 24h
+    if (opts.warnThreshold != null) {
+      const aboveCount = vals24.filter(v => v >= opts.warnThreshold).length;
+      if (aboveCount === 0 && max24 < opts.warnThreshold - 1) {
+        // never approached threshold — no need to mention
+      } else if (aboveCount === vals24.length) {
+        sentences.push(`Values remained above the ${opts.warnThreshold}${unit} threshold throughout the day.`);
+      } else if (aboveCount > 0) {
+        const pct = Math.round((aboveCount / vals24.length) * 100);
+        sentences.push(`Readings crossed the ${opts.warnThreshold}${unit} threshold for approximately ${pct}% of the day.`);
+      }
+    }
+  } else {
+    sentences.push(`Insufficient 24-hour data for trend analysis (${vals24.length} readings available).`);
+  }
+
+  // ---- 7-day analysis ----
+  const vals7 = (series7d || []).map(p => p.value).filter(v => v != null && !isNaN(v));
+  if (vals7.length >= 24) {
+    const mean7 = vals7.reduce((a, b) => a + b, 0) / vals7.length;
+    const max7  = Math.max(...vals7);
+    const min7  = Math.min(...vals7);
+
+    // Compare today vs week mean
+    if (vals24.length) {
+      const mean24 = vals24.reduce((a, b) => a + b, 0) / vals24.length;
+      const delta = mean24 - mean7;
+      const absDelta = Math.abs(delta);
+      if (absDelta >= opts.weekDeltaSignificance) {
+        const dir = delta > 0 ? 'higher than' : 'lower than';
+        sentences.push(`Today's 24-hour average (${fmt(mean24)}${unit}) is ${fmt(absDelta)}${unit} ${dir} the 7-day average of ${fmt(mean7)}${unit}.`);
+      } else {
+        sentences.push(`Today's average is consistent with the 7-day baseline of ${fmt(mean7)}${unit}.`);
+      }
+    }
+
+    // Week peak context
+    if (max7 - (vals24.length ? Math.max(...vals24) : 0) >= opts.peakSignificance * 2) {
+      sentences.push(`The weekly peak of ${fmt(max7)}${unit} occurred earlier in the week.`);
+    }
+  } else if (sgWeekData.fetching) {
+    sentences.push(`7-day historical data is loading…`);
+  } else if (vals7.length > 0 && vals7.length < 24) {
+    sentences.push(`7-day baseline available from ${vals7.length} historical readings.`);
+  }
+
+  if (!sentences.length) {
+    return '';
+  }
+  return `<div class="sg-ra-pop" style="margin-top:10px;background:var(--bg)">
+    <div class="sg-ra-pop-label">Trend Analysis</div>
+    <div class="sg-ra-pop-rule" style="font-size:13px;line-height:1.5">${sentences.join(' ')}</div>
+  </div>`;
+}
+
+function buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData) {
+  // Build timeseries from sgData (last 24h, sorted)
+  const psiSeries = (sgData?.items || [])
+    .map(d => ({ timestamp: d.timestamp, value: (d.readings?.psi_twenty_four_hourly?.national) ?? null }))
+    .filter(p => p.value != null);
+  const pmSeries = (sgData?.pm25Items || [])
+    .map(d => ({ timestamp: d.timestamp, value: (d.readings?.pm25_one_hourly?.national) ?? null }))
+    .filter(p => p.value != null);
+  const tempSeries = (sgData?.tempItems || [])
+    .map(d => ({ timestamp: d.timestamp, value: d.value }))
+    .filter(p => p.value != null);
+
+  // 7-day series for each metric — pulled from sgWeekData (fetched async on tab-open).
+  // Temperature in v1 has a per-station structure; we average all stations per reading.
+  const psi7d = (sgWeekData.psi || [])
+    .map(d => ({ timestamp: d.timestamp, value: (d.readings?.psi_twenty_four_hourly?.national) ?? null }))
+    .filter(p => p.value != null);
+  const pm7d = (sgWeekData.pm25 || [])
+    .map(d => ({ timestamp: d.timestamp, value: (d.readings?.pm25_one_hourly?.national) ?? null }))
+    .filter(p => p.value != null);
+  const temp7d = (sgWeekData.temp || [])
+    .map(d => {
+      const arr = d.readings || [];
+      const vals = arr.map(r => r.value).filter(v => v != null && !isNaN(v));
+      const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+      return { timestamp: d.timestamp, value: avg };
+    })
+    .filter(p => p.value != null);
+
+  const psiBand  = safPsiActivityBand(psiVal);
+  const pmBand   = safPm25Band(pmVal);
+  const tempBand = safTempBand(tempVal);
+
+  // === PSI block ===
+  let psiBlock = '';
+  if (psiBand) {
+    psiBlock = `
+      <div class="sg-ra-block ${psiBand.sev}">
+        <div class="sg-ra-header">
+          <span class="sg-ra-title">PSI 24-Hour · ${psiVal}</span>
+          <span class="sg-ra-badge ${psiBand.sev}">${psiBand.label}</span>
+        </div>
+        <div class="sg-ra-grid">
+          <div class="sg-ra-pop">
+            <div class="sg-ra-pop-label">SAF General Population</div>
+            <div class="sg-ra-pop-rule">${psiBand.gen}</div>
+          </div>
+          <div class="sg-ra-pop">
+            <div class="sg-ra-pop-label">SAF Susceptible (PES B4↓)</div>
+            <div class="sg-ra-pop-rule">${psiBand.susc}</div>
+          </div>
+        </div>
+        <div class="sg-ra-pop" style="margin-top:10px">
+          <div class="sg-ra-pop-label">Physical Fitness / Training</div>
+          <div class="sg-ra-pop-rule">${psiBand.pft}</div>
+        </div>`;
+
+    // Trends for PSI
+    const psiTrends = detectTrends(psiSeries, {
+      unit: 'PSI ', dec: 0, spikeAbs: 20, rapidDelta: 15,
+      warnThreshold: 100, crossThreshold: 100, rangeNote: 30,
+    });
+    if (psiTrends.length) {
+      psiBlock += `
+        <div class="sg-ra-trends">
+          ${psiTrends.map(t => `
+            <div class="sg-ra-trend ${t.sev}">
+              <span class="ti">${t.sev === 'alert' ? '▲' : t.sev === 'warn' ? '!' : t.sev === 'ok' ? '✓' : '·'}</span>
+              <div>${t.txt}</div>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+    psiBlock += `</div>`;
+  }
+
+  // === PM2.5 block ===
+  let pmBlock = '';
+  if (pmBand) {
+    pmBlock = `
+      <div class="sg-ra-block ${pmBand.sev}">
+        <div class="sg-ra-header">
+          <span class="sg-ra-title">PM2.5 1-Hour · ${pmVal} µg/m³</span>
+          <span class="sg-ra-badge ${pmBand.sev}">${pmBand.label}</span>
+        </div>
+        <div class="sg-ra-pop">
+          <div class="sg-ra-pop-label">Doctrine Note</div>
+          <div class="sg-ra-pop-rule">SAF primarily uses 24h PSI for activity decisions. 1h PM2.5 is monitored for volatile spikes — AEG may impose additional measures if PM2.5 enters the High band (>151 µg/m³).</div>
+        </div>`;
+
+    const pmTrends = detectTrends(pmSeries, {
+      unit: 'µg/m³ ', dec: 0, spikeAbs: 15, rapidDelta: 20,
+      warnThreshold: 56, crossThreshold: 56, rangeNote: 40,
+    });
+    if (pmTrends.length) {
+      pmBlock += `
+        <div class="sg-ra-trends">
+          ${pmTrends.map(t => `
+            <div class="sg-ra-trend ${t.sev}">
+              <span class="ti">${t.sev === 'alert' ? '▲' : t.sev === 'warn' ? '!' : t.sev === 'ok' ? '✓' : '·'}</span>
+              <div>${t.txt}</div>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+
+    // AEG trigger alert
+    if (pmVal != null && pmVal > 151) {
+      pmBlock += `
+        <div class="sg-ra-aeg">
+          <b>AEG ACTION TRIGGER:</b> 1-hour PM2.5 has exceeded the High band threshold (151 µg/m³). Per Section 9 doctrine, the AEG may impose additional precautionary measures via GSOC executive decision.
+        </div>`;
+    }
+    pmBlock += `</div>`;
+  }
+
+  // === Air Temperature block ===
+  let tempBlock = '';
+  if (tempBand) {
+    tempBlock = `
+      <div class="sg-ra-block ${tempBand.sev}">
+        <div class="sg-ra-header">
+          <span class="sg-ra-title">Air Temperature · ${tempVal?.toFixed(1)}°C</span>
+          <span class="sg-ra-badge ${tempBand.sev}">${tempBand.label}</span>
+        </div>
+        <div class="sg-ra-grid">
+          <div class="sg-ra-pop">
+            <div class="sg-ra-pop-label">SAF General Population</div>
+            <div class="sg-ra-pop-rule">${tempBand.gen}</div>
+          </div>
+          <div class="sg-ra-pop">
+            <div class="sg-ra-pop-label">SAF Susceptible (PES B4↓)</div>
+            <div class="sg-ra-pop-rule">${tempBand.susc}</div>
+          </div>
+        </div>
+        <div class="sg-ra-pop" style="margin-top:10px">
+          <div class="sg-ra-pop-label">Physical Fitness / Training</div>
+          <div class="sg-ra-pop-rule">${tempBand.pft}</div>
+        </div>`;
+
+    const tempTrends = detectTrends(tempSeries, {
+      unit: '°C ', dec: 1, spikeAbs: 2, rapidDelta: 2.5,
+      warnThreshold: 34, crossThreshold: 34, rangeNote: 5,
+    });
+    if (tempTrends.length) {
+      tempBlock += `
+        <div class="sg-ra-trends">
+          ${tempTrends.map(t => `
+            <div class="sg-ra-trend ${t.sev}">
+              <span class="ti">${t.sev === 'alert' ? '▲' : t.sev === 'warn' ? '!' : t.sev === 'ok' ? '✓' : '·'}</span>
+              <div>${t.txt}</div>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+    tempBlock += buildTrendParagraph('Air temperature', '°C', 1, tempVal, tempSeries, temp7d, {
+      peakSignificance: 1.5, warnThreshold: 34, weekDeltaSignificance: 1,
+    });
+
+    tempBlock += `
+        <div class="sg-ra-pop-rule" style="margin-top:10px;color:var(--text-mute);font-size:11px;font-style:italic">
+          Heat-injury guidance is not part of SAF Section 9 (haze doctrine). Bands shown derive from common SAF/MOH heat-injury training guidance for tropical outdoor conditions.
+        </div>
+      </div>`;
+  }
+
+  return `
+    ${psiBlock}
+    ${pmBlock}
+    ${tempBlock}
+    <div class="sg-ra-foot">
+      Auto-updates on data refresh · Last calculated ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Singapore', hour12: false })} SGT
+    </div>
+  `;
 }
 
 async function refreshSingaporeData() {
@@ -5818,6 +6458,29 @@ function isNightTime(tz) {
   } catch (e) { return false; }
 }
 
+// Convert ISO2 country code to a regional-indicator flag emoji.
+// Modern OSes/browsers render this as the country flag.
+function iso2ToFlagEmoji(iso2) {
+  if (!iso2 || iso2.length !== 2) return '';
+  const A = 0x41;          // ASCII 'A'
+  const BASE = 0x1F1E6;    // Regional Indicator Symbol Letter A
+  const code = iso2.toUpperCase();
+  const c0 = code.charCodeAt(0) - A;
+  const c1 = code.charCodeAt(1) - A;
+  if (c0 < 0 || c0 > 25 || c1 < 0 || c1 > 25) return '';
+  return String.fromCodePoint(BASE + c0) + String.fromCodePoint(BASE + c1);
+}
+
+// For a clock entry, return the ISO2 to use for the flag.
+//   - country clock: id is the iso2 directly (e.g. "US")
+//   - state clock:   id is "US-TX" → we use the leading "US"
+function clockFlagISO2(clock) {
+  if (!clock) return '';
+  if (clock.type === 'country') return clock.id;
+  if (clock.type === 'state')   return (clock.id || '').split('-')[0];
+  return '';
+}
+
 function renderClocks() {
   const grid = document.getElementById('clocks-grid');
   if (!grid) return;
@@ -5837,14 +6500,16 @@ function renderClocks() {
     const idEsc  = escSql(c.id);
     return `
       <div class="clock-card" data-tz="${c.tz}">
-        <button class="card-action-btn hide-btn" onclick="removeClock('${c.type}', '${idEsc}')" title="Remove this clock" style="display:flex">✕</button>
-        <span class="offset">${offset}</span>
-        <div>
-          <div class="city">${c.label}</div>
-          <div class="country-code">${c.sublabel}</div>
+        <button class="card-action-btn hide-btn" onclick="removeClock('${c.type}', '${idEsc}')" title="Remove this clock">✕</button>
+        <div class="clock-name-row">
+          <div>
+            <div class="city">${c.label}</div>
+            <div class="country-code">${c.sublabel}</div>
+          </div>
         </div>
         <div class="time" data-role="time">—</div>
         <div class="date" data-role="date">—</div>
+        <span class="offset">${offset}</span>
         ${night ? '<span class="night-indicator" title="Local night time">🌙</span>' : ''}
       </div>`;
   }).join('');
@@ -5926,6 +6591,8 @@ document.querySelectorAll('.views button').forEach(b => {
           fetchSGWeatherData().then(renderSGMap);
         });
       }
+      // Fire-and-forget 7-day history fetch for the Risk Assessment trend paragraphs
+      if (typeof fetchSingapore7DayHistory === 'function') fetchSingapore7DayHistory();
       setTimeout(() => {
         initSGMap();
         if (sgMap) sgMap.invalidateSize();
@@ -6839,6 +7506,80 @@ function renderTable() {
 // ============================================================
 //  CARDS
 // ============================================================
+
+// Extract a PSI value hint from an air-quality event's description / fields.
+// We look for the highest plausible PSI number mentioned. Returns null if none
+// can be inferred — in which case Section 9 guidance defers to a generic
+// haze-monitoring posture rather than a band-specific rule.
+function extractHazePsiFromEvent(d) {
+  if (!d) return null;
+  if (typeof d.psi === 'number') return d.psi;
+  const blob = `${d.desc || ''} ${d.event || ''} ${d.subtype || ''}`;
+  // Look for "PSI <num>" or "PSI <num>-<num>" patterns
+  const ranges = [...blob.matchAll(/PSI\s*(\d{2,3})(?:\s*[-–]\s*(\d{2,3}))?/gi)];
+  let highest = null;
+  for (const m of ranges) {
+    const a = parseInt(m[1], 10);
+    const b = m[2] ? parseInt(m[2], 10) : null;
+    const v = Math.max(a, b || 0);
+    if (Number.isFinite(v) && (highest == null || v > highest)) highest = v;
+  }
+  if (highest != null) return highest;
+  // Fall back to severity-based default
+  if (d.severity === 'crit') return 220;
+  if (d.severity === 'warn') return 150;
+  if (d.severity === 'watch') return 75;
+  return null;
+}
+
+// Build Risk Assessment + Recommended Actions for a haze incident, per SAF
+// Section 9 doctrine (29 Sep 23). PSI band drives the wording.
+function buildSection9HazeGuidance(psi, d) {
+  // Defer to generic preset if we genuinely can't infer a PSI band
+  if (psi == null) return null;
+
+  let threshold, bullets;
+  if (psi > 300) {
+    threshold = `EXCEEDED — PSI in HAZARDOUS band (>300). All outdoor physical activities to be avoided per SAF Section 9.`;
+    bullets = [
+      'Minimise outdoor activities for SAF General Population',
+      'Don PPE (N95) for essential outdoor duties',
+      'SAF Susceptible (PES B4↓): avoid all outdoor activity, reassign to indoor duties',
+      'Suspend all physical fitness and strenuous training',
+      'AEG to maintain executive oversight via GSOC',
+    ];
+  } else if (psi > 200) {
+    threshold = `EXCEEDED — PSI in VERY UNHEALTHY band (201–300). Strenuous and prolonged outdoor activity restricted per SAF Section 9.`;
+    bullets = [
+      'SAF General Population: avoid prolonged or strenuous outdoor activity',
+      'SAF Susceptible (PES B4↓): avoid outdoor activities, don N95 for essential duties',
+      'Physical fitness tests must be conducted in air-conditioned facilities',
+      'Issue N95 guidance for personnel performing essential outdoor duties',
+      'Initiate welfare check on susceptible personnel',
+    ];
+  } else if (psi > 100) {
+    threshold = `APPROACHING — PSI in UNHEALTHY band (101–200). Prolonged and strenuous outdoor activity to be reduced per SAF Section 9.`;
+    bullets = [
+      'SAF General Population: reduce prolonged or strenuous outdoor activities',
+      'SAF Susceptible (PES B4↓): avoid prolonged or strenuous outdoor activities, reassign to indoor duties',
+      'Limit to one prolonged + one strenuous outdoor activity, or two prolonged activities per day',
+      'Cater 50% more rest between training stations',
+      'Monitor 1-hour PM2.5 readings for AEG-level spikes (>151 µg/m³)',
+    ];
+  } else {
+    threshold = `BELOW — PSI in GOOD/MODERATE band (≤100). Normal activities permitted per SAF Section 9; routine monitoring only.`;
+    bullets = [
+      'Normal activities for SAF General and Susceptible populations',
+      'Monitor NEA / regional air quality feeds for escalation',
+      'Maintain awareness of transboundary haze trajectory',
+    ];
+  }
+  return {
+    threshold,
+    actions: bullets.map(b => '• ' + b).join('\n'),
+  };
+}
+
 function renderCards() {
   const wrap = document.getElementById('cards');
   wrap.innerHTML = '';
@@ -6880,6 +7621,18 @@ function renderCards() {
     preset.exposure = hasSAF
       ? 'SAF personnel presence in-country confirmed (country-level).'
       : 'No known SAF personnel presence in this country.';
+
+    // For HAZE cards specifically, override Risk Assessment + Recommended
+    // Actions with SAF Section 9 doctrine wording (29 Sep 23). Other hazards
+    // keep their preset / auto-generated content unchanged.
+    if (d.hazard === 'haze') {
+      const psiHint = extractHazePsiFromEvent(d);
+      const sec9 = buildSection9HazeGuidance(psiHint, d);
+      if (sec9) {
+        preset.threshold = sec9.threshold;
+        preset.actions   = sec9.actions;
+      }
+    }
     card.innerHTML = `
       <div class="top">
         <div>
@@ -6903,7 +7656,7 @@ function renderCards() {
           <span>⬡ AI STAFF-ASSIST SUMMARY</span>
           <button class="regen" onclick="regenerateSummary('${d.code}', '${d.hazard}', {force: true})">↻ Regenerate</button>
         </div>
-        <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Personnel Exposure</span>${preset.exposure}<span class="label">Risk Assessment</span>${preset.threshold}<span class="label">Recommended Actions</span>${preset.actions}</div>
+        <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}<span class="label">Recommended Actions</span>${preset.actions}</div>
       </div>
       ${d.hazard === 'haze' ? `
       <div class="aq-history">
@@ -6922,9 +7675,6 @@ function renderCards() {
         <div class="aq-stats" id="aq-stats-${d.code}"></div>
       </div>
       ` : ''}
-      <div class="actions">
-        ${(d.actions||[]).map(a => `<span class="action ${a.includes('WELFARE')||a.includes('HADR')?'on':''}">${a}</span>`).join('')}
-      </div>
     `;
     wrap.appendChild(card);
     // Auto-load default 1W history for AQ cards
@@ -7011,7 +7761,6 @@ ALERT DATA:
 
 Produce output in EXACTLY this format (plain text, no markdown):
 Situation: <2 sentences max>
-Personnel Exposure: <1 sentence, country-level only — never suggest specific numbers or locations>
 Risk Assessment: <1 sentence on the operational risk level and key drivers>
 Recommended Actions: <3-5 short bullets, each on its own line starting with "• ">
 
@@ -7035,8 +7784,7 @@ Be concise, factual, military-professional. No speculation beyond the data.`;
 
     // Parse sections
     const sections = {
-      situation:  /Situation:\s*(.+?)(?=\n\s*Personnel Exposure:|$)/s,
-      exposure:   /Personnel Exposure:\s*(.+?)(?=\n\s*Risk Assessment:|$)/s,
+      situation:  /Situation:\s*(.+?)(?=\n\s*Risk Assessment:|$)/s,
       threshold:  /Risk Assessment:\s*(.+?)(?=\n\s*Recommended Actions:|$)/s,
       actions:    /Recommended Actions:\s*(.+)/s
     };
@@ -7048,7 +7796,6 @@ Be concise, factual, military-professional. No speculation beyond the data.`;
 
     const html =
       `<span class="label">Situation</span>${parsed.situation}` +
-      `<span class="label">Personnel Exposure</span>${parsed.exposure}` +
       `<span class="label">Risk Assessment</span>${parsed.threshold}` +
       `<span class="label">Recommended Actions</span>${parsed.actions}` +
       `<div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-mute);letter-spacing:0.1em">⬡ LIVE · GENERATED ${new Date().toISOString().substring(11,19)}Z · REVIEW REQUIRED</div>`;
@@ -7524,6 +8271,11 @@ async function fetchPersonnelStateFromBridge() {
     personnelLastSyncAt = Date.now();
     updatePersonnelSyncBadge();
 
+    // Eager-load state lists for every country that has a state-level tick,
+    // so the exposure panel can resolve "VN-91" → "An Giang" without waiting
+    // for the user to drill into that country in the Personnel tab.
+    eagerLoadStatesForCheckedCountries();
+
     // If Personnel tab is currently active, re-render to show any remote changes
     if (document.getElementById('personnel-view')?.classList.contains('active') &&
         typeof renderPersonnelView === 'function') {
@@ -7531,7 +8283,6 @@ async function fetchPersonnelStateFromBridge() {
       if (typeof updatePersonnelSummary === 'function') updatePersonnelSummary();
     }
     if (typeof renderPersonnelAlertBanner === 'function') {
-      personnelAlertsDismissed = false;
       renderPersonnelAlertBanner();
     }
     // Cards/Table/Map show SAF Presence flags driven by live personnel state.
@@ -7638,7 +8389,6 @@ function togglePersonnelPresence(unitKey, kind, checked) {
   savePersonnelPresence();
   // Fire-and-forget D1 push (optimistic UI — local change shows immediately)
   pushPersonnelStateToBridge(unitKey);
-  personnelAlertsDismissed = false;
   renderPersonnelView();
   updatePersonnelSummary();
   renderPersonnelAlertBanner();
@@ -7694,19 +8444,71 @@ function updatePersonnelSummary() {
 //  When a personnel location is checked AND a critical incident
 //  is active in that country within the last 24h, raise an alert.
 // ============================================================
+// When personnel state arrives from D1, we may have state-level ticks for
+// countries whose state lists haven't been fetched yet (the user never
+// drilled into them in the Personnel tab). This loads them in the background
+// so the exposure panel can show full state names instead of raw IDs.
+//
+// City-level ticks (3-segment keys like "GB|GB-ENG|GB-CAM") additionally need
+// the cities-for-state cache populated so we can render the city name.
+function eagerLoadStatesForCheckedCountries() {
+  if (typeof loadGeoStates !== 'function') return;
+  const neededCountries = new Set();
+  const neededStates = new Set();
+  Object.keys(personnelPresence).forEach(key => {
+    const v = personnelPresence[key];
+    if (!v || (!v.others && !v.exercises)) return;
+    const parts = key.split('|');
+    const iso2 = parts[0];
+    const stateId = parts[1];
+    const cityId = parts[2];
+    if (!iso2) return;
+    if (stateId && !GEO_STATES_BY_COUNTRY[iso2]) neededCountries.add(iso2);
+    if (cityId  && !GEO_CITIES_BY_STATE[stateId]) neededStates.add(stateId);
+  });
+  if (!neededCountries.size && !neededStates.size) return;
+  const allPromises = [
+    ...[...neededCountries].map(iso2 => loadGeoStates(iso2).catch(() => null)),
+    ...[...neededStates].map(sid  => loadGeoCities(sid).catch(() => null)),
+  ];
+  Promise.all(allPromises).then(() => {
+    if (typeof renderPersonnelAlertBanner === 'function') renderPersonnelAlertBanner();
+    if (typeof renderPersonnelView === 'function' &&
+        document.getElementById('personnel-view')?.classList.contains('active')) {
+      renderPersonnelView();
+    }
+  });
+}
+
 function getCheckedCategoryISO2Codes() {
   // Build a map: ISO2 -> [{country, subUnit, kinds:['others','exercises']}, ...]
-  // New key shape: presKey is either "US" (country-level) or "US|US-TX" (state-level)
+  // Key shape variants:
+  //   "US"                — country-level
+  //   "US|US-TX"          — state-level
+  //   "GB|GB-ENG|GB-CAM"  — city-level (resolves to its state for matching)
   const result = {};
   Object.keys(personnelPresence).forEach(key => {
     const v = personnelPresence[key];
     if (!v || (!v.others && !v.exercises)) return;
-    const [iso2, stateId] = key.split('|');
+    const parts = key.split('|');
+    const iso2 = parts[0];
+    const stateId = parts[1];
+    const cityId = parts[2];
     if (!iso2) return;
     const country = getCountryByISO2(iso2);
-    // Sub-unit label: state name if state, country name if country-level
+    // Sub-unit label: city > state > country level granularity
     let subUnitLabel;
-    if (stateId) {
+    if (cityId) {
+      // City-level tick: resolve city name (cached) and parent state
+      const cities = GEO_CITIES_BY_STATE[stateId] || [];
+      const cty = cities.find(c => c.id === cityId);
+      const states = GEO_STATES_BY_COUNTRY[iso2] || [];
+      const st = states.find(s => s.id === stateId);
+      const stateName = st ? st.name : stateId;
+      subUnitLabel = cty
+        ? { name: `${cty.name}, ${stateName}`, abbr: cty.id }
+        : { name: `${cityId}, ${stateName}`, abbr: '' };
+    } else if (stateId) {
       const states = GEO_STATES_BY_COUNTRY[iso2] || [];
       const st = states.find(s => s.id === stateId);
       subUnitLabel = st ? { name: st.name, abbr: st.code } : { name: stateId, abbr: '' };
@@ -7728,7 +8530,8 @@ function getCheckedCategoryISO2Codes() {
 }
 
 function getPersonnelIncidentAlerts() {
-  // Find incidents that are: (a) Critical severity, (b) within last 24h, (c) in a country with checked personnel.
+  // Find incidents that are: (a) Critical or Warning severity, (b) within last 24h,
+  // (c) in a country with checked personnel.
   if (typeof DATA === 'undefined' || !Array.isArray(DATA)) return [];
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
   const checkedByISO = getCheckedCategoryISO2Codes();
@@ -7737,7 +8540,7 @@ function getPersonnelIncidentAlerts() {
   const alerts = [];
   DATA.forEach(d => {
     if (d.nominal) return;
-    if (d.severity !== 'crit') return;
+    if (d.severity !== 'crit' && d.severity !== 'warn') return;
     if (!d.updated) return;
     const t = new Date(d.updated).getTime();
     if (!t || t < cutoff) return;
@@ -7745,70 +8548,87 @@ function getPersonnelIncidentAlerts() {
     if (!matches || !matches.length) return;
     alerts.push({ incident: d, personnel: matches });
   });
+  // Critical first, then warning; newest first within each severity
+  const sevOrder = { crit: 0, warn: 1 };
+  alerts.sort((a, b) => {
+    const s = sevOrder[a.incident.severity] - sevOrder[b.incident.severity];
+    if (s !== 0) return s;
+    return new Date(b.incident.updated) - new Date(a.incident.updated);
+  });
   return alerts;
 }
 
+// Panel is collapsed by default; user clicks the button to expand.
+let exposurePanelExpanded = false;
+function togglePersonnelExposurePanel() {
+  exposurePanelExpanded = !exposurePanelExpanded;
+  renderPersonnelAlertBanner();
+}
+
 function renderPersonnelAlertBanner() {
-  // Only render if map view is active
   const mapView = document.getElementById('map-view');
   if (!mapView) return;
 
-  let banner = document.getElementById('personnel-alert-banner');
+  let panel = document.getElementById('personnel-exposure-panel');
   const alerts = getPersonnelIncidentAlerts();
 
   if (!alerts.length) {
-    // No alerts — remove banner if present
-    if (banner) banner.remove();
+    if (panel) panel.remove();
     return;
   }
 
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'personnel-alert-banner';
-    banner.className = 'personnel-alert-banner';
-    mapView.appendChild(banner);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'personnel-exposure-panel';
+    panel.className = 'personnel-exposure-panel';
+    mapView.appendChild(panel);
   }
 
-  const items = alerts.map(({ incident, personnel }) => {
-    const country = ISO2_TO_NAME[incident.code] || incident.name || incident.code;
-    const hazardLabel = (incident.subtype || incident.event || 'incident').toLowerCase();
-    const subUnitNames = personnel.map(p => p.subUnit.name).slice(0, 3).join(', ');
-    const extra = personnel.length > 3 ? ` +${personnel.length - 3} more` : '';
-    return `
-      <div class="pab-item" onclick="jumpToCard('${incident.code}-${incident.hazard}')">
-        <div class="pab-icon">⚠</div>
-        <div class="pab-body">
-          <div class="pab-title"><b>${country}</b> — Critical ${hazardLabel}</div>
-          <div class="pab-detail">Personnel present: <b>${subUnitNames}${extra}</b> · Check-up required</div>
+  // Compute summary numbers
+  const critCount = alerts.filter(a => a.incident.severity === 'crit').length;
+  const warnCount = alerts.filter(a => a.incident.severity === 'warn').length;
+  const countriesAffected = new Set(alerts.map(a => a.incident.code)).size;
+
+  // Summary header (always visible)
+  const summary = `
+    <button class="pep-toggle" onclick="togglePersonnelExposurePanel()" title="Click to ${exposurePanelExpanded ? 'collapse' : 'expand'} the list">
+      <span class="pep-icon">⚠</span>
+      <div class="pep-summary">
+        <div class="pep-headline">
+          <b>${alerts.length}</b> SAF exposure${alerts.length === 1 ? '' : 's'} across <b>${countriesAffected}</b> ${countriesAffected === 1 ? 'country' : 'countries'}
         </div>
-        <div class="pab-action">VIEW →</div>
+        <div class="pep-subline">
+          ${critCount ? `<span class="pep-sev crit">${critCount} CRITICAL</span>` : ''}
+          ${warnCount ? `<span class="pep-sev warn">${warnCount} WARNING</span>` : ''}
+        </div>
       </div>
-    `;
-  }).join('');
+      <span class="pep-chevron">${exposurePanelExpanded ? '▾' : '▸'}</span>
+    </button>`;
 
-  banner.innerHTML = `
-    <div class="pab-header">
-      <span class="pab-hdr-label">⬛ PERSONNEL IN CRITICAL INCIDENT ZONE ⬛</span>
-      <span class="pab-count">${alerts.length}</span>
-      <button class="pab-close" onclick="dismissPersonnelAlerts()" title="Dismiss until next refresh">✕</button>
-    </div>
-    ${items}
-  `;
+  let body = '';
+  if (exposurePanelExpanded) {
+    const items = alerts.map(({ incident, personnel }) => {
+      const country = ISO2_TO_NAME[incident.code] || incident.name || incident.code;
+      const hazardLabel = (incident.subtype || incident.event || 'incident').toLowerCase();
+      const subUnitNames = personnel.map(p => p.subUnit.name).slice(0, 3).join(', ');
+      const extra = personnel.length > 3 ? ` +${personnel.length - 3} more` : '';
+      const sevClass = incident.severity; // 'crit' or 'warn'
+      const sevLabel = incident.severity === 'crit' ? 'Critical' : 'Warning';
+      return `
+        <div class="pep-item ${sevClass}" onclick="jumpToCard('${incident.code}-${incident.hazard}')">
+          <div class="pep-item-sev sev-${sevClass}">${sevLabel}</div>
+          <div class="pep-item-body">
+            <div class="pep-item-title"><b>${country}</b> · ${hazardLabel}</div>
+            <div class="pep-item-detail">Personnel: ${subUnitNames}${extra}</div>
+          </div>
+          <div class="pep-item-action">VIEW →</div>
+        </div>`;
+    }).join('');
+    body = `<div class="pep-list">${items}</div>`;
+  }
+
+  panel.innerHTML = summary + body;
 }
-
-let personnelAlertsDismissed = false;
-function dismissPersonnelAlerts() {
-  personnelAlertsDismissed = true;
-  const banner = document.getElementById('personnel-alert-banner');
-  if (banner) banner.remove();
-}
-
-// Wrap renderPersonnelAlertBanner to respect dismissal
-const _originalRenderBanner = renderPersonnelAlertBanner;
-renderPersonnelAlertBanner = function() {
-  if (personnelAlertsDismissed) return;
-  _originalRenderBanner();
-};
 
 // Re-run alerts whenever personnel state or incident data changes.
 // This interval is cheap and covers: new incidents arriving, old incidents aging out of 24h window.
@@ -7823,6 +8643,7 @@ setInterval(renderPersonnelAlertBanner, 30 * 1000);
 //   into that country.
 let GEO_COUNTRIES = [];
 let GEO_STATES_BY_COUNTRY = {};
+let GEO_CITIES_BY_STATE = {};   // state-id → array of city objects
 let GEO_LOADED = false;
 
 const GEO_BRIDGE_URL = TELEGRAM_BRIDGE_URL || '';
@@ -7863,17 +8684,40 @@ async function loadGeoStates(iso2) {
   }
 }
 
+// Load pre-curated personnel cities for a given state.
+// Returns empty array if the state has no cities defined.
+async function loadGeoCities(stateId) {
+  if (!stateId) return [];
+  if (GEO_CITIES_BY_STATE[stateId]) return GEO_CITIES_BY_STATE[stateId];
+  if (!GEO_BRIDGE_URL) return [];
+  try {
+    const r = await fetch(GEO_BRIDGE_URL + '/geo/cities?state=' + encodeURIComponent(stateId));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    GEO_CITIES_BY_STATE[stateId] = data.cities || [];
+    return GEO_CITIES_BY_STATE[stateId];
+  } catch (e) {
+    console.warn(`[geo] Failed to load cities for ${stateId}:`, e.message);
+    GEO_CITIES_BY_STATE[stateId] = [];
+    return [];
+  }
+}
+
 async function searchGeo(q) {
-  if (!q || q.length < 2) return { countries: [], states: [] };
-  if (!GEO_BRIDGE_URL) return { countries: [], states: [] };
+  if (!q || q.length < 2) return { countries: [], states: [], cities: [] };
+  if (!GEO_BRIDGE_URL) return { countries: [], states: [], cities: [] };
   try {
     const r = await fetch(GEO_BRIDGE_URL + '/geo/search?q=' + encodeURIComponent(q));
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
-    return { countries: data.countries || [], states: data.states || [] };
+    return {
+      countries: data.countries || [],
+      states: data.states || [],
+      cities: data.cities || [],
+    };
   } catch (e) {
     console.warn('[geo] Search failed:', e.message);
-    return { countries: [], states: [] };
+    return { countries: [], states: [], cities: [] };
   }
 }
 
@@ -8036,8 +8880,8 @@ async function renderPersonnelView() {
       return;
     }
 
-    const r = personnelSearchResults || { countries: [], states: [] };
-    const totalHits = r.countries.length + r.states.length;
+    const r = personnelSearchResults || { countries: [], states: [], cities: [] };
+    const totalHits = r.countries.length + r.states.length + (r.cities?.length || 0);
     labelEl.innerHTML = `<div class="personnel-search-results-label">Showing <b>${totalHits}</b> result${totalHits === 1 ? '' : 's'} for "${personnelSearchQuery.replace(/</g,'&lt;')}"</div>`;
 
     if (totalHits === 0) {
@@ -8051,8 +8895,17 @@ async function renderPersonnelView() {
       const country = getCountryByISO2(s.country_iso2);
       cards.push(buildStateCard(country, s, /*showCountry*/true));
     });
-    // Search may include states (terminal cards) so use wider grid
-    grid.classList.toggle('terminal-mode', r.states.length > 0);
+    (r.cities || []).forEach(city => {
+      const country = getCountryByISO2(city.country_iso2);
+      // Need the state object for the city card; use cached or stub
+      const states = GEO_STATES_BY_COUNTRY[city.country_iso2] || [];
+      const state = states.find(s => s.id === city.state_id)
+                 || { id: city.state_id, name: city.state_id };
+      cards.push(buildCityCard(country, state, city));
+    });
+    // Search may include states/cities (terminal cards) so use wider grid
+    const hasTerminal = r.states.length > 0 || (r.cities?.length || 0) > 0;
+    grid.classList.toggle('terminal-mode', hasTerminal);
     grid.innerHTML = cards.join('');
     return;
   }
@@ -8080,7 +8933,7 @@ async function renderPersonnelView() {
     } else {
       grid.innerHTML = countries.map(c => buildCountryCard(c)).join('');
     }
-  } else {
+  } else if (personnelPath.length === 1) {
     // Inside a country — list its states (terminal cards with checkboxes)
     grid.classList.add('terminal-mode');
     const iso2 = personnelPath[0];
@@ -8096,6 +8949,33 @@ async function renderPersonnelView() {
     states.forEach(s => cards.push(buildStateCard(country, s, /*showCountry*/false)));
     if (states.length === 0) {
       cards.push('<div class="personnel-search-results-label" style="color:var(--text-mute);grid-column:1/-1">No state/province subdivisions for this country.</div>');
+    }
+    grid.innerHTML = cards.join('');
+  } else if (personnelPath.length === 2) {
+    // Inside a state — list its cities (terminal cards with checkboxes)
+    grid.classList.add('terminal-mode');
+    const iso2 = personnelPath[0];
+    const stateId = personnelPath[1];
+    const country = getCountryByISO2(iso2);
+    if (!country) return;
+    const states = GEO_STATES_BY_COUNTRY[iso2] || [];
+    const state = states.find(s => s.id === stateId);
+    if (!state) {
+      // States not yet loaded — load and retry
+      await loadGeoStates(iso2);
+      renderPersonnelView();
+      return;
+    }
+    let cities = GEO_CITIES_BY_STATE[stateId];
+    if (!cities) {
+      grid.innerHTML = '<div class="personnel-search-results-label" style="color:var(--text-mute)">◌ Loading cities for ' + state.name + '…</div>';
+      cities = await loadGeoCities(stateId);
+    }
+    // State-level "tick whole state" card always at top
+    const cards = [buildStateCard(country, state, /*showCountry*/false, /*forceTerminal*/true)];
+    cities.forEach(c => cards.push(buildCityCard(country, state, c)));
+    if (cities.length === 0) {
+      cards.push('<div class="personnel-search-results-label" style="color:var(--text-mute);grid-column:1/-1">No curated cities under this state.</div>');
     }
     grid.innerHTML = cards.join('');
   }
@@ -8127,7 +9007,9 @@ function buildCountryCard(country) {
 
 // State card — used inside a country drilldown and in search results.
 // Pass `state=null` to render the country-level "tick whole country" card.
-function buildStateCard(country, state, showCountry) {
+// If the state has curated cities under it AND forceTerminal is false,
+// also renders a "View cities" link that drills further.
+function buildStateCard(country, state, showCountry, forceTerminal) {
   const iso2 = country.iso2;
   const isCountryLevel = !state;
   const unitKey = isCountryLevel ? iso2 : `${iso2}|${state.id}`;
@@ -8157,11 +9039,20 @@ function buildStateCard(country, state, showCountry) {
 
   const displayName = isCountryLevel
     ? `${country.name} (Country-level)`
-    : state.name;
-  const displayAbbr = isCountryLevel ? iso2 : (state.code || '');
+    : (forceTerminal ? `${state.name} (State-level)` : state.name);
+  const rawCode = isCountryLevel ? iso2 : (state.code || '');
+  const displayAbbr = /[A-Za-z]/.test(rawCode) ? rawCode : '';
 
   const countryLabel = showCountry
     ? `<div class="mono" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${iso2} ${country.name}</div>`
+    : '';
+
+  // Show "View cities" link if this state has curated cities and we're
+  // currently inside the country drilldown (not in forced state-terminal view
+  // and not in search results, which uses showCountry=true).
+  const hasCities = state && !showCountry && !forceTerminal && hasCuratedCities(state.id);
+  const citiesLink = hasCities
+    ? `<button class="pnl-cities-link" onclick="event.stopPropagation(); personnelDrillToState('${state.id}')" title="View curated cities in this state">View cities →</button>`
     : '';
 
   return `
@@ -8182,8 +9073,67 @@ function buildStateCard(country, state, showCountry) {
       </div>
       <div>
         <div class="name">${displayName}</div>
-        <div class="abbr">${displayAbbr}</div>
+        ${displayAbbr ? `<div class="abbr">${displayAbbr}</div>` : ''}
         ${countryLabel}
+      </div>
+      <div class="unit-meta">
+        <div><span class="mk">Status:</span> ${statusHtml}</div>
+        <div><span class="mk">Last updated:</span> <span class="mv">${whenStr}</span></div>
+        <div><span class="mk">Updated by:</span> <span class="mv">${updatedBy}</span></div>
+      </div>
+      ${citiesLink}
+    </div>
+  `;
+}
+
+// City card — terminal card for a curated city under a state.
+// Key shape: iso2|state-id|city-id (e.g. "GB|GB-ENG|GB-CAM")
+function buildCityCard(country, state, city) {
+  const iso2 = country.iso2;
+  const unitKey = `${iso2}|${state.id}|${city.id}`;
+  const rec = personnelPresence[unitKey] || {};
+  const hasOthers    = !!rec.others;
+  const hasExercises = !!rec.exercises;
+
+  let stateClass = '';
+  if (hasOthers && hasExercises) stateClass = 'personnel-present-both';
+  else if (hasOthers)   stateClass = 'personnel-present-others';
+  else if (hasExercises) stateClass = 'personnel-present-exercises';
+
+  const updatedWhen = rec.exercisesWhen || rec.othersWhen;
+  const whenStr = updatedWhen ? fmtFullTime(updatedWhen) : '—';
+  const updatedBy = rec.by || '—';
+
+  let statusHtml;
+  if (hasOthers && hasExercises) {
+    statusHtml = `<span class="unit-status on-others">◉ Personnel</span> <span class="unit-status on-exercises">◉ Exercises</span>`;
+  } else if (hasOthers) {
+    statusHtml = `<span class="unit-status on-others">◉ Personnel Present</span>`;
+  } else if (hasExercises) {
+    statusHtml = `<span class="unit-status on-exercises">◉ Exercises Active</span>`;
+  } else {
+    statusHtml = `<span class="unit-status pending">○ No Personnel</span>`;
+  }
+
+  return `
+    <div class="pnl-card terminal ${stateClass}">
+      <div class="pnl-checkbox-group">
+        <label class="pnl-checkbox exercises" title="Check if SAF exercises are currently running at this location">
+          <input type="checkbox" ${hasExercises ? 'checked' : ''}
+                 onchange="togglePersonnelPresence('${unitKey}', 'exercises', this.checked)" />
+          <span class="pnl-checkbox-box"></span>
+          <span class="lbl">Exercises</span>
+        </label>
+        <label class="pnl-checkbox others" title="Check if SAF personnel (non-exercise) are present at this location">
+          <input type="checkbox" ${hasOthers ? 'checked' : ''}
+                 onchange="togglePersonnelPresence('${unitKey}', 'others', this.checked)" />
+          <span class="pnl-checkbox-box"></span>
+          <span class="lbl">Others</span>
+        </label>
+      </div>
+      <div>
+        <div class="name">${city.name}</div>
+        <div class="mono" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${state.name} · ${iso2}</div>
       </div>
       <div class="unit-meta">
         <div><span class="mk">Status:</span> ${statusHtml}</div>
@@ -8192,6 +9142,25 @@ function buildStateCard(country, state, showCountry) {
       </div>
     </div>
   `;
+}
+
+// Returns true if the given state-id has at least one curated city.
+// Uses cached city data; if not yet loaded, returns false (will be re-rendered
+// later once data arrives).
+function hasCuratedCities(stateId) {
+  const arr = GEO_CITIES_BY_STATE[stateId];
+  return Array.isArray(arr) && arr.length > 0;
+}
+
+// Pre-fetch all cities for the kept countries in the background so the
+// "View cities" affordance shows up correctly without waiting for the user
+// to drill into each state. Called from boot.
+async function eagerLoadCitiesForVisibleStates(iso2) {
+  if (!iso2) return;
+  const states = GEO_STATES_BY_COUNTRY[iso2] || [];
+  // Only fetch a small set in parallel to avoid hammering D1.
+  await Promise.all(states.map(s => loadGeoCities(s.id)));
+  if (typeof renderPersonnelView === 'function') renderPersonnelView();
 }
 
 async function personnelDrillDown(iso2) {
@@ -8207,7 +9176,35 @@ async function personnelDrillDown(iso2) {
   }
   // Trigger background fetch of states (renderPersonnelView also handles it,
   // but starting it here lets the spinner show without the rendering delay).
-  if (!GEO_STATES_BY_COUNTRY[iso2]) loadGeoStates(iso2);
+  if (!GEO_STATES_BY_COUNTRY[iso2]) {
+    await loadGeoStates(iso2);
+  }
+  // Eager-load cities for each of this country's states so the "View cities"
+  // link shows up on states that have them. Fires in background; the view
+  // re-renders when it's done so links appear without user interaction.
+  eagerLoadCitiesForVisibleStates(iso2);
+  renderPersonnelView();
+}
+
+// Drill into a specific state inside the currently-shown country, to view its
+// cities. Only fires when the state has at least one curated city.
+async function personnelDrillToState(stateId) {
+  const iso2 = stateId.split('-')[0];
+  // If we're not already inside the country, set up the path properly.
+  if (personnelPath[0] !== iso2) {
+    personnelPath = [iso2, stateId];
+  } else {
+    personnelPath = [iso2, stateId];
+  }
+  // Clear search if active
+  if (personnelSearchQuery) {
+    personnelSearchQuery = '';
+    personnelSearchResults = null;
+    personnelSearchPending = false;
+    const input = document.getElementById('personnel-search');
+    if (input) input.value = '';
+  }
+  if (!GEO_CITIES_BY_STATE[stateId]) loadGeoCities(stateId);
   renderPersonnelView();
 }
 
@@ -8222,9 +9219,21 @@ function renderPersonnelBreadcrumb() {
   let html = personnelPath.length === 0
     ? `<span class="crumb current">All Countries</span>`
     : `<span class="crumb" onclick="personnelGoTo(0)">All Countries</span>`;
-  personnelPath.forEach((iso2, i) => {
-    const country = getCountryByISO2(iso2);
-    const label = country ? country.name : iso2;
+  personnelPath.forEach((segment, i) => {
+    let label;
+    if (i === 0) {
+      // segment is a country ISO2
+      const country = getCountryByISO2(segment);
+      label = country ? country.name : segment;
+    } else if (i === 1) {
+      // segment is a state-id like "GB-ENG"
+      const iso2 = personnelPath[0];
+      const states = GEO_STATES_BY_COUNTRY[iso2] || [];
+      const st = states.find(s => s.id === segment);
+      label = st ? st.name : segment;
+    } else {
+      label = segment;
+    }
     html += `<span class="sep">›</span>`;
     if (i === personnelPath.length - 1) {
       html += `<span class="crumb current">${label}</span>`;
@@ -8396,7 +9405,6 @@ async function refreshHazardDataOnly() {
     updateStats();
     renderAll();
     update24hButton();
-    personnelAlertsDismissed = false;
     if (typeof renderPersonnelAlertBanner === 'function') renderPersonnelAlertBanner();
 
     setSourceStatusUI(false);

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -128,7 +129,7 @@
   /* Stats strip */
   .stats {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1px;
     background: var(--line);
     border-bottom: 1px solid var(--line);
@@ -163,6 +164,12 @@
   .stat.watch .val { color: var(--watch); }
   .stat.info .val { color: var(--info); }
   .stat.ok .val { color: var(--ok); }
+  /* Meta tiles (right side) use the accent color by default; if sources
+     degrade we flip the colour at runtime via a sev modifier. */
+  .stat.meta-ppl .val { color: var(--accent); }
+  .stat.meta-src .val { color: var(--accent); }
+  .stat.meta-src.sev-warn .val { color: var(--warn); }
+  .stat.meta-src.sev-crit .val { color: var(--crit); }
 
   /* Toolbar */
   .toolbar {
@@ -537,6 +544,7 @@
   }
   .personnel-exposure-panel .pep-sev.crit { background: var(--crit); color: var(--bg); }
   .personnel-exposure-panel .pep-sev.warn { background: var(--warn); color: var(--bg); }
+  .personnel-exposure-panel .pep-sev.watch { background: var(--watch); color: var(--bg); }
   .personnel-exposure-panel .pep-chevron {
     color: var(--text-mute);
     font-size: 12px;
@@ -559,6 +567,7 @@
   .personnel-exposure-panel .pep-item:hover { background: var(--panel); }
   .personnel-exposure-panel .pep-item.crit { border-left: 3px solid var(--crit); }
   .personnel-exposure-panel .pep-item.warn { border-left: 3px solid var(--warn); }
+  .personnel-exposure-panel .pep-item.watch { border-left: 3px solid var(--watch); }
   .personnel-exposure-panel .pep-item-sev {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
@@ -569,6 +578,7 @@
   }
   .personnel-exposure-panel .pep-item-sev.sev-crit { background: var(--crit); color: var(--bg); }
   .personnel-exposure-panel .pep-item-sev.sev-warn { background: var(--warn); color: var(--bg); }
+  .personnel-exposure-panel .pep-item-sev.sev-watch { background: var(--watch); color: var(--bg); }
   .personnel-exposure-panel .pep-item-body {
     flex: 1;
     min-width: 0;
@@ -903,6 +913,67 @@
   }
   .table-search-results b { color: var(--accent); }
 
+  /* "REC" column on the Table tab — duty-officer checkbox column.
+     Visually distinct from sortable headers (no hover, no underline). */
+  .table-recorded-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+    margin-left: auto;
+    padding: 0 8px;
+  }
+  .table-recorded-counter b { color: var(--ok); }
+  table.data thead th.th-recorded {
+    width: 44px;
+    text-align: center;
+    cursor: default;
+  }
+  table.data tbody td.rec-cell {
+    width: 44px;
+    text-align: center;
+    padding: 4px 0;
+  }
+  /* Native checkbox restyled to match the dark theme. We keep the native
+     element (no fancy JS) so screen-readers + keyboard nav still work. */
+  input.rec-check {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--line-2);
+    background: var(--bg);
+    cursor: pointer;
+    position: relative;
+    vertical-align: middle;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  input.rec-check:hover {
+    border-color: var(--accent);
+  }
+  input.rec-check:checked {
+    background: var(--ok);
+    border-color: var(--ok);
+  }
+  input.rec-check:checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+  }
+  /* When a row is recorded, fade everything except the checkbox so the
+     user can still find/uncheck it but it doesn't dominate the table. */
+  table.data tbody tr.recorded td:not(.rec-cell) {
+    opacity: 0.42;
+  }
+  table.data tbody tr.recorded:hover td:not(.rec-cell) {
+    opacity: 0.7;
+  }
+
   /* Table */
   table.data {
     width: 100%;
@@ -1005,6 +1076,22 @@
   .card.info  { border-left-color: var(--info); }
   .card.ok    { border-left-color: var(--ok); }
 
+  .card.focused {
+    position: relative;
+    z-index: 2;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 4px rgba(75, 145, 255, 0.18), 0 18px 40px rgba(0, 0, 0, 0.08);
+    background: rgba(75, 145, 255, 0.08);
+    transform: translateY(-2px);
+    animation: card-focus-pulse 2.2s ease-in-out;
+  }
+
+  @keyframes card-focus-pulse {
+    0%   { box-shadow: 0 0 0 2px rgba(75, 145, 255, 0.25), 0 18px 40px rgba(0, 0, 0, 0.08); }
+    50%  { box-shadow: 0 0 0 10px rgba(75, 145, 255, 0.12), 0 24px 48px rgba(0, 0, 0, 0.10); }
+    100% { box-shadow: 0 0 0 4px rgba(75, 145, 255, 0.18), 0 18px 40px rgba(0, 0, 0, 0.08); }
+  }
+
   .card .top {
     display: flex; justify-content: space-between; align-items: flex-start;
     gap: 12px;
@@ -1020,6 +1107,7 @@
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.12em;
+    word-spacing: 0.08em;
     margin-bottom: 4px;
   }
   .card .meta {
@@ -1027,6 +1115,7 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     color: var(--text-dim);
+    word-spacing: 0.08em;
     padding: 8px 0;
     border-top: 1px dashed var(--line-2);
     border-bottom: 1px dashed var(--line-2);
@@ -1273,6 +1362,13 @@
     letter-spacing: 0.1em;
     margin-left: 8px;
     vertical-align: middle;
+  }
+  /* Yellow variant for "nearby" tier — personnel not exactly in the incident
+     area but within 100km, or only country-level ticked. */
+  .saf-flag.nearby {
+    background: var(--watch-bg);
+    color: var(--watch);
+    border-color: var(--watch);
   }
 
   /* Air quality history chart */
@@ -2727,6 +2823,267 @@
   }
   .sg-ra-aeg b { color: var(--crit); }
 
+  /* ====== Past 7 Days table ====== */
+  .sg-temp-table-wrap {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+  }
+  .sg-temp-table-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  table.sg-temp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  table.sg-temp-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--text-mute);
+    font-weight: 600;
+    text-align: center;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  table.sg-temp-table th .dd {
+    font-size: 8px;
+    color: var(--text-mute);
+    opacity: 0.7;
+  }
+  table.sg-temp-table td {
+    text-align: center;
+    padding: 6px 6px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  table.sg-temp-table tr:last-child td { border-bottom: none; }
+  table.sg-temp-table .row-label {
+    text-align: left;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+  }
+  table.sg-temp-table .avg-col { color: var(--accent); }
+  table.sg-temp-table .avg-col b { color: var(--accent); font-weight: 700; }
+
+  /* ====== Forecast (Next 7 days) ====== */
+  .sg-forecast-wrap {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+  }
+  .sg-forecast-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .sg-forecast-grid {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .sg-forecast-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .sg-forecast-row:last-child { border-bottom: none; }
+  .sg-forecast-k {
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+  .sg-forecast-v {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .sg-forecast-v.crit  { color: var(--crit); }
+  .sg-forecast-v.warn  { color: var(--warn); }
+  .sg-forecast-v.watch { color: var(--watch); }
+  .sg-forecast-v.ok    { color: var(--ok); }
+  .sg-forecast-note {
+    margin-top: 4px;
+    font-weight: 400;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-style: italic;
+  }
+  .sg-forecast-byday {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .sg-fd {
+    text-align: center;
+    padding: 8px 4px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+  .sg-fd-day {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .sg-fd-date {
+    font-size: 9px;
+    color: var(--text-mute);
+    margin-bottom: 4px;
+  }
+  .sg-fd-max {
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .sg-fd-min {
+    font-size: 11px;
+    color: var(--text-mute);
+  }
+  .sg-fd-wx {
+    margin-top: 4px;
+    font-size: 9px;
+    color: var(--text-dim);
+    line-height: 1.2;
+  }
+  .sg-forecast-src {
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-mute);
+    letter-spacing: 0.06em;
+    font-style: italic;
+  }
+
+  @media (max-width: 800px) {
+    .sg-forecast-row { grid-template-columns: 1fr; gap: 4px; }
+    .sg-forecast-byday { grid-template-columns: repeat(4, 1fr); }
+    table.sg-temp-table { font-size: 10px; }
+    table.sg-temp-table th, table.sg-temp-table td { padding: 4px 3px; }
+  }
+
+  /* ====== Watch Officer Assessment Box ====== */
+  .sg-assess-box {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+    border-left: 4px solid var(--accent);
+  }
+  .sg-assess-box.crit  { border-left-color: var(--crit);  background: rgba(255,77,77,0.05); }
+  .sg-assess-box.warn  { border-left-color: var(--warn);  background: rgba(255,136,77,0.05); }
+  .sg-assess-box.watch { border-left-color: var(--watch); background: rgba(255,216,61,0.05); }
+  .sg-assess-box.ok    { border-left-color: var(--ok); }
+  .sg-assess-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sg-assess-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    flex: 1;
+  }
+  .sg-assess-risk {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    background: var(--ok); color: var(--bg);
+  }
+  .sg-assess-risk.crit  { background: var(--crit);  color: var(--bg); }
+  .sg-assess-risk.warn  { background: var(--warn);  color: var(--bg); }
+  .sg-assess-risk.watch { background: var(--watch); color: var(--bg); }
+  .sg-assess-refresh {
+    background: transparent;
+    border: 1px solid var(--line-2);
+    color: var(--text-mute);
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .sg-assess-refresh:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .sg-assess-headline {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text);
+    padding: 10px 12px;
+    background: var(--panel);
+    border-left: 2px solid var(--accent);
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .sg-assess-body {
+    display: grid;
+    gap: 12px;
+  }
+  .sg-assess-section { }
+  .sg-assess-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  ul.sg-assess-list {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  ul.sg-assess-list li {
+    margin-bottom: 5px;
+  }
+  ul.sg-assess-list b { color: var(--text); font-weight: 600; }
+  ul.sg-assess-list .risk-crit  { color: var(--crit);  font-weight: 700; }
+  ul.sg-assess-list .risk-warn  { color: var(--warn);  font-weight: 700; }
+  ul.sg-assess-list .risk-watch { color: var(--watch); font-weight: 700; }
+  ul.sg-assess-list .risk-ok    { color: var(--ok);    font-weight: 700; }
+  ul.sg-assess-list.watch-list li::marker { color: var(--warn); }
+  .sg-assess-foot {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   @media (max-width: 1000px) and (min-width: 701px) {
     .sg-current { grid-template-columns: 1fr 1fr; }
   }
@@ -2911,207 +3268,7 @@
     #paste-modal-header, #paste-modal-body, #paste-modal-footer { padding-left: 12px; padding-right: 12px; }
   }
 
-  /* Floating chat bubble */
-  #chat-bubble {
-    position: fixed;
-    bottom: 24px; right: 24px;
-    z-index: 9999;
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    padding: 12px 18px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 3px rgba(79,209,197,0.2);
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  #chat-bubble:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.5), 0 0 0 3px rgba(79,209,197,0.3);
-  }
-  #chat-bubble .chat-icon { font-size: 16px; }
-  #chat-bubble.hidden { display: none; }
-
-  /* Chat popup window */
-  #chat-window {
-    position: fixed;
-    bottom: 24px; right: 24px;
-    width: 420px;
-    max-width: calc(100vw - 24px);
-    max-height: calc(100vh - 100px);
-    z-index: 10000;
-    background: var(--bg-2);
-    border: 1px solid var(--accent);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
-    display: flex;
-    flex-direction: column;
-    transform-origin: bottom right;
-    transition: transform 0.22s ease-out, opacity 0.22s ease-out;
-  }
-  #chat-window.closed {
-    transform: scale(0.6) translate(50%, 50%);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  #chat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--line);
-    background: var(--bg-3);
-  }
-  .chat-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .chat-title-icon {
-    width: 32px; height: 32px;
-    display: grid; place-items: center;
-    background: var(--info-bg);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  .chat-title-main {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.12em;
-  }
-  .chat-title-sub {
-    font-size: 10px;
-    color: var(--text-mute);
-    margin-top: 2px;
-  }
-  .chat-header-actions {
-    display: flex;
-    gap: 4px;
-  }
-  .chat-header-actions button {
-    background: transparent;
-    border: 1px solid var(--line-2);
-    color: var(--text-dim);
-    width: 26px; height: 26px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: grid; place-items: center;
-  }
-  .chat-header-actions button:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-
-  #cmd-history {
-    flex: 1;
-    min-height: 200px;
-    max-height: 420px;
-    overflow-y: auto;
-    padding: 14px 16px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
-    font-size: 13px;
-    line-height: 1.55;
-    color: var(--text-mute);
-  }
-  #cmd-history:empty::before {
-    content: '⬢ Hi, I\'m Claude. Ask me anything about HADR operations, weather patterns, air quality thresholds, heat injury guidance, or the data sources in this dashboard.';
-    display: block;
-    color: var(--text-mute);
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  #cmd-history .msg {
-    padding: 10px 0;
-    border-bottom: 1px dashed var(--line);
-  }
-  #cmd-history .msg:last-child { border-bottom: none; }
-  #cmd-history .msg .role {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    margin-right: 8px;
-    margin-bottom: 6px;
-    vertical-align: middle;
-  }
-  #cmd-history .msg.user .role  { color: var(--text-dim);  border: 1px solid var(--line-2); }
-  #cmd-history .msg.ai   .role  { color: var(--accent); border: 1px solid var(--accent); background: var(--info-bg); }
-  #cmd-history .msg.err  .role  { color: var(--warn); border: 1px solid var(--warn); }
-  #cmd-history .msg .text {
-    display: block;
-    color: var(--text);
-    white-space: pre-wrap;
-    margin-top: 2px;
-  }
-  #cmd-history .msg.err .text { color: var(--warn); }
-  #cmd-history .msg.loading .text::after {
-    content: '';
-    display: inline-block;
-    width: 10px; height: 10px;
-    border: 2px solid var(--line-2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
-
-  #cmd-form {
-    display: flex;
-    gap: 0;
-    background: var(--bg-2);
-  }
-  #cmd-input {
-    flex: 1;
-    background: var(--bg);
-    border: none;
-    color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    padding: 14px 16px;
-    outline: none;
-  }
-  #cmd-input:focus { background: var(--bg-3); }
-  #cmd-input::placeholder { color: var(--text-mute); }
-  #cmd-send {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 0 20px;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  #cmd-send:hover { opacity: 0.85; }
-  #cmd-send:disabled { opacity: 0.4; cursor: wait; }
-
-  @media (max-width: 500px) {
-    #chat-bubble { bottom: 16px; right: 16px; padding: 10px 14px; }
-    #chat-bubble .chat-label { display: none; }
-    #chat-window {
-      bottom: 12px; right: 12px; left: 12px;
-      width: auto;
-      max-height: calc(100vh - 60px);
-    }
-    #cmd-history { min-height: 160px; max-height: calc(100vh - 220px); }
-  }
-
+  /* Inline spinner used by the per-card AI summary loading state */
   .spinner {
     width: 12px; height: 12px;
     border: 2px solid var(--line-2);
@@ -3121,10 +3278,9 @@
     display: inline-block;
     vertical-align: middle;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 900px) {
-    .stats { grid-template-columns: repeat(3, 1fr); }
+    .stats { grid-template-columns: repeat(2, 1fr); }
     .cards { grid-template-columns: 1fr; }
     header.app { padding: 12px 16px; }
     .toolbar { padding: 10px 16px; }
@@ -3150,12 +3306,10 @@
 </header>
 
 <div class="stats">
-  <div class="stat crit">   <div class="lbl">Critical</div>   <div class="val" id="s-crit">0</div>   <div class="delta">Threshold exceeded</div></div>
-  <div class="stat warn">   <div class="lbl">Warning</div>    <div class="val" id="s-warn">0</div>   <div class="delta">Action required</div></div>
-  <div class="stat watch">  <div class="lbl">Watch</div>      <div class="val" id="s-watch">0</div>  <div class="delta">Elevated monitoring</div></div>
-  <div class="stat info">   <div class="lbl">Advisory</div>   <div class="val" id="s-info">0</div>   <div class="delta">Informational</div></div>
-  <div class="stat ok">     <div class="lbl">Nominal</div>    <div class="val" id="s-ok">0</div>     <div class="delta">No action needed</div></div>
-  <div class="stat">        <div class="lbl">Countries</div>  <div class="val" id="s-total">0</div>  <div class="delta">Personnel presence</div></div>
+  <div class="stat crit">   <div class="lbl">Critical</div>   <div class="val" id="s-crit">0</div>   <div class="delta">Personnel in affected area</div></div>
+  <div class="stat warn">   <div class="lbl">Warning</div>    <div class="val" id="s-warn">0</div>   <div class="delta">Personnel nearby</div></div>
+  <div class="stat watch">  <div class="lbl">Watch</div>      <div class="val" id="s-watch">0</div>  <div class="delta">Significant event, no impact</div></div>
+  <div class="stat info">   <div class="lbl">Advisory</div>   <div class="val" id="s-info">0</div>   <div class="delta">Minor event, no impact</div></div>
 </div>
 
 <div class="toolbar">
@@ -3286,7 +3440,6 @@
       <div class="row"><div class="pip" style="background:#ffa336"></div> Warning</div>
       <div class="row"><div class="pip" style="background:#ffd83d"></div> Watch</div>
       <div class="row"><div class="pip" style="background:#4fd1c5"></div> Advisory</div>
-      <div class="row"><div class="pip" style="background:#5ed67b"></div> Nominal</div>
       <div class="title" style="margin-top:10px">TYPE</div>
       <div class="row"><div class="pip pip-round"></div> In-country</div>
       <div class="row"><div class="pip pip-tri"></div> Open sea / region</div>
@@ -3300,10 +3453,12 @@
         <button class="table-search-clear" onclick="clearTableSearch()" title="Clear search">✕</button>
       </div>
       <div class="table-search-results" id="table-search-results"></div>
+      <div class="table-recorded-counter" id="recorded-counter" title="Recorded events on this device"></div>
     </div>
     <table class="data">
       <thead>
         <tr>
+          <th class="th-recorded" title="Mark events as recorded once you've logged them"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">REC</span></th>
           <th class="sortable" data-sort-key="name"      onclick="sortTableBy('name')">Country <span class="sort-ind"></span></th>
           <th class="sortable" data-sort-key="event"     onclick="sortTableBy('event')">Hazard <span class="sort-ind"></span></th>
           <th class="sortable" data-sort-key="severity"  onclick="sortTableBy('severity')">Severity <span class="sort-ind"></span></th>
@@ -3450,32 +3605,6 @@
   <div>Sources: USGS Earthquake Hazards Program · GDACS (EU JRC + UN OCHA) · Open-Meteo CAMS Air Quality · OpenStreetMap / Natural Earth</div>
 </footer>
 
-<!-- Chat popup - floating assistant -->
-<button id="chat-bubble" title="Open Staff Assistant" aria-label="Open chat">
-  <span class="chat-icon">⬢</span>
-  <span class="chat-label">STAFF ASSIST</span>
-</button>
-
-<div id="chat-window" class="closed">
-  <div id="chat-header">
-    <div class="chat-title">
-      <span class="chat-title-icon">⬢</span>
-      <div>
-        <div class="chat-title-main">⬢ STAFF ASSISTANT</div>
-        <div class="chat-title-sub">Ask anything about HADR, weather, or thresholds</div>
-      </div>
-    </div>
-    <div class="chat-header-actions">
-      <button id="chat-clear" title="Clear chat">⟲</button>
-      <button id="chat-close" title="Close chat">✕</button>
-    </div>
-  </div>
-  <div id="cmd-history"></div>
-  <form id="cmd-form">
-    <input type="text" id="cmd-input" placeholder="Type your question and hit Enter…" autocomplete="off" />
-    <button type="submit" id="cmd-send">➤</button>
-  </form>
-</div>
 
 <script>
 // ============================================================
@@ -3510,7 +3639,7 @@ const MOCK_DATA = [
   { code:'NP', name:'Nepal', lat:28.3949, lng:84.1240, personnel:true,
     hazard:'flood', subtype:'Landslide', event:'Monsoon landslide complex — Sindhupalchok',
     severity:'crit', threshold:'EXCEEDED',
-    source:'NEOC / ReliefWeb', updated: mins(65),
+    source:'NEOC', updated: mins(65),
     desc:'Multiple landslides blocking Araniko Highway. Several villages cut off. Rainfall 220mm in 24h, forecast to continue.',
     actions:['WELFARE CHECK','MOVEMENT RESTRICTION','HADR PRELIM']
   },
@@ -3612,36 +3741,22 @@ const MOCK_DATA = [
     actions:['MONITOR']
   },
 
-  // === NOMINAL ===
-  { code:'SG', name:'Singapore', lat:1.3521, lng:103.8198, personnel:true, severity:'ok', nominal:true },
-  { code:'BN', name:'Brunei', lat:4.5353, lng:114.7277, personnel:true, severity:'ok', nominal:true },
-  { code:'NZ', name:'New Zealand', lat:-40.9006, lng:174.8860, personnel:true, severity:'ok', nominal:true },
-  { code:'GB', name:'United Kingdom', lat:55.3781, lng:-3.4360, personnel:true, severity:'ok', nominal:true },
-  { code:'FR', name:'France', lat:46.2276, lng:2.2137, personnel:true, severity:'ok', nominal:true },
-  { code:'DE', name:'Germany', lat:51.1657, lng:10.4515, personnel:true, severity:'ok', nominal:true },
-  { code:'AE', name:'UAE', lat:23.4241, lng:53.8478, personnel:true, severity:'ok', nominal:true },
-  { code:'KH', name:'Cambodia', lat:12.5657, lng:104.9910, personnel:true, severity:'ok', nominal:true },
-  { code:'LA', name:'Laos', lat:19.8563, lng:102.4955, personnel:true, severity:'ok', nominal:true },
-  { code:'MM', name:'Myanmar', lat:21.9162, lng:95.9560, personnel:false, severity:'ok', nominal:true },
-  { code:'BD', name:'Bangladesh', lat:23.6850, lng:90.3563, personnel:true, severity:'ok', nominal:true },
-  { code:'LK', name:'Sri Lanka', lat:7.8731, lng:80.7718, personnel:false, severity:'ok', nominal:true },
-  { code:'CA', name:'Canada', lat:56.1304, lng:-106.3468, personnel:true, severity:'ok', nominal:true },
-  { code:'FJ', name:'Fiji', lat:-17.7134, lng:178.0650, personnel:false, severity:'ok', nominal:true },
-  { code:'TL', name:'Timor-Leste', lat:-8.8742, lng:125.7275, personnel:false, severity:'ok', nominal:true },
-  { code:'MV', name:'Maldives', lat:3.2028, lng:73.2207, personnel:false, severity:'ok', nominal:true },
-  { code:'KZ', name:'Kazakhstan', lat:48.0196, lng:66.9237, personnel:false, severity:'ok', nominal:true },
-  { code:'MN', name:'Mongolia', lat:46.8625, lng:103.8467, personnel:false, severity:'ok', nominal:true },
-  { code:'OM', name:'Oman', lat:21.4735, lng:55.9754, personnel:false, severity:'ok', nominal:true },
-  { code:'ES', name:'Spain', lat:40.4637, lng:-3.7492, personnel:false, severity:'ok', nominal:true },
-  { code:'IT', name:'Italy', lat:41.8719, lng:12.5674, personnel:false, severity:'ok', nominal:true },
-  { code:'ZA', name:'South Africa', lat:-30.5595, lng:22.9375, personnel:false, severity:'ok', nominal:true },
+  // === NOMINAL: removed May 2026 ===
+  // Country placeholder entries were dropped as part of the personnel-driven
+  // severity reclassification. The dashboard now only displays actual events
+  // classified into CRITICAL / WARNING / WATCH / ADVISORY based on personnel
+  // exposure. Empty list of countries kept for compatibility with any callers
+  // that read MOCK_DATA.filter(d => d.nominal) — they will now return [].
 ];
 
 // Pre-baked "AI" summaries for each active alert.
 // Structure mimics what a Claude call would produce.
 // Initial DATA holds only nominal country-status entries until the first
 // live fetch lands. No mock alerts/incidents are seeded.
-let DATA = MOCK_DATA.filter(d => d.nominal);
+// Empty initial DATA. Populated by rebuildDATA() after fetchers complete.
+// (Previously seeded with nominal country placeholders — removed per the
+// May 2026 criteria change.)
+let DATA = [];
 
 const PRESET_SUMMARIES = {
   'PH-weather': {
@@ -3739,15 +3854,22 @@ const PRESET_SUMMARIES = {
 // ============================================================
 //  RENDER
 // ============================================================
-const SEV_ORDER = { crit: 0, warn: 1, watch: 2, info: 3, ok: 4 };
-const SEV_COLOR = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5', ok:'#5ed67b' };
-const SEV_LABEL = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory', ok:'Nominal' };
+// Operational severity tiers (personnel-impact based):
+//   crit  → CRITICAL: personnel in affected area
+//   warn  → WARNING : personnel nearby
+//   watch → WATCH   : significant event, no personnel impact
+//   info  → ADVISORY: minor event, no personnel impact
+// The 'ok'/Nominal tier was removed in May 2026 along with the nominal
+// country placeholders — every alert now classifies into one of the above.
+const SEV_ORDER = { crit: 0, warn: 1, watch: 2, info: 3 };
+const SEV_COLOR = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5' };
+const SEV_LABEL = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory' };
 const HAZ_LABEL = {
   weather: 'Weather', haze: 'Air Quality', quake: 'Seismic',
   flood: 'Flood / Wildfire', volcano: 'Volcanic', disease: 'Health'
 };
 
-let activeAlerts = DATA.filter(d => !d.nominal);
+let activeAlerts = DATA.slice(); // populated by rebuildDATA()
 
 let activeFilters = new Set(Object.keys(HAZ_LABEL));
 
@@ -3956,6 +4078,37 @@ async function fetchWithCORS(url, options = {}) {
   throw new Error('All fetch attempts failed (direct + proxies)');
 }
 
+// Lookup: US state name (lowercase) → ISO state code (e.g. "alaska" → "US-AK").
+// Used to extract the state from USGS earthquake "place" strings so that
+// personnel cross-references can match at state granularity rather than
+// flagging a Texas-based unit as exposed by an Alaska earthquake.
+const US_STATE_TO_ISO = {
+  'alabama':'US-AL','alaska':'US-AK','arizona':'US-AZ','arkansas':'US-AR','california':'US-CA',
+  'colorado':'US-CO','connecticut':'US-CT','delaware':'US-DE','florida':'US-FL','georgia':'US-GA',
+  'hawaii':'US-HI','idaho':'US-ID','illinois':'US-IL','indiana':'US-IN','iowa':'US-IA',
+  'kansas':'US-KS','kentucky':'US-KY','louisiana':'US-LA','maine':'US-ME','maryland':'US-MD',
+  'massachusetts':'US-MA','michigan':'US-MI','minnesota':'US-MN','mississippi':'US-MS','missouri':'US-MO',
+  'montana':'US-MT','nebraska':'US-NE','nevada':'US-NV','new hampshire':'US-NH','new jersey':'US-NJ',
+  'new mexico':'US-NM','new york':'US-NY','north carolina':'US-NC','north dakota':'US-ND','ohio':'US-OH',
+  'oklahoma':'US-OK','oregon':'US-OR','pennsylvania':'US-PA','rhode island':'US-RI','south carolina':'US-SC',
+  'south dakota':'US-SD','tennessee':'US-TN','texas':'US-TX','utah':'US-UT','vermont':'US-VT',
+  'virginia':'US-VA','washington':'US-WA','west virginia':'US-WV','wisconsin':'US-WI','wyoming':'US-WY',
+};
+
+// Extract a US state code from a USGS-style "place" string.
+// Returns { iso: 'US-AK', name: 'Alaska' } or null.
+function parseUSStateFromPlace(place) {
+  if (!place) return null;
+  const parts = place.split(',').map(s => s.trim().toLowerCase());
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i].replace(/\s+region$/, '');
+    if (US_STATE_TO_ISO[p]) {
+      return { iso: US_STATE_TO_ISO[p], name: parts[i].replace(/\s+region$/,'').replace(/\b\w/g, c => c.toUpperCase()) };
+    }
+  }
+  return null;
+}
+
 function parseCountryFromPlace(place) {
   if (!place) return null;
   // USGS strings often end with country/state name after last comma
@@ -4063,13 +4216,17 @@ async function fetchUSGS() {
         const inSAF = code && SAF_PRESENCE_CODES.has(code);
         const mag = f.properties.mag;
         const depth = f.geometry.coordinates[2];
-        // Friendly display name: full country name when we have one, otherwise the place string
         const displayName = code ? (ISO2_TO_NAME[code] || code) : place;
+        // For US quakes, also extract the state so cross-references can match at
+        // state granularity. parseUSStateFromPlace returns null for non-US places.
+        const usState = code === 'US' ? parseUSStateFromPlace(place) : null;
         return {
           id: 'usgs-' + f.id,
           live: true, source: 'USGS',
           code: code || '??',
           name: displayName,
+          regionCode: usState ? usState.iso : null,
+          regionName: usState ? usState.name : null,
           lat: f.geometry.coordinates[1],
           lng: f.geometry.coordinates[0],
           personnel: !!inSAF,
@@ -4226,18 +4383,83 @@ async function fetchAirQuality() {
   }
 }
 
-// Recompute DATA from live sources only.
+
+// ============================================================
+//  DEDUPLICATION
+//  Prevents the same real-world event appearing multiple times
+//  when two sources (e.g. GDACS) cover it.
+//
+//  Strategy — two alerts are considered duplicates when ALL of:
+//    1. Same hazard type
+//    2. Same country code (or both '??')
+//    3. Event times within 7 days of each other
+//    4. Either title substring match OR epicentre within ~150 km
+//
+//  Priority order (kept when a dup is found):
+//    USGS > GDACS > OpenMeteo
+// ============================================================
+const SOURCE_PRIORITY = { 'USGS':1, 'GDACS':2, 'OpenMeteo':3 };
+
+function deduplicateAlerts(alerts) {
+  const kept = [];
+
+  for (const candidate of alerts) {
+    let isDup = false;
+
+    for (let i = 0; i < kept.length; i++) {
+      const existing = kept[i];
+
+      // Must be same hazard type to be a dup
+      if (candidate.hazard !== existing.hazard) continue;
+
+      // Must be same country (skip if both are unknown)
+      if (candidate.code !== existing.code) continue;
+      if (candidate.code === '??') continue;
+
+      // Must be within 7 days of each other
+      const tA = new Date(candidate.updated).getTime();
+      const tB = new Date(existing.updated).getTime();
+      if (isNaN(tA) || isNaN(tB) || Math.abs(tA - tB) > 7 * 24 * 60 * 60 * 1000) continue;
+
+      // Check title similarity (one title contains the other, or shared keywords)
+      const titleA = (candidate.event || '').toLowerCase();
+      const titleB = (existing.event || '').toLowerCase();
+      const shortA = titleA.replace(/[^a-z0-9 ]/g, '').substring(0, 30);
+      const shortB = titleB.replace(/[^a-z0-9 ]/g, '').substring(0, 30);
+      const titleMatch = shortA && shortB && (shortA.includes(shortB.substring(0,15)) || shortB.includes(shortA.substring(0,15)));
+
+      // Check proximity (~150 km, rough lat/lng delta)
+      const dLat = Math.abs((candidate.lat || 0) - (existing.lat || 0));
+      const dLng = Math.abs((candidate.lng || 0) - (existing.lng || 0));
+      const proximate = dLat < 1.5 && dLng < 1.5; // ~150 km
+
+      if (!titleMatch && !proximate) continue;
+
+      // It's a duplicate — keep the higher-priority source
+      isDup = true;
+      const priA = SOURCE_PRIORITY[candidate.source] || 99;
+      const priB = SOURCE_PRIORITY[existing.source] || 99;
+      if (priA < priB) {
+        kept[i] = candidate; // replace with higher-priority version
+      }
+      break;
+    }
+
+    if (!isDup) kept.push(candidate);
+  }
+
+  const removed = alerts.length - kept.length;
+  if (removed > 0) console.log(`[dedup] Removed ${removed} duplicate alert(s) from ${alerts.length} total`);
+  return kept;
+}
+
 // Mock incident data was previously merged here as a fallback when live APIs
 // failed; that's been removed at the user's request. Only live alerts now
 // populate the dashboard. NOMINAL country-status entries (the green
 // "country OK" markers on the world map) are preserved from MOCK_DATA since
 // those aren't incidents — they represent baseline country status, not events.
 function rebuildDATA() {
-  const NOMINAL = MOCK_DATA.filter(d => d.nominal);
-
-  // 30-day window: drop incidents older than 30 days. Nominal entries are
-  // never time-bound — they represent country status, not events — so they
-  // pass through unfiltered.
+  // 30-day window: drop incidents older than 30 days.
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   const recentAlerts = liveAlerts.filter(a => {
     if (!a.updated) return false; // no timestamp = drop
@@ -4245,8 +4467,15 @@ function rebuildDATA() {
     return !isNaN(t) && t >= cutoff;
   });
 
-  DATA = [...NOMINAL, ...recentAlerts];
-  activeAlerts = DATA.filter(d => !d.nominal);
+  // Deduplicate by source priority, then re-classify severity by personnel
+  // exposure (CRITICAL > WARNING > WATCH > ADVISORY). The classifier is
+  // idempotent — sourceSeverity is captured once and severity recomputed
+  // on every rebuild so the picture stays current as personnel ticks change.
+  const deduped = deduplicateAlerts(recentAlerts);
+  deduped.forEach(classifySeverityByPersonnelExposure);
+
+  DATA = deduped;
+  activeAlerts = DATA;
 }
 
 let refreshStartTime = null;
@@ -4290,6 +4519,16 @@ async function refreshAllLiveData(opts = {}) {
 
   // Wait for SG too, then re-render SG view
   await sgFetchPromise;
+  // Re-fetch temp/rain only if the user has already opened those layers —
+  // avoids hitting the NEA rate limit for layers that were never viewed.
+  await Promise.all([
+    sgTempLoaded ? fetchOneSGEndpoint('air-temperature').then(r => {
+      if (r && sgWeatherData) { sgWeatherData.temp = parseSGStations(r); layerLastRefresh.temp = new Date().toISOString(); }
+    }).catch(() => {}) : Promise.resolve(),
+    sgRainLoaded ? fetchOneSGEndpoint('rainfall').then(r => {
+      if (r && sgWeatherData) { sgWeatherData.rain = parseSGStations(r); layerLastRefresh.rain = new Date().toISOString(); }
+    }).catch(() => {}) : Promise.resolve(),
+  ]);
   if (typeof renderSGMap === 'function') renderSGMap();
   if (typeof updateSGLastUpdated === 'function') updateSGLastUpdated();
 
@@ -5028,6 +5267,10 @@ setInterval(() => {
 function renderSingaporeView() {
   if (!sgData.items.length) return;
   updateSGLastUpdated();
+  // Fire-and-forget: forecast loader caches for 1h, safe to call on every render
+  if (!sgForecastData.lastFetch && !sgForecastData.fetching) {
+    fetchSGForecast().catch(() => {});
+  }
   const latest = sgData.items[sgData.items.length - 1];
   const latestPM = sgData.pm25Items[sgData.pm25Items.length - 1];
   const psi = latest?.readings?.psi_twenty_four_hourly || {};
@@ -5113,6 +5356,11 @@ function renderSingaporeView() {
   // Build SAF doctrine-driven analysis (Section 9, dated 29 Sep 23).
   // Output is fully deterministic: re-runs on every data refresh.
   threshEl.innerHTML = buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData);
+  // Mount the watch-officer assessment box at the bottom of risk assessment
+  const assessmentMount = document.getElementById('sg-assessment-mount');
+  if (assessmentMount && typeof renderSGAssessmentBox === 'function') {
+    renderSGAssessmentBox(assessmentMount);
+  }
   // If map is initialised, re-render with fresh data
   if (sgMap) renderSGMap();
 }
@@ -5179,6 +5427,499 @@ function safPm25Band(pm) {
 // These bands are derived from common SAF/MOH heat-injury guidance for
 // outdoor training in tropical conditions — used here as supporting context
 // for unit commanders.
+// =============================================================
+//  SG Daily Temperature Statistics + 7-Day Forecast
+// =============================================================
+// Builds a "Past 7 Days" summary from sgWeekData.temp (hourly NEA readings),
+// and a "Next 7 Days" forecast from Open-Meteo. Used by the Air Temperature
+// Risk Assessment block on SG Focus.
+
+// Group hourly temp readings by SGT date and return one entry per day with
+// the daily max and daily mean. Input: temp7d = [{timestamp, value}, ...].
+function computeDailyTempStats(temp7d) {
+  if (!Array.isArray(temp7d) || !temp7d.length) return [];
+  const byDate = {};
+  for (const p of temp7d) {
+    if (p.value == null || !isFinite(p.value)) continue;
+    // Get the date in SGT (UTC+8) regardless of host timezone
+    const t = new Date(p.timestamp);
+    const sgtMs = t.getTime() + 8 * 3600 * 1000;
+    const sgtDate = new Date(sgtMs).toISOString().substring(0, 10);
+    if (!byDate[sgtDate]) byDate[sgtDate] = { date: sgtDate, vals: [] };
+    byDate[sgtDate].vals.push(p.value);
+  }
+  return Object.values(byDate).map(d => {
+    const max = Math.max(...d.vals);
+    const mean = d.vals.reduce((a, b) => a + b, 0) / d.vals.length;
+    return { date: d.date, max, mean };
+  }).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// Open-Meteo weather code → short human-readable label.
+// Reference: https://open-meteo.com/en/docs (WMO codes)
+function wmoCodeToText(code) {
+  if (code == null) return '—';
+  if (code === 0) return 'Clear sky';
+  if (code === 1) return 'Mainly clear';
+  if (code === 2) return 'Partly cloudy';
+  if (code === 3) return 'Overcast';
+  if (code === 45 || code === 48) return 'Fog';
+  if (code >= 51 && code <= 57) return 'Drizzle';
+  if (code >= 61 && code <= 67) return 'Rain';
+  if (code >= 71 && code <= 77) return 'Snow';
+  if (code >= 80 && code <= 82) return 'Rain showers';
+  if (code >= 85 && code <= 86) return 'Snow showers';
+  if (code === 95) return 'Thunderstorm';
+  if (code === 96 || code === 99) return 'Thunderstorm with hail';
+  return `Code ${code}`;
+}
+
+// SG forecast cache — Open-Meteo, past 7 + next 7 days daily summary.
+// past_days lets us include past-week rainfall (NEA doesn't expose a 7-day
+// rainfall archive in convenient form), keeping us on a single source for
+// past/future rain consistency.
+let sgForecastData = { days: [], past: [], future: [], lastFetch: null, fetching: false };
+
+async function fetchSGForecast() {
+  if (sgForecastData.fetching) return sgForecastData;
+  // 1-hour cache — forecast doesn't change often
+  if (sgForecastData.lastFetch && (Date.now() - sgForecastData.lastFetch) < 60 * 60 * 1000) {
+    return sgForecastData;
+  }
+  sgForecastData.fetching = true;
+  try {
+    const lat = 1.3521, lng = 103.8198; // Singapore center
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}`
+      + '&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,weather_code,precipitation_sum'
+      + '&past_days=7&forecast_days=7&timezone=Asia%2FSingapore';
+    const resp = await fetchWithCORS(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const d = data.daily || {};
+    const all = (d.time || []).map((date, i) => ({
+      date,
+      max: d.temperature_2m_max?.[i] ?? null,
+      min: d.temperature_2m_min?.[i] ?? null,
+      mean: d.temperature_2m_mean?.[i] ?? null,
+      weatherCode: d.weather_code?.[i] ?? null,
+      precip: d.precipitation_sum?.[i] ?? null,
+    }));
+    // Split into past (date < today) and future (date >= today). Open-Meteo
+    // returns SGT-local dates because we passed timezone=Asia/Singapore.
+    const todaySGT = new Date(Date.now() + 8 * 3600 * 1000).toISOString().substring(0, 10);
+    const past   = all.filter(x => x.date <  todaySGT);
+    const future = all.filter(x => x.date >= todaySGT);
+    // Keep `days` populated with the future portion to remain backward-compatible
+    // with the existing forecast strip rendering.
+    sgForecastData = { days: future, past, future, lastFetch: Date.now(), fetching: false };
+    console.log(`[SG forecast] past:${past.length} future:${future.length}`);
+    if (typeof renderSingaporeView === 'function') {
+      try { renderSingaporeView(); } catch (e) {}
+    }
+  } catch (e) {
+    console.warn('[SG forecast] fetch failed:', e.message);
+    sgForecastData.fetching = false;
+  }
+  return sgForecastData;
+}
+
+// Heatwave risk assessment based on forecast.
+// Singapore has no official heatwave standard, but Met Service flags
+// "very hot" days at ≥34°C. We use a tiered approach informed by
+// SAF heat-injury training thresholds.
+function assessHeatwaveRisk(forecastDays) {
+  if (!forecastDays.length) return null;
+  const maxes = forecastDays.map(d => d.max).filter(x => x != null && isFinite(x));
+  if (!maxes.length) return null;
+  const peakMax = Math.max(...maxes);
+  // Count consecutive days ≥35°C
+  let maxStreak = 0, currentStreak = 0;
+  for (const m of maxes) {
+    if (m >= 35) { currentStreak++; maxStreak = Math.max(maxStreak, currentStreak); }
+    else { currentStreak = 0; }
+  }
+  // Count days ≥33°C
+  const hotDays = maxes.filter(m => m >= 33).length;
+  let level, label, color, note;
+  if (maxStreak >= 3) {
+    level = 'critical'; color = 'crit';
+    label = `CRITICAL — ${maxStreak} consecutive days forecast ≥35°C`;
+    note = 'Sustained extreme heat. Implement Heat Stress Risk Management measures; defer non-essential outdoor activity to early morning / late afternoon.';
+  } else if (peakMax >= 35) {
+    level = 'high'; color = 'warn';
+    label = `HIGH — peak ${peakMax.toFixed(1)}°C forecast within 7 days`;
+    note = 'At least one very hot day expected. Brief sub-units on heat-injury signs; review training schedules.';
+  } else if (hotDays >= 3 || peakMax >= 34) {
+    level = 'moderate'; color = 'watch';
+    label = `MODERATE — ${hotDays} day${hotDays === 1 ? '' : 's'} forecast ≥33°C${peakMax >= 34 ? ', peak ' + peakMax.toFixed(1) + '°C' : ''}`;
+    note = 'Hot conditions expected. Standard hydration discipline; monitor heat-stress on outdoor exercises.';
+  } else {
+    level = 'low'; color = 'ok';
+    label = `LOW — peak ${peakMax.toFixed(1)}°C forecast within 7 days`;
+    note = 'No elevated heat risk indicated.';
+  }
+  return { level, label, color, note, peakMax, hotDays, maxStreak };
+}
+
+// =============================================================
+//  SG Watch Officer Assessment Box (end of Risk Assessment)
+// =============================================================
+// Hybrid generator: rule-based skeleton (always available, deterministic)
+// with optional AI-generated headline at top (Gemini). Cached for 15 min
+// so we don't spam the AI bridge on every refresh.
+
+// Build a structured "facts" object from the raw data. This is the single
+// source of truth that drives both the rule-based briefing and the AI prompt.
+function buildSGAssessmentFacts() {
+  const facts = {
+    generatedAt: new Date().toISOString(),
+    temp: { past: null, future: null },
+    psi:  { past: null, future: null }, // PSI has no public forecast
+    pm25: { past: null, future: null }, // PM2.5 has no reliable SG forecast
+    rain: { past: null, future: null },
+    overallRisk: 'low',
+  };
+
+  // ----- Temperature past 7 days (NEA temp7d) -----
+  const temp7d = (sgWeekData.temp || [])
+    .map(d => {
+      const arr = d.readings || [];
+      const vals = arr.map(r => r.value).filter(v => v != null && !isNaN(v));
+      return { timestamp: d.timestamp, value: vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null };
+    })
+    .filter(p => p.value != null);
+  const dailyStats = computeDailyTempStats(temp7d);
+  if (dailyStats.length) {
+    const last7 = dailyStats.slice(-7);
+    const maxes = last7.map(d => d.max);
+    const means = last7.map(d => d.mean);
+    const peakMaxIdx = maxes.indexOf(Math.max(...maxes));
+    const lowMeanIdx = means.indexOf(Math.min(...means));
+    // Trend: compare first 3 days vs last 3 days of daily means
+    let trend = 'stable';
+    if (last7.length >= 6) {
+      const earlyAvg = (last7[0].mean + last7[1].mean + last7[2].mean) / 3;
+      const lateAvg  = (last7[last7.length-3].mean + last7[last7.length-2].mean + last7[last7.length-1].mean) / 3;
+      const delta = lateAvg - earlyAvg;
+      if (delta >  0.6) trend = 'rising';
+      else if (delta < -0.6) trend = 'falling';
+    }
+    facts.temp.past = {
+      peakMax: last7[peakMaxIdx].max,
+      peakDate: last7[peakMaxIdx].date,
+      lowMean: last7[lowMeanIdx].mean,
+      lowDate: last7[lowMeanIdx].date,
+      weekAvgMax: maxes.reduce((a,b)=>a+b,0) / maxes.length,
+      weekAvgMean: means.reduce((a,b)=>a+b,0) / means.length,
+      trend,
+      daysAbove34: last7.filter(d => d.max >= 34).length,
+    };
+  }
+
+  // ----- Temperature next 7 days (Open-Meteo forecast) -----
+  if (sgForecastData.future && sgForecastData.future.length) {
+    const fc = sgForecastData.future;
+    const heatwave = assessHeatwaveRisk(fc);
+    const maxes = fc.map(d => d.max).filter(v => v != null);
+    facts.temp.future = {
+      heatwave,
+      peakMax: maxes.length ? Math.max(...maxes) : null,
+      peakDate: maxes.length ? fc[fc.map(d => d.max).indexOf(Math.max(...maxes))].date : null,
+      daysAbove34: fc.filter(d => d.max != null && d.max >= 34).length,
+    };
+  }
+
+  // ----- PSI past 7 days (NEA) -----
+  const psi7d = (sgWeekData.psi || [])
+    .map(d => ({ timestamp: d.timestamp, value: d.readings?.psi_twenty_four_hourly?.national ?? null }))
+    .filter(p => p.value != null);
+  if (psi7d.length) {
+    const vals = psi7d.map(p => p.value);
+    const peakIdx = vals.indexOf(Math.max(...vals));
+    const peakVal = vals[peakIdx];
+    const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+    let trend = 'stable';
+    if (psi7d.length >= 24) {
+      const earlyAvg = vals.slice(0, Math.floor(vals.length/3)).reduce((a,b)=>a+b,0) / Math.floor(vals.length/3);
+      const lateAvg  = vals.slice(-Math.floor(vals.length/3)).reduce((a,b)=>a+b,0) / Math.floor(vals.length/3);
+      if (lateAvg - earlyAvg >  10) trend = 'rising';
+      else if (lateAvg - earlyAvg < -10) trend = 'falling';
+    }
+    // Count unhealthy hours (>100) and very unhealthy (>200)
+    facts.psi.past = {
+      peakValue: peakVal,
+      peakDate: psi7d[peakIdx].timestamp,
+      weekAvg: avg,
+      trend,
+      unhealthyHours: vals.filter(v => v > 100).length,
+      veryUnhealthyHours: vals.filter(v => v > 200).length,
+    };
+  }
+
+  // ----- PM2.5 past 7 days (NEA) -----
+  const pm7d = (sgWeekData.pm25 || [])
+    .map(d => ({ timestamp: d.timestamp, value: d.readings?.pm25_one_hourly?.national ?? null }))
+    .filter(p => p.value != null);
+  if (pm7d.length) {
+    const vals = pm7d.map(p => p.value);
+    const peakIdx = vals.indexOf(Math.max(...vals));
+    const peakVal = vals[peakIdx];
+    const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+    let trend = 'stable';
+    if (pm7d.length >= 24) {
+      const earlyAvg = vals.slice(0, Math.floor(vals.length/3)).reduce((a,b)=>a+b,0) / Math.floor(vals.length/3);
+      const lateAvg  = vals.slice(-Math.floor(vals.length/3)).reduce((a,b)=>a+b,0) / Math.floor(vals.length/3);
+      if (lateAvg - earlyAvg >  3) trend = 'rising';
+      else if (lateAvg - earlyAvg < -3) trend = 'falling';
+    }
+    // Section 9 PM2.5 threshold for SAF impact: 55 µg/m³ (Band 2+)
+    facts.pm25.past = {
+      peakValue: peakVal,
+      peakDate: pm7d[peakIdx].timestamp,
+      weekAvg: avg,
+      trend,
+      hoursAbove55: vals.filter(v => v > 55).length,
+    };
+  }
+
+  // ----- Rainfall past + future (Open-Meteo, single source for consistency) -----
+  if (sgForecastData.past && sgForecastData.past.length) {
+    const past = sgForecastData.past;
+    const rains = past.map(d => d.precip || 0);
+    const totalMm = rains.reduce((a,b)=>a+b,0);
+    const peakIdx = rains.indexOf(Math.max(...rains));
+    facts.rain.past = {
+      totalMm,
+      wettestDay: past[peakIdx]?.date,
+      wettestMm: rains[peakIdx],
+      dryDays: rains.filter(r => r < 1).length,
+    };
+  }
+  if (sgForecastData.future && sgForecastData.future.length) {
+    const future = sgForecastData.future;
+    const rains = future.map(d => d.precip || 0);
+    const totalMm = rains.reduce((a,b)=>a+b,0);
+    const peakIdx = rains.indexOf(Math.max(...rains));
+    facts.rain.future = {
+      totalMm,
+      wettestDay: future[peakIdx]?.date,
+      wettestMm: rains[peakIdx],
+      dryDays: rains.filter(r => r < 1).length,
+    };
+  }
+
+  // ----- Overall risk score (composite) -----
+  let riskScore = 0;
+  if (facts.temp.future?.heatwave?.level === 'critical') riskScore += 4;
+  else if (facts.temp.future?.heatwave?.level === 'high') riskScore += 3;
+  else if (facts.temp.future?.heatwave?.level === 'moderate') riskScore += 2;
+  if (facts.psi.past?.peakValue > 200)  riskScore += 4;
+  else if (facts.psi.past?.peakValue > 100) riskScore += 2;
+  else if (facts.psi.past?.peakValue > 50)  riskScore += 1;
+  if (facts.pm25.past?.peakValue > 55)  riskScore += 2;
+  if (facts.rain.future?.wettestMm > 50) riskScore += 1;
+  if (riskScore >= 7)       facts.overallRisk = 'critical';
+  else if (riskScore >= 4)  facts.overallRisk = 'high';
+  else if (riskScore >= 2)  facts.overallRisk = 'moderate';
+  else                       facts.overallRisk = 'low';
+
+  return facts;
+}
+
+// Convert facts into the rule-based 3-paragraph briefing body. Always works
+// even when AI is down. Uses standard military briefing structure.
+function renderSGAssessmentBody(facts) {
+  const fmtDate = d => {
+    if (!d) return '—';
+    const dt = new Date(d.includes('T') ? d : d + 'T00:00:00+08:00');
+    return dt.toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', timeZone:'Asia/Singapore' });
+  };
+  const sgtTime = ts => {
+    if (!ts) return '';
+    return new Date(ts).toLocaleString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Singapore', hour12:false });
+  };
+
+  // ===== Past 7 Days =====
+  const pastBits = [];
+  if (facts.temp.past) {
+    const t = facts.temp.past;
+    pastBits.push(`Air temperature peaked at <b>${t.peakMax.toFixed(1)}°C</b> on ${fmtDate(t.peakDate)}; 7-day mean ${t.weekAvgMean.toFixed(1)}°C${t.daysAbove34 > 0 ? `, with <b>${t.daysAbove34} day${t.daysAbove34===1?'':'s'} ≥34°C</b>` : ''}. Trend: ${t.trend}.`);
+  }
+  if (facts.psi.past) {
+    const p = facts.psi.past;
+    let psiNote = '';
+    if (p.veryUnhealthyHours > 0) psiNote = ` <b>${p.veryUnhealthyHours}h in Very Unhealthy band (>200)</b>.`;
+    else if (p.unhealthyHours > 0) psiNote = ` <b>${p.unhealthyHours}h in Unhealthy band (>100)</b>.`;
+    pastBits.push(`PSI peaked at <b>${p.peakValue.toFixed(0)}</b> on ${fmtDate(p.peakDate)}; 7-day mean ${p.weekAvg.toFixed(0)}. Trend: ${p.trend}.${psiNote}`);
+  }
+  if (facts.pm25.past) {
+    const pm = facts.pm25.past;
+    const pmNote = pm.hoursAbove55 > 0 ? ` <b>${pm.hoursAbove55}h above SAF Section 9 PM2.5 threshold (55µg/m³)</b>.` : '';
+    pastBits.push(`PM2.5 peaked at <b>${pm.peakValue.toFixed(1)}µg/m³</b> on ${fmtDate(pm.peakDate)}; 7-day mean ${pm.weekAvg.toFixed(1)}µg/m³. Trend: ${pm.trend}.${pmNote}`);
+  }
+  if (facts.rain.past) {
+    const r = facts.rain.past;
+    pastBits.push(`Rainfall total <b>${r.totalMm.toFixed(0)}mm</b> over the week (${r.dryDays} dry day${r.dryDays===1?'':'s'}); wettest on ${fmtDate(r.wettestDay)} (${r.wettestMm.toFixed(0)}mm).`);
+  }
+
+  // ===== Next 7 Days =====
+  const futureBits = [];
+  if (facts.temp.future) {
+    const f = facts.temp.future;
+    let hwNote = '';
+    if (f.heatwave) hwNote = ` Heatwave risk: <b class="risk-${f.heatwave.color}">${f.heatwave.level.toUpperCase()}</b>.`;
+    futureBits.push(`Forecast peak max <b>${f.peakMax?.toFixed(1)}°C</b>${f.peakDate ? ' on ' + fmtDate(f.peakDate) : ''}${f.daysAbove34 > 0 ? `, with ${f.daysAbove34} day${f.daysAbove34===1?'':'s'} forecast ≥34°C` : ''}.${hwNote}`);
+  }
+  if (facts.rain.future) {
+    const r = facts.rain.future;
+    futureBits.push(`Rainfall expected <b>${r.totalMm.toFixed(0)}mm</b> total over next 7 days${r.wettestMm > 20 ? `, with significant rain on ${fmtDate(r.wettestDay)} (${r.wettestMm.toFixed(0)}mm)` : ''}.`);
+  }
+  futureBits.push(`<span style="color:var(--text-mute);font-style:italic">PSI/PM2.5 7-day forecast not publicly available — refer to NEA daily bulletin for outlook.</span>`);
+
+  // ===== Watch For (actionable) =====
+  const watchBits = [];
+  if (facts.temp.future?.heatwave?.level === 'critical') {
+    watchBits.push(`<b>Sustained extreme heat ahead</b> — review training schedules per Heat Stress Risk Management. Defer non-essential outdoor activity to early morning / late afternoon.`);
+  } else if (facts.temp.future?.heatwave?.level === 'high') {
+    watchBits.push(`<b>At least one very hot day expected</b> — brief sub-units on heat-injury signs; check water resupply and shaded-area access at outdoor training sites.`);
+  } else if (facts.temp.future?.heatwave?.level === 'moderate') {
+    watchBits.push(`Hot conditions forecast — standard hydration discipline; monitor heat-stress on outdoor PT.`);
+  }
+  if (facts.psi.past?.unhealthyHours > 0 || facts.psi.past?.peakValue > 100) {
+    watchBits.push(`<b>Recent PSI excursions into Unhealthy band</b> — monitor NEA hourly. Pre-position N95 stocks; review outdoor exercise schedules in case of haze return.`);
+  }
+  if (facts.pm25.past?.hoursAbove55 > 0) {
+    watchBits.push(`PM2.5 exceeded SAF Section 9 threshold in past week — confirm haze SOP refresher with affected units.`);
+  }
+  if (facts.rain.future?.wettestMm > 50) {
+    watchBits.push(`<b>Heavy rain expected on ${fmtDate(facts.rain.future.wettestDay)}</b> (${facts.rain.future.wettestMm.toFixed(0)}mm) — possible localised flooding; review training-area drainage and standfast triggers.`);
+  }
+  if (!watchBits.length) {
+    watchBits.push(`No elevated risks indicated for the coming 7 days. Maintain routine monitoring.`);
+  }
+
+  return { pastBits, futureBits, watchBits };
+}
+
+// Cache for AI-generated headlines. Key by data hash + lookups for the most
+// recent fact set we've sent. Avoid spamming Gemini on every render.
+let sgHeadlineCache = { headline: null, factsKey: null, ts: 0 };
+
+function factsKeyFor(facts) {
+  // Compact deterministic key — round numbers to avoid noise from tiny diffs
+  const r = (x, d=1) => x == null ? '_' : Number(x).toFixed(d);
+  return [
+    facts.overallRisk,
+    r(facts.temp.past?.peakMax), r(facts.temp.past?.weekAvgMean),
+    r(facts.temp.future?.peakMax), facts.temp.future?.heatwave?.level || '_',
+    r(facts.psi.past?.peakValue, 0), r(facts.psi.past?.weekAvg, 0), facts.psi.past?.trend || '_',
+    r(facts.pm25.past?.peakValue), r(facts.pm25.past?.weekAvg),
+    r(facts.rain.past?.totalMm, 0), r(facts.rain.future?.totalMm, 0),
+  ].join('|');
+}
+
+async function generateSGHeadline(facts) {
+  const key = factsKeyFor(facts);
+  // Cache hit: same fact-set generated within last 15 minutes
+  if (sgHeadlineCache.factsKey === key && sgHeadlineCache.headline && (Date.now() - sgHeadlineCache.ts) < 15 * 60 * 1000) {
+    return sgHeadlineCache.headline;
+  }
+  // Need an AI bridge configured
+  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) {
+    return null;
+  }
+  const prompt = `You are an AI staff-assist for a Singapore Armed Forces watch officer. Produce ONE concise sentence (max 30 words) summarizing Singapore's environmental risk picture for the past + next 7 days. Lead with the most operationally significant finding. Military briefing tone. No preamble.
+
+DATA:
+- Overall risk tier: ${facts.overallRisk.toUpperCase()}
+- Air temp past 7d: peak ${facts.temp.past?.peakMax?.toFixed(1) || '?'}°C, mean ${facts.temp.past?.weekAvgMean?.toFixed(1) || '?'}°C, trend ${facts.temp.past?.trend || '?'}, days≥34°C: ${facts.temp.past?.daysAbove34 || 0}
+- Air temp next 7d: forecast peak ${facts.temp.future?.peakMax?.toFixed(1) || '?'}°C, heatwave risk: ${facts.temp.future?.heatwave?.level || 'unknown'}
+- PSI past 7d: peak ${facts.psi.past?.peakValue?.toFixed(0) || '?'}, mean ${facts.psi.past?.weekAvg?.toFixed(0) || '?'}, trend ${facts.psi.past?.trend || '?'}, unhealthy hours: ${facts.psi.past?.unhealthyHours || 0}
+- PM2.5 past 7d: peak ${facts.pm25.past?.peakValue?.toFixed(1) || '?'}µg/m³, hours>55µg/m³: ${facts.pm25.past?.hoursAbove55 || 0}
+- Rain past 7d: ${facts.rain.past?.totalMm?.toFixed(0) || '?'}mm
+- Rain next 7d: ${facts.rain.future?.totalMm?.toFixed(0) || '?'}mm, wettest day max ${facts.rain.future?.wettestMm?.toFixed(0) || '?'}mm
+
+Output: ONE sentence only.`;
+
+  try {
+    const resp = await fetch(TELEGRAM_BRIDGE_URL + '/ai-chat', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const txt = (data.text || data.response || '').trim().replace(/^["']|["']$/g, '');
+    if (!txt) throw new Error('empty');
+    sgHeadlineCache = { headline: txt, factsKey: key, ts: Date.now() };
+    return txt;
+  } catch (e) {
+    console.warn('[sg-assessment] AI headline failed:', e.message);
+    return null;
+  }
+}
+
+// Compose + inject the assessment box. Renders the rule-based body
+// immediately, then fires the AI headline asynchronously and updates
+// the headline span when it returns.
+function renderSGAssessmentBox(containerEl) {
+  if (!containerEl) return;
+  const facts = buildSGAssessmentFacts();
+  const { pastBits, futureBits, watchBits } = renderSGAssessmentBody(facts);
+  const riskColor = facts.overallRisk === 'critical' ? 'crit'
+                  : facts.overallRisk === 'high'     ? 'warn'
+                  : facts.overallRisk === 'moderate' ? 'watch' : 'ok';
+  containerEl.innerHTML = `
+    <div class="sg-assess-box ${riskColor}">
+      <div class="sg-assess-head">
+        <span class="sg-assess-title">⬢ WATCH OFFICER ASSESSMENT</span>
+        <span class="sg-assess-risk ${riskColor}">${facts.overallRisk.toUpperCase()}</span>
+        <button class="sg-assess-refresh" onclick="refreshSGAssessment()" title="Force AI headline refresh">↻</button>
+      </div>
+      <div class="sg-assess-headline" id="sg-assess-headline">
+        ${sgHeadlineCache.headline && sgHeadlineCache.factsKey === factsKeyFor(facts)
+          ? sgHeadlineCache.headline
+          : '<span style="color:var(--text-mute);font-style:italic">◌ Generating AI headline…</span>'}
+      </div>
+      <div class="sg-assess-body">
+        <div class="sg-assess-section">
+          <div class="sg-assess-label">Past 7 Days</div>
+          <ul class="sg-assess-list">${pastBits.map(b => `<li>${b}</li>`).join('')}</ul>
+        </div>
+        <div class="sg-assess-section">
+          <div class="sg-assess-label">Next 7 Days</div>
+          <ul class="sg-assess-list">${futureBits.map(b => `<li>${b}</li>`).join('')}</ul>
+        </div>
+        <div class="sg-assess-section">
+          <div class="sg-assess-label">Watch For</div>
+          <ul class="sg-assess-list watch-list">${watchBits.map(b => `<li>${b}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div class="sg-assess-foot">
+        Auto-generated · Refresh dashboard to update facts · AI headline cached 15 min
+      </div>
+    </div>`;
+  // Fire AI headline async if not already cached for this fact-set
+  if (!(sgHeadlineCache.headline && sgHeadlineCache.factsKey === factsKeyFor(facts))) {
+    generateSGHeadline(facts).then(h => {
+      if (!h) {
+        const el = document.getElementById('sg-assess-headline');
+        if (el) el.innerHTML = `<span style="color:var(--text-mute);font-style:italic">AI headline unavailable; rule-based briefing below remains valid.</span>`;
+        return;
+      }
+      const el = document.getElementById('sg-assess-headline');
+      if (el) el.textContent = h;
+    });
+  }
+}
+
+// Manual refresh — clears the AI cache and re-renders
+function refreshSGAssessment() {
+  sgHeadlineCache = { headline: null, factsKey: null, ts: 0 };
+  const box = document.getElementById('sg-assessment-mount');
+  if (box) renderSGAssessmentBox(box);
+}
+
 function safTempBand(t) {
   if (t == null) return null;
   if (t >= 38) return {
@@ -5548,6 +6289,90 @@ function buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData) {
       peakSignificance: 1.5, warnThreshold: 34, weekDeltaSignificance: 1,
     });
 
+    // ===== Past 7 Days Table =====
+    const dailyStats = computeDailyTempStats(temp7d);
+    if (dailyStats.length) {
+      const last7 = dailyStats.slice(-7);
+      const dayShort = d => {
+        const dt = new Date(d + 'T00:00:00+08:00');
+        return dt.toLocaleDateString('en-GB', { weekday:'short', timeZone:'Asia/Singapore' });
+      };
+      tempBlock += `
+        <div class="sg-temp-table-wrap">
+          <div class="sg-temp-table-label">Past 7 Days · Daily Statistics</div>
+          <table class="sg-temp-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                ${last7.map(d => `<th>${dayShort(d.date)}<br><span class="dd">${d.date.slice(5)}</span></th>`).join('')}
+                <th class="avg-col">7-Day Avg</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-label">Daily Max °C</td>
+                ${last7.map(d => `<td>${d.max.toFixed(1)}</td>`).join('')}
+                <td class="avg-col"><b>${(last7.reduce((a,d)=>a+d.max,0)/last7.length).toFixed(1)}</b></td>
+              </tr>
+              <tr>
+                <td class="row-label">Daily Mean °C</td>
+                ${last7.map(d => `<td>${d.mean.toFixed(1)}</td>`).join('')}
+                <td class="avg-col"><b>${(last7.reduce((a,d)=>a+d.mean,0)/last7.length).toFixed(1)}</b></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    // ===== Forecast (Next 7 Days) =====
+    const forecast = (sgForecastData.days || []);
+    if (forecast.length) {
+      const heatRisk = assessHeatwaveRisk(forecast);
+      const maxes = forecast.map(d => d.max).filter(v => v != null);
+      const minMax = maxes.length ? Math.min(...maxes).toFixed(1) : '—';
+      const maxMax = maxes.length ? Math.max(...maxes).toFixed(1) : '—';
+      // Most common weather code over the 7 days
+      const codeCounts = {};
+      forecast.forEach(d => { if (d.weatherCode != null) codeCounts[d.weatherCode] = (codeCounts[d.weatherCode] || 0) + 1; });
+      const sortedCodes = Object.entries(codeCounts).sort((a,b) => b[1] - a[1]);
+      const dominantWeather = sortedCodes.length ? wmoCodeToText(parseInt(sortedCodes[0][0], 10)) : '—';
+      // Total rain expected
+      const totalRain = forecast.reduce((sum, d) => sum + (d.precip || 0), 0);
+      tempBlock += `
+        <div class="sg-forecast-wrap">
+          <div class="sg-forecast-label">Forecast · Next 7 Days</div>
+          <div class="sg-forecast-grid">
+            <div class="sg-forecast-row">
+              <div class="sg-forecast-k">Risk of heatwave:</div>
+              <div class="sg-forecast-v ${heatRisk?.color || ''}">
+                ${heatRisk ? heatRisk.label : '—'}
+                ${heatRisk?.note ? `<div class="sg-forecast-note">${heatRisk.note}</div>` : ''}
+              </div>
+            </div>
+            <div class="sg-forecast-row">
+              <div class="sg-forecast-k">Daily maximum temperatures range:</div>
+              <div class="sg-forecast-v">${minMax}°C – ${maxMax}°C</div>
+            </div>
+            <div class="sg-forecast-row">
+              <div class="sg-forecast-k">Weather:</div>
+              <div class="sg-forecast-v">${dominantWeather}${totalRain > 0 ? ` · ${totalRain.toFixed(0)}mm total rain expected` : ''}</div>
+            </div>
+          </div>
+          <div class="sg-forecast-byday">
+            ${forecast.map(d => `
+              <div class="sg-fd">
+                <div class="sg-fd-day">${new Date(d.date + 'T00:00:00+08:00').toLocaleDateString('en-GB', { weekday:'short', timeZone:'Asia/Singapore' })}</div>
+                <div class="sg-fd-date">${d.date.slice(5)}</div>
+                <div class="sg-fd-max">${d.max != null ? d.max.toFixed(0) + '°' : '—'}</div>
+                <div class="sg-fd-min">${d.min != null ? d.min.toFixed(0) + '°' : '—'}</div>
+                <div class="sg-fd-wx">${wmoCodeToText(d.weatherCode).slice(0, 14)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="sg-forecast-src">Source: Open-Meteo (GFS/ECMWF blend)</div>
+        </div>`;
+    }
+
     tempBlock += `
         <div class="sg-ra-pop-rule" style="margin-top:10px;color:var(--text-mute);font-size:11px;font-style:italic">
           Heat-injury guidance is not part of SAF Section 9 (haze doctrine). Bands shown derive from common SAF/MOH heat-injury training guidance for tropical outdoor conditions.
@@ -5559,6 +6384,7 @@ function buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData) {
     ${psiBlock}
     ${pmBlock}
     ${tempBlock}
+    <div id="sg-assessment-mount"></div>
     <div class="sg-ra-foot">
       Auto-updates on data refresh · Last calculated ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Singapore', hour12: false })} SGT
     </div>
@@ -5568,6 +6394,8 @@ function buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData) {
 async function refreshSingaporeData() {
   await fetchSingaporeData();
   await fetchSGWeatherData();
+  // Forecast is cached for 1h — safe to call freely
+  fetchSGForecast().catch(e => console.warn('[SG forecast]', e.message));
   renderSGMap();
 }
 
@@ -5577,6 +6405,10 @@ async function refreshSingaporeData() {
 let sgMap = null;
 let sgMapLayers = { markers: null, regions: null };
 let sgActiveLayer = 'psi';
+// Lazy-load flags: temp and rain are NOT fetched on page load.
+// They are fetched the first time the user activates that layer.
+let sgTempLoaded = false;
+let sgRainLoaded = false;
 let sgRegionPolygons = null;
 
 // Weather station data fetched separately (temp/rain/wind/humidity come from different endpoints)
@@ -5658,45 +6490,55 @@ async function fetchSGWeatherData() {
   const backend = await fetchSGWeatherFromBackend();
   if (backend && backend.data) {
     const d = backend.data;
+    // temp and rain are lazy-loaded — only populate them from the backend if
+    // the user has already opened that layer (flag is set) OR if the backend
+    // provides them free of charge (no separate rate-limited call needed).
     sgWeatherData = {
       live: true,
       source: 'backend',
       capturedAt: backend.capturedAt,
-      temp:      d.temp      ? parseSGStations(d.temp)      : [],
-      rain:      d.rain      ? parseSGStations(d.rain)      : [],
+      temp:      d.temp      ? parseSGStations(d.temp)      : (sgWeatherData?.temp ?? []),
+      rain:      d.rain      ? parseSGStations(d.rain)      : (sgWeatherData?.rain ?? []),
       windSpeed: d.windSpeed ? parseSGStations(d.windSpeed) : [],
       windDir:   d.windDir   ? parseSGStations(d.windDir)   : [],
     };
+    // If backend returned temp/rain data, mark them as loaded
+    if (d.temp)      { sgTempLoaded = true; layerLastRefresh.temp = new Date().toISOString(); }
+    if (d.rain)      { sgRainLoaded = true; layerLastRefresh.rain = new Date().toISOString(); }
     console.log('[SG weather] via backend, station counts:', backend.stationCounts);
     return;
   }
 
   // 2) Fall back to direct fetch + proxy race
+  // Temperature and Rainfall are lazy-loaded (fetched only when the user
+  // opens those layers) to avoid rate-limiting on initial page load.
   try {
-    const [tempR, rainR, windSpeedR, windDirR] = await Promise.all([
-      fetchOneSGEndpoint('air-temperature'),
-      fetchOneSGEndpoint('rainfall'),
+    const [windSpeedR, windDirR] = await Promise.all([
       fetchOneSGEndpoint('wind-speed'),
       fetchOneSGEndpoint('wind-direction'),
     ]);
-    if (!tempR || !rainR || !windSpeedR || !windDirR) {
+    if (!windSpeedR || !windDirR) {
       throw new Error('one or more SG endpoints returned null');
     }
+    // Preserve any already-loaded temp/rain data in case this is a re-fetch.
     sgWeatherData = {
       live: true,
       source: 'direct',
-      temp: parseSGStations(tempR),
-      rain: parseSGStations(rainR),
+      temp: sgWeatherData?.temp ?? [],
+      rain: sgWeatherData?.rain ?? [],
       windSpeed: parseSGStations(windSpeedR),
       windDir: parseSGStations(windDirR),
     };
-    console.log('[SG weather] via direct/proxy, station counts:',
-      'temp=' + sgWeatherData.temp.length,
-      'rain=' + sgWeatherData.rain.length,
-      'wind=' + sgWeatherData.windSpeed.length);
+    console.log('[SG weather] via direct/proxy (wind only — temp/rain lazy), wind=' + sgWeatherData.windSpeed.length);
   } catch (e) {
-    sgWeatherData = generateMockSGWeatherData();
-    sgWeatherData.source = 'mock';
+    const mock = generateMockSGWeatherData();
+    sgWeatherData = {
+      ...mock,
+      source: 'mock',
+      // Preserve any already-loaded temp/rain
+      temp: sgWeatherData?.temp ?? mock.temp,
+      rain: sgWeatherData?.rain ?? mock.rain,
+    };
   }
 }
 
@@ -5823,6 +6665,75 @@ async function ensureLeaflet() {
   return false;
 }
 
+// ============================================================
+//  LAZY-LOAD: Temperature & Rainfall
+//  These two layers are NOT fetched on page load to avoid hitting
+//  the NEA rate limit before the user needs them. The first time
+//  the user clicks "Temperature" or "Rainfall" in the SG map, we
+//  fetch the data, mark it loaded, and start the 5-minute timer.
+// ============================================================
+async function maybeLazyLoadWeatherLayer(layer) {
+  if (layer === 'temp' && !sgTempLoaded) {
+    sgTempLoaded = true; // set early to prevent double-fetch
+    console.log('[lazy] Fetching air-temperature for the first time…');
+    const btn = document.querySelector('#sg-map-layers button[data-layer="temp"]');
+    if (btn) btn.textContent = '⟳ Loading…';
+    try {
+      const r = await fetchOneSGEndpoint('air-temperature');
+      if (r) {
+        if (!sgWeatherData) sgWeatherData = { live: true };
+        sgWeatherData.temp = parseSGStations(r);
+        layerLastRefresh.temp = new Date().toISOString();
+        lastTempAutoRefresh = Date.now();
+        // Start the 5-minute auto-refresh timer now that we have data
+        if (!autoRefreshTempTimer) {
+          autoRefreshTempTimer = setInterval(() => {
+            if (document.hidden) return;
+            refreshTempStationsOnly();
+          }, AUTO_REFRESH_TEMP_MS);
+          console.log('[lazy] Temperature auto-refresh timer started');
+        }
+      }
+    } catch (e) {
+      console.warn('[lazy] Temperature fetch failed:', e);
+      sgTempLoaded = false; // allow retry next click
+    } finally {
+      if (btn) { btn.innerHTML = '<span class="icon">🌡</span> Temperature'; }
+      if (typeof updateLayerLastRefreshUI === 'function') updateLayerLastRefreshUI();
+    }
+  }
+
+  if (layer === 'rain' && !sgRainLoaded) {
+    sgRainLoaded = true; // set early to prevent double-fetch
+    console.log('[lazy] Fetching rainfall for the first time…');
+    const btn = document.querySelector('#sg-map-layers button[data-layer="rain"]');
+    if (btn) btn.textContent = '⟳ Loading…';
+    try {
+      const r = await fetchOneSGEndpoint('rainfall');
+      if (r) {
+        if (!sgWeatherData) sgWeatherData = { live: true };
+        sgWeatherData.rain = parseSGStations(r);
+        layerLastRefresh.rain = new Date().toISOString();
+        lastRainAutoRefresh = Date.now();
+        // Start the 5-minute auto-refresh timer now that we have data
+        if (!autoRefreshRainTimer) {
+          autoRefreshRainTimer = setInterval(() => {
+            if (document.hidden) return;
+            refreshRainStationsOnly();
+          }, AUTO_REFRESH_RAIN_MS);
+          console.log('[lazy] Rainfall auto-refresh timer started');
+        }
+      }
+    } catch (e) {
+      console.warn('[lazy] Rainfall fetch failed:', e);
+      sgRainLoaded = false; // allow retry next click
+    } finally {
+      if (btn) { btn.innerHTML = '<span class="icon">☂</span> Rainfall'; }
+      if (typeof updateLayerLastRefreshUI === 'function') updateLayerLastRefreshUI();
+    }
+  }
+}
+
 async function initSGMap() {
   if (sgMap) return; // already initialised
   const mapEl = document.getElementById('sg-leaflet-map');
@@ -5945,7 +6856,8 @@ async function initSGMap() {
       document.querySelectorAll('#sg-map-layers button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       sgActiveLayer = btn.dataset.layer;
-      renderSGMap();
+      // Lazy-load temperature/rainfall data on first access
+      maybeLazyLoadWeatherLayer(btn.dataset.layer).then(() => renderSGMap());
     });
   });
 
@@ -6549,14 +7461,12 @@ setInterval(() => {
 renderClocks();
 
 function updateStats() {
-  const counts = { crit:0, warn:0, watch:0, info:0, ok:0 };
-  DATA.forEach(d => { counts[d.severity]++; });
+  const counts = { crit:0, warn:0, watch:0, info:0 };
+  DATA.forEach(d => { if (counts[d.severity] != null) counts[d.severity]++; });
   document.getElementById('s-crit').textContent  = counts.crit;
   document.getElementById('s-warn').textContent  = counts.warn;
   document.getElementById('s-watch').textContent = counts.watch;
   document.getElementById('s-info').textContent  = counts.info;
-  document.getElementById('s-ok').textContent    = counts.ok;
-  document.getElementById('s-total').textContent = DATA.filter(d => d.personnel).length;
 }
 updateStats();
 
@@ -6821,8 +7731,8 @@ function renderRecentPanel() {
     return;
   }
 
-  const sevColors = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5', ok:'#5ed67b' };
-  const sevLabels = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory', ok:'Nominal' };
+  const sevColors = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5' };
+  const sevLabels = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory' };
 
   listEl.innerHTML = recent.map(d => {
     const color = sevColors[d.severity] || '#4fd1c5';
@@ -7217,16 +8127,9 @@ function showMapPopup(evt, code, hazard, pin) {
   clearTimeout(popup._hideTimer);
 
   // Build richer content that mirrors the table/cards views
-  if (d.nominal) {
-    popup.innerHTML = `
-      <div class="pt">${d.name}</div>
-      <div class="pm">${d.code} · Status: <b style="color:var(--ok)">Nominal</b></div>
-      <div class="popup-meta-row">Personnel: <b>${d.personnel ? 'Yes (country-level)' : 'None known'}</b></div>
-      <div class="popup-meta-row">No active alerts</div>
-    `;
-  } else {
-    const sevColor = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5', ok:'#5ed67b' }[d.severity];
-    const sevLabel = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory', ok:'Nominal' }[d.severity];
+  {
+    const sevColor = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5' }[d.severity];
+    const sevLabel = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory' }[d.severity];
     const timeAgo = d.updated ? fmtTime(d.updated) : '—';
     const fullTime = d.updated ? fmtFullTime(d.updated) : '—';
     // Summarise description to 2 sentences max for the tooltip
@@ -7445,6 +8348,127 @@ function updateSortHeaderUI() {
   });
 }
 
+// ============================================================
+//  RECORDED EVENTS — duty-officer checkbox column on the Table tab
+// ============================================================
+// When the duty officer logs an event in their separate records (paper /
+// spreadsheet / war diary), they can tick the row here to mark it done.
+// Persisted in localStorage keyed by event ID, so it survives refreshes
+// and even browser restarts. NOT synced via D1 — this is a per-device
+// state. If you want shared cross-device sync, ask and we can add it.
+
+// REC ticks are SHARED across the team via D1 (May 2026 onwards).
+// Storage flow:
+//   localStorage = instant cache for snappy UI (no network on every click)
+//   D1 via Worker  = source of truth, shared by all watch officers
+//
+// On boot: load from localStorage immediately, then async-fetch from Worker
+// and overwrite the cache so other officers' ticks are picked up.
+// On toggle: update localStorage + UI synchronously, then POST to Worker.
+// On dashboard refresh: re-sync from Worker so the local view stays current.
+
+const RECORDED_STORAGE_KEY = 'hadr_recorded_events_v1';
+
+function loadRecordedSetLocal() {
+  try {
+    const raw = localStorage.getItem(RECORDED_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch (e) {
+    console.warn('[recorded] local load failed:', e.message);
+    return new Set();
+  }
+}
+
+function saveRecordedSetLocal(set) {
+  try {
+    localStorage.setItem(RECORDED_STORAGE_KEY, JSON.stringify([...set]));
+  } catch (e) {
+    console.warn('[recorded] local save failed:', e.message);
+  }
+}
+
+let recordedEvents = loadRecordedSetLocal();
+let recordedSyncing = false;
+let recordedLastSync = 0;
+
+// Pull the authoritative set from the Worker. Replaces the local cache.
+// Safe to call repeatedly — guards against concurrent fetches and caches
+// for 30s to avoid hammering the Worker.
+async function syncRecordedFromWorker(opts = {}) {
+  if (typeof TELEGRAM_BRIDGE_URL === 'undefined' || !TELEGRAM_BRIDGE_URL) return;
+  if (recordedSyncing) return;
+  if (!opts.force && (Date.now() - recordedLastSync) < 30 * 1000) return;
+  recordedSyncing = true;
+  try {
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/recorded');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (Array.isArray(data.event_ids)) {
+      recordedEvents = new Set(data.event_ids);
+      saveRecordedSetLocal(recordedEvents);
+      recordedLastSync = Date.now();
+      console.log(`[recorded] synced from D1: ${recordedEvents.size} ticks`);
+      // Re-render table if it's currently visible so other officers' ticks appear
+      const tableView = document.getElementById('table-view');
+      if (tableView && !tableView.classList.contains('hidden') && typeof renderTable === 'function') {
+        try { renderTable(); } catch (e) {}
+      }
+      updateRecordedCounter();
+    }
+  } catch (e) {
+    console.warn('[recorded] sync from D1 failed:', e.message);
+  } finally {
+    recordedSyncing = false;
+  }
+}
+
+// Toggle the recorded state for an event. Optimistic local + UI update,
+// then async sync to D1 via Worker. If the Worker call fails, the local
+// state persists in localStorage and will reconcile on next sync.
+async function toggleRecorded(eventId, checked) {
+  if (!eventId) return;
+  // 1. Optimistic local update
+  if (checked) recordedEvents.add(eventId);
+  else recordedEvents.delete(eventId);
+  saveRecordedSetLocal(recordedEvents);
+  // 2. Visual update without re-rendering the table
+  const row = document.querySelector(`tr[data-event-id="${CSS.escape(eventId)}"]`);
+  if (row) row.classList.toggle('recorded', checked);
+  updateRecordedCounter();
+  // 3. Async sync to Worker
+  if (typeof TELEGRAM_BRIDGE_URL === 'undefined' || !TELEGRAM_BRIDGE_URL ||
+      typeof TELEGRAM_SHARED_SECRET === 'undefined' || !TELEGRAM_SHARED_SECRET) {
+    console.warn('[recorded] no Worker configured — saved locally only');
+    return;
+  }
+  try {
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/recorded/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+      body: JSON.stringify({ event_id: eventId, recorded: checked }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (!data?.ok) throw new Error(data?.error || 'unknown error');
+  } catch (e) {
+    console.warn('[recorded] sync to D1 failed:', e.message, '— local state preserved, will reconcile on next refresh');
+  }
+}
+
+function updateRecordedCounter() {
+  const el = document.getElementById('recorded-counter');
+  if (!el) return;
+  const visibleIds = DATA.map(d => d.id).filter(Boolean);
+  const recordedVisible = visibleIds.filter(id => recordedEvents.has(id)).length;
+  if (visibleIds.length === 0) {
+    el.textContent = '';
+    return;
+  }
+  el.innerHTML = `<b>${recordedVisible}</b> of <b>${visibleIds.length}</b> recorded`;
+}
+
 function renderTable() {
   const tbody = document.getElementById('tbody');
   if (!tbody) return;
@@ -7483,15 +8507,21 @@ function renderTable() {
   rows.forEach(d => {
     const row = document.createElement('tr');
     row.onclick = () => jumpToCard(`${d.code}-${d.hazard || 'ok'}`);
-    row.innerHTML = d.nominal
-      ? `<td><div class="country-cell"><div class="flag">${d.code}</div>${d.name}</div></td>
-         <td class="mono" style="color:var(--text-mute)">—</td>
-         <td><span class="sev ok"><span class="dot"></span>Nominal</span></td>
-         <td class="mono" style="color:var(--text-mute)">—</td>
-         <td class="mono" style="color:var(--text-mute)">—</td>
-         <td class="mono" style="color:var(--text-mute)">—</td>
-         <td class="mono" style="color:var(--text-mute)">—</td>`
-      : `<td><div class="country-cell"><div class="flag">${d.code}</div>${d.name}</div></td>
+    if (d.id) row.setAttribute('data-event-id', d.id);
+    const isRecorded = !!d.id && recordedEvents.has(d.id);
+    if (isRecorded) row.classList.add('recorded');
+    // Checkbox cell. stopPropagation prevents the row's onclick (jumpToCard)
+    // from firing when the user clicks just the box.
+    const checkboxCell = d.nominal
+      ? `<td class="rec-cell"></td>`
+      : `<td class="rec-cell" onclick="event.stopPropagation()">
+           <input type="checkbox" class="rec-check"
+                  ${isRecorded ? 'checked' : ''}
+                  onchange="toggleRecorded('${(d.id || '').replace(/'/g, "\\'")}', this.checked)"
+                  title="Mark this event as recorded">
+         </td>`;
+    row.innerHTML = checkboxCell +
+      `<td><div class="country-cell"><div class="flag">${d.code}</div>${d.name}</div></td>
          <td><div style="font-weight:500">${d.event}</div>
              <div class="mono" style="font-size:10px;color:var(--text-mute);margin-top:2px">${HAZ_LABEL[d.hazard]} · ${d.subtype}</div></td>
          <td><span class="sev ${d.severity}"><span class="dot"></span>${SEV_LABEL[d.severity]}</span></td>
@@ -7501,11 +8531,47 @@ function renderTable() {
          <td>${d.actions ? d.actions.slice(0,1).map(a=>`<span class="action on">${a}</span>`).join(' ') : ''}</td>`;
     tbody.appendChild(row);
   });
+
+  updateRecordedCounter();
 }
 
 // ============================================================
 //  CARDS
 // ============================================================
+
+// Build a Situation paragraph from the live event's actual fields. Falls
+// back to the raw `d.desc` if no enrichment applies. Adds operational
+// context (location, hazard type) without inventing content not present
+// in the source data.
+function buildLiveSituation(d) {
+  if (!d) return 'No additional details available.';
+  const descRaw = (d.desc || '').trim();
+  const where = d.regionName ? `${d.name} (${d.regionName})` : (d.name || '');
+  switch (d.hazard) {
+    case 'haze':
+      // OpenMeteo air-quality events: d.desc is "US AQI ... PM2.5: ... PM10: ..."
+      return where
+        ? `Air quality reading at ${where}: ${descRaw}`
+        : descRaw || 'Air quality reading reported.';
+    case 'quake':
+      // USGS events: d.desc is "Magnitude X.X earthquake at depth Y km. ..."
+      return descRaw || `Seismic event reported in ${where || 'the area'}.`;
+    case 'weather':
+      return where
+        ? `Weather event affecting ${where}: ${descRaw || 'see source for details.'}`
+        : descRaw || 'Weather event reported.';
+    case 'flood':
+      return where
+        ? `Flood event in ${where}: ${descRaw || 'see source for details.'}`
+        : descRaw || 'Flood event reported.';
+    case 'volcano':
+      return where
+        ? `Volcanic activity in ${where}: ${descRaw || 'see source for details.'}`
+        : descRaw || 'Volcanic activity reported.';
+    default:
+      return descRaw || `${HAZ_LABEL[d.hazard] || 'Incident'} reported${where ? ' in ' + where : ''}.`;
+  }
+}
 
 // Extract a PSI value hint from an air-quality event's description / fields.
 // We look for the highest plausible PSI number mentioned. Returns null if none
@@ -7534,44 +8600,71 @@ function extractHazePsiFromEvent(d) {
 
 // Build Risk Assessment + Recommended Actions for a haze incident, per SAF
 // Section 9 doctrine (29 Sep 23). PSI band drives the wording.
-function buildSection9HazeGuidance(psi, d) {
+function buildSection9HazeGuidance(psi, d, hasSAF) {
   // Defer to generic preset if we genuinely can't infer a PSI band
   if (psi == null) return null;
 
   let threshold, bullets;
   if (psi > 300) {
-    threshold = `EXCEEDED — PSI in HAZARDOUS band (>300). All outdoor physical activities to be avoided per SAF Section 9.`;
-    bullets = [
+    threshold = hasSAF
+      ? `EXCEEDED — PSI in HAZARDOUS band (>300). All outdoor physical activities to be avoided per SAF Section 9.`
+      : `HAZARDOUS — PSI in HAZARDOUS band (>300). Avoid all outdoor physical activities and seek shelter indoors if possible.`;
+    bullets = hasSAF ? [
       'Minimise outdoor activities for SAF General Population',
       'Don PPE (N95) for essential outdoor duties',
       'SAF Susceptible (PES B4↓): avoid all outdoor activity, reassign to indoor duties',
       'Suspend all physical fitness and strenuous training',
       'AEG to maintain executive oversight via GSOC',
+    ] : [
+      'Avoid all non-essential outdoor activities',
+      'Sensitive individuals should stay indoors and use respiratory protection if outdoors',
+      'Monitor updates from air quality authorities',
+      'Consider postponing outdoor events and training',
     ];
   } else if (psi > 200) {
-    threshold = `EXCEEDED — PSI in VERY UNHEALTHY band (201–300). Strenuous and prolonged outdoor activity restricted per SAF Section 9.`;
-    bullets = [
+    threshold = hasSAF
+      ? `EXCEEDED — PSI in VERY UNHEALTHY band (201–300). Strenuous and prolonged outdoor activity restricted per SAF Section 9.`
+      : `VERY UNHEALTHY — PSI in VERY UNHEALTHY band (201–300). Avoid strenuous and prolonged outdoor activity.`;
+    bullets = hasSAF ? [
       'SAF General Population: avoid prolonged or strenuous outdoor activity',
       'SAF Susceptible (PES B4↓): avoid outdoor activities, don N95 for essential duties',
       'Physical fitness tests must be conducted in air-conditioned facilities',
       'Issue N95 guidance for personnel performing essential outdoor duties',
       'Initiate welfare check on susceptible personnel',
+    ] : [
+      'Reduce strenuous and prolonged outdoor activity',
+      'Vulnerable individuals should limit outdoor exposure',
+      'Use respiratory protection for essential outdoor tasks',
+      'Monitor local air quality advisories closely',
     ];
   } else if (psi > 100) {
-    threshold = `APPROACHING — PSI in UNHEALTHY band (101–200). Prolonged and strenuous outdoor activity to be reduced per SAF Section 9.`;
-    bullets = [
+    threshold = hasSAF
+      ? `APPROACHING — PSI in UNHEALTHY band (101–200). Prolonged and strenuous outdoor activity to be reduced per SAF Section 9.`
+      : `UNHEALTHY — PSI in UNHEALTHY band (101–200). Reduce prolonged and strenuous outdoor activity.`;
+    bullets = hasSAF ? [
       'SAF General Population: reduce prolonged or strenuous outdoor activities',
       'SAF Susceptible (PES B4↓): avoid prolonged or strenuous outdoor activities, reassign to indoor duties',
       'Limit to one prolonged + one strenuous outdoor activity, or two prolonged activities per day',
       'Cater 50% more rest between training stations',
       'Monitor 1-hour PM2.5 readings for AEG-level spikes (>151 µg/m³)',
+    ] : [
+      'Reduce prolonged or strenuous outdoor activity',
+      'Sensitive groups should take precautions outdoors',
+      'Stay aware of hourly air quality changes',
+      'Postpone outdoor events if conditions persist',
     ];
   } else {
-    threshold = `BELOW — PSI in GOOD/MODERATE band (≤100). Normal activities permitted per SAF Section 9; routine monitoring only.`;
-    bullets = [
+    threshold = hasSAF
+      ? `BELOW — PSI in GOOD/MODERATE band (≤100). Normal activities permitted per SAF Section 9; routine monitoring only.`
+      : `GOOD/MODERATE — PSI in GOOD/MODERATE band (≤100). Normal outdoor activities may continue with routine monitoring.`;
+    bullets = hasSAF ? [
       'Normal activities for SAF General and Susceptible populations',
       'Monitor NEA / regional air quality feeds for escalation',
       'Maintain awareness of transboundary haze trajectory',
+    ] : [
+      'Normal outdoor activities may continue',
+      'Continue routine monitoring of air quality',
+      'Stay prepared to adjust plans if conditions worsen',
     ];
   }
   return {
@@ -7596,49 +8689,70 @@ function renderCards() {
     const card = document.createElement('div');
     card.className = `card ${d.severity}`;
     card.id = `card-${d.code}-${d.hazard}`;
-    let preset = PRESET_SUMMARIES[`${d.code}-${d.hazard}`];
-    if (!preset) {
-      // Auto-generate basic summary from the event data (live events)
-      preset = {
-        situation: d.desc || 'No additional details available.',
-        exposure: '__PLACEHOLDER__', // overridden below from live state
-        threshold: d.threshold === 'EXCEEDED'
-          ? `EXCEEDED — ${HAZ_LABEL[d.hazard]} threshold reached.`
-          : d.threshold === 'APPROACHING'
-            ? `APPROACHING — monitor for escalation.`
-            : `BELOW — sub-threshold event.`,
-        actions: (d.actions || ['MONITOR']).map(a => '• ' + a).join('\n')
-      };
-    } else {
-      // Clone so we can override exposure without mutating the shared PRESET object
-      preset = { ...preset };
-    }
-    const hasSAF = hasPersonnelInCountry(d.code);
+    // Always auto-generate the Situation from the actual event data.
+    // PRESET_SUMMARIES is no longer consulted — it contained stale content
+    // (e.g. "Riau/Kalimantan peatland fires" was firing for any Indonesia
+    // haze event, including unrelated Jakarta air-quality readings).
+    // Live API data is the source of truth; the Risk Assessment is then
+    // refined further by SAF Section 9 doctrine for haze cards (below).
+    let preset = {
+      situation: buildLiveSituation(d),
+      exposure: '__PLACEHOLDER__', // overridden below from live state
+      threshold: d.threshold === 'EXCEEDED'
+        ? `EXCEEDED — ${HAZ_LABEL[d.hazard]} threshold reached.`
+        : d.threshold === 'APPROACHING'
+          ? `APPROACHING — monitor for escalation.`
+          : `BELOW — sub-threshold event.`,
+      actions: (d.actions || ['MONITOR']).map(a => '• ' + a).join('\n')
+    };
+    // Tiered SAF exposure classification (new):
+    //   'in_area' → green ⬢ SAF PRESENCE badge (same admin region)
+    //   'nearby'  → yellow ◌ SAF NEARBY badge (country-level tick OR city within 100km)
+    //   'none'    → no badge
+    const exposureLevel = getPersonnelExposureLevel(d);
+    const hasSAF = exposureLevel !== 'none';
     // Override the exposure line to reflect the *current* personnel state.
-    // This catches both the auto-generated case (live events) AND the static
-    // PRESET_SUMMARIES case — both should accurately mirror what the user has
-    // ticked in the Personnel tab, not a hardcoded "presence confirmed" string.
-    preset.exposure = hasSAF
-      ? 'SAF personnel presence in-country confirmed (country-level).'
-      : 'No known SAF personnel presence in this country.';
+    if (exposureLevel === 'in_area') {
+      preset.exposure = `SAF personnel confirmed in ${d.regionName || 'the incident area'}.`;
+    } else if (exposureLevel === 'nearby') {
+      preset.exposure = 'SAF personnel within 100km of the incident (not in exact area).';
+    } else {
+      preset.exposure = 'No known SAF personnel presence in this country.';
+    }
 
     // For HAZE cards specifically, override Risk Assessment + Recommended
     // Actions with SAF Section 9 doctrine wording (29 Sep 23). Other hazards
     // keep their preset / auto-generated content unchanged.
     if (d.hazard === 'haze') {
       const psiHint = extractHazePsiFromEvent(d);
-      const sec9 = buildSection9HazeGuidance(psiHint, d);
+      const sec9 = buildSection9HazeGuidance(psiHint, d, hasSAF);
       if (sec9) {
         preset.threshold = sec9.threshold;
         preset.actions   = sec9.actions;
       }
     }
+    // Render the appropriate badge for the exposure tier.
+    const safBadge = exposureLevel === 'in_area'
+      ? '<span class="saf-flag">⬢ SAF PRESENCE</span>'
+      : exposureLevel === 'nearby'
+        ? '<span class="saf-flag nearby">◌ SAF NEARBY</span>'
+        : '';
+    // Location label shows state when known
+    const locationLabel = d.regionName
+      ? `${d.code} · ${d.regionName} · ${d.name}`
+      : `${d.code} · ${d.name}`;
+    // Personnel-line text matches the tier
+    const personnelText = exposureLevel === 'in_area'
+      ? (d.regionName ? `Yes (in ${d.regionName})` : 'Yes (in area)')
+      : exposureLevel === 'nearby'
+        ? 'Nearby (within 100km / country-level)'
+        : 'None known';
     card.innerHTML = `
       <div class="top">
         <div>
-          <div class="country">${d.code} · ${d.name}
+          <div class="country">${locationLabel}
             <span class="src-badge ${d.live ? 'live' : 'mock'}">${d.live ? '◉ LIVE · ' + (d.source || 'API') : '◌ MOCK'}</span>
-            ${hasSAF ? '<span class="saf-flag">⬢ SAF PRESENCE</span>' : ''}
+            ${safBadge}
           </div>
           <div class="title">${d.event}</div>
         </div>
@@ -7648,7 +8762,7 @@ function renderCards() {
         <span>Hazard: <b>${HAZ_LABEL[d.hazard]} / ${d.subtype}</b></span>
         <span>Incident Time: <b>${fmtFullTime(d.updated)}</b> <span style="color:var(--accent)">(${fmtTime(d.updated)})</span></span>
         <span>Source: <b>${d.source}</b></span>
-        <span>Personnel: <b>${hasSAF ? 'Yes (country-level)' : 'None known'}</b></span>
+        <span>Personnel: <b>${personnelText}</b></span>
       </div>
       <div class="desc">${d.desc}</div>
       <div class="ai">
@@ -7656,7 +8770,7 @@ function renderCards() {
           <span>⬡ AI STAFF-ASSIST SUMMARY</span>
           <button class="regen" onclick="regenerateSummary('${d.code}', '${d.hazard}', {force: true})">↻ Regenerate</button>
         </div>
-        <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}<span class="label">Recommended Actions</span>${preset.actions}</div>
+        <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}${hasSAF ? `<span class="label">Recommended Actions</span>${preset.actions}` : ''}</div>
       </div>
       ${d.hazard === 'haze' ? `
       <div class="aq-history">
@@ -7687,11 +8801,12 @@ function renderCards() {
 function jumpToCard(id) {
   document.querySelector('[data-view="cards"]').click();
   setTimeout(() => {
+    document.querySelectorAll('.card.focused').forEach(card => card.classList.remove('focused'));
     const el = document.getElementById(`card-${id}`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.style.outline = '2px solid var(--accent)';
-      setTimeout(() => el.style.outline = '', 2000);
+      el.classList.add('focused');
+      setTimeout(() => el.classList.remove('focused'), 2200);
     }
   }, 100);
 }
@@ -7762,7 +8877,7 @@ ALERT DATA:
 Produce output in EXACTLY this format (plain text, no markdown):
 Situation: <2 sentences max>
 Risk Assessment: <1 sentence on the operational risk level and key drivers>
-Recommended Actions: <3-5 short bullets, each on its own line starting with "• ">
+${hasPersonnelInCountry(d.code) ? 'Recommended Actions: <3-5 short bullets, each on its own line starting with "• ">' : '(Do NOT include a Recommended Actions section — no SAF personnel are present in this country.)'}
 
 Be concise, factual, military-professional. No speculation beyond the data.`;
 
@@ -7794,10 +8909,11 @@ Be concise, factual, military-professional. No speculation beyond the data.`;
       parsed[k] = m ? m[1].trim() : '—';
     }
 
+    const hasSAF = hasPersonnelInCountry(d.code);
     const html =
       `<span class="label">Situation</span>${parsed.situation}` +
       `<span class="label">Risk Assessment</span>${parsed.threshold}` +
-      `<span class="label">Recommended Actions</span>${parsed.actions}` +
+      (hasSAF ? `<span class="label">Recommended Actions</span>${parsed.actions}` : '') +
       `<div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-mute);letter-spacing:0.1em">⬡ LIVE · GENERATED ${new Date().toISOString().substring(11,19)}Z · REVIEW REQUIRED</div>`;
 
     bodyEl.innerHTML = html;
@@ -8019,169 +9135,6 @@ async function loadAQHistory(code, lat, lng, range, btnEl) {
   renderAQChart(chartId, statsId, series, isLive);
 }
 
-// ============================================================
-//  COMMAND BAR — Ask Claude
-// ============================================================
-const cmdHistory = [];
-
-function addCmdMessage(role, text, opts = {}) {
-  const hist = document.getElementById('cmd-history');
-  if (!hist) return null;
-  const msg = document.createElement('div');
-  msg.className = 'msg ' + role + (opts.loading ? ' loading' : '');
-  const labelMap = { user: 'YOU', ai: 'AI', err: 'ERROR' };
-  msg.innerHTML = `<span class="role">${labelMap[role] || role}</span><span class="text"></span>`;
-  msg.querySelector('.text').textContent = text;
-  hist.appendChild(msg);
-  hist.scrollTop = hist.scrollHeight;
-  return msg;
-}
-
-async function askClaude(question) {
-  const sendBtn = document.getElementById('cmd-send');
-  const input   = document.getElementById('cmd-input');
-  sendBtn.disabled = true;
-  input.disabled = true;
-
-  addCmdMessage('user', question);
-  const loadingMsg = addCmdMessage('ai', 'Thinking…', { loading: true });
-
-  const systemPrompt = `You are a helpful AI assistant embedded in a HADR (Humanitarian Assistance and Disaster Relief) environmental monitoring dashboard used by military staff officers. Your role is to answer questions concisely and professionally.
-
-Topics you can help with:
-- HADR concepts, doctrine, and best practices
-- Weather, haze, earthquakes, floods, volcanoes, disease outbreaks
-- Air quality indices (PSI, PM2.5, US AQI), thresholds, and health implications
-- Heat injury prevention, outdoor activity guidelines
-- Disaster response planning and welfare check procedures
-- Singapore NEA / data.gov.sg environmental monitoring
-- GDACS, USGS, and other HADR data sources
-- General factual questions
-
-Guidelines:
-- Keep answers concise (2-4 paragraphs max unless user asks for detail)
-- Be professional, factual, and military-appropriate
-- When uncertain, say so rather than speculating
-- Do NOT make up specific numbers, event details, or operational data
-- Do NOT provide medical, legal, or operational advice — defer to qualified personnel
-- If asked about data shown on the dashboard, explain what it means generally rather than reading specific values`;
-
-  try {
-    if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) {
-      throw new Error('AI bridge not configured');
-    }
-    // Build the conversation as a single prompt — Gemini doesn't have a native
-    // multi-turn message format like Anthropic; we concatenate history into the
-    // user prompt with role tags. The system instruction goes in `system`.
-    const historyText = cmdHistory.length
-      ? cmdHistory.map(m => `${m.role === 'assistant' ? 'Assistant' : 'User'}: ${m.content}`).join('\n\n') + '\n\n'
-      : '';
-    const fullPrompt = historyText + `User: ${question}\n\nAssistant:`;
-
-    const resp = await fetch(TELEGRAM_BRIDGE_URL + '/ai-chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Auth-Token': TELEGRAM_SHARED_SECRET,
-      },
-      body: JSON.stringify({ prompt: fullPrompt, system: systemPrompt }),
-    });
-    const data = await resp.json();
-    if (!data?.ok || !data?.text) throw new Error(data?.error || `HTTP ${resp.status}`);
-    const answer = data.text.trim() || '(No response)';
-
-    loadingMsg.classList.remove('loading');
-    loadingMsg.querySelector('.text').textContent = answer;
-
-    cmdHistory.push({ role: 'user', content: question });
-    cmdHistory.push({ role: 'assistant', content: answer });
-    // Keep history bounded
-    while (cmdHistory.length > 20) cmdHistory.shift();
-  } catch (err) {
-    loadingMsg.classList.remove('loading');
-    loadingMsg.classList.remove('ai');
-    loadingMsg.classList.add('err');
-    loadingMsg.querySelector('.role').textContent = 'ERROR';
-    loadingMsg.querySelector('.text').textContent = '⚠ AI unavailable. Error: ' + (err.message || err);
-  } finally {
-    sendBtn.disabled = false;
-    input.disabled = false;
-    input.focus();
-  }
-}
-
-function wireCommandBar() {
-  const form    = document.getElementById('cmd-form');
-  const input   = document.getElementById('cmd-input');
-  const sendBtn = document.getElementById('cmd-send');
-  const bubble  = document.getElementById('chat-bubble');
-  const window_ = document.getElementById('chat-window');
-  const closeBtn = document.getElementById('chat-close');
-  const clearBtn = document.getElementById('chat-clear');
-  const history = document.getElementById('cmd-history');
-
-  if (!form || !input) {
-    console.error('Chat elements not found in DOM');
-    return;
-  }
-
-  const submitQuestion = () => {
-    const q = input.value.trim();
-    if (!q) return;
-    input.value = '';
-    askClaude(q);
-  };
-
-  form.addEventListener('submit', (e) => { e.preventDefault(); submitQuestion(); });
-  if (sendBtn) sendBtn.addEventListener('click', (e) => { e.preventDefault(); submitQuestion(); });
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuestion(); }
-  });
-
-  // Open/close controls
-  if (bubble && window_) {
-    bubble.addEventListener('click', () => {
-      window_.classList.remove('closed');
-      bubble.classList.add('hidden');
-      setTimeout(() => input.focus(), 250);
-    });
-  }
-  if (closeBtn && window_ && bubble) {
-    closeBtn.addEventListener('click', () => {
-      window_.classList.add('closed');
-      bubble.classList.remove('hidden');
-    });
-  }
-  if (clearBtn && history) {
-    clearBtn.addEventListener('click', () => {
-      history.innerHTML = '';
-      cmdHistory.length = 0;
-    });
-  }
-
-  // Close on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if (window_ && !window_.classList.contains('closed')) {
-        window_.classList.add('closed');
-        if (bubble) bubble.classList.remove('hidden');
-      }
-      const pm = document.getElementById('paste-modal');
-      if (pm && !pm.classList.contains('modal-closed')) {
-        pm.classList.add('modal-closed');
-      }
-    }
-  });
-
-  console.log('Chat popup wired successfully');
-}
-
-// Auto-wire as soon as DOM is available (don't wait for bootApp)
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', wireCommandBar);
-} else {
-  wireCommandBar();
-}
 
 // ============================================================
 //  GO
@@ -8420,6 +9373,124 @@ function hasPersonnelInCountry(iso2) {
   return false;
 }
 
+// Great-circle distance between two lat/lng pairs (km). Haversine formula.
+function haversineKm(lat1, lng1, lat2, lng2) {
+  if ([lat1, lng1, lat2, lng2].some(v => v == null || !Number.isFinite(v))) return Infinity;
+  const R = 6371; // Earth radius in km
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+// Classify an incident's SAF personnel exposure into one of three tiers:
+//
+//   'in_area' (green badge): personnel ticked at city OR state level in the
+//             SAME admin region (state) as the incident. Strongest match.
+//
+//   'nearby'  (yellow badge): personnel ticked anywhere in the SAME country
+//             as the incident, OR a city tick in a DIFFERENT country whose
+//             coordinates are within 100km of the incident (cross-border
+//             proximity, e.g. JB personnel + Singapore incident).
+//
+//   'none'    (no badge): no personnel signal for this incident.
+//
+// The tier drives the badge shown on cards and the panel item severity tag.
+function getPersonnelExposureLevel(incident) {
+  if (!incident || !incident.code) return 'none';
+  const iso2 = String(incident.code).toUpperCase();
+  const incidentState = incident.regionCode || null; // e.g. "US-AK" or null
+  const incidentLat = incident.lat;
+  const incidentLng = incident.lng;
+
+  let hasSameCountryTick = false;
+  let hasCrossBorderProximity = false;
+
+  // Pass 1: scan ticks for any signal at all.
+  for (const key of Object.keys(personnelPresence)) {
+    if (!isAnyPresence(key)) continue;
+    const parts = key.split('|');
+    const tickCountry = parts[0];
+    const tickStateId = parts[1] || null;
+    const tickCityId  = parts[2] || null;
+
+    if (tickCountry === iso2) {
+      // Same-country tick. 'in_area' check: tick's state == incident's state.
+      if (incidentState && tickStateId === incidentState) {
+        return 'in_area';
+      }
+      hasSameCountryTick = true;
+      continue;
+    }
+
+    // Different country. Check cross-border 100km proximity for city ticks.
+    if (tickCityId && Number.isFinite(incidentLat) && Number.isFinite(incidentLng)) {
+      const cities = GEO_CITIES_BY_STATE[tickStateId] || [];
+      const city = cities.find(c => c.id === tickCityId);
+      if (city && Number.isFinite(city.lat) && Number.isFinite(city.lng)) {
+        const dist = haversineKm(incidentLat, incidentLng, city.lat, city.lng);
+        if (dist <= 100) hasCrossBorderProximity = true;
+      }
+    }
+  }
+
+  // No 'in_area' match found.
+  if (hasSameCountryTick)      return 'nearby'; // any tick in incident's country
+  if (hasCrossBorderProximity) return 'nearby'; // city tick from a neighbour within 100km
+  return 'none';
+}
+
+// Convenience: legacy callers that just want a yes/no.
+function hasPersonnelExposure(incident) {
+  return getPersonnelExposureLevel(incident) !== 'none';
+}
+
+// =============================================================
+//  PERSONNEL-DRIVEN SEVERITY CLASSIFICATION
+// =============================================================
+// New criteria (May 2026 onwards):
+//   CRITICAL — disaster (any source severity) with DIRECT safety concern
+//              to personnel IN the area. e.g. volcanic event at personnel
+//              location.
+//   WARNING  — disaster predicted/occurring NEAR personnel area that may
+//              cause impact. e.g. cyclone forecast tracking toward
+//              personnel location.
+//   WATCH    — significant disaster happening globally with NO immediate
+//              impact on overseas personnel (event is elsewhere).
+//   ADVISORY — good-to-know events; minor incidents with no personnel
+//              impact and limited operational significance.
+//
+// We preserve the original source severity on `sourceSeverity` so dedup,
+// sorting fall-backs, and tooltips can still reference the raw source
+// classification. The displayed `severity` is the operational tier.
+function classifySeverityByPersonnelExposure(incident) {
+  if (!incident) return incident;
+  // Preserve the source-derived severity once (idempotent)
+  if (!incident.sourceSeverity) incident.sourceSeverity = incident.severity;
+
+  const exposure = getPersonnelExposureLevel(incident);
+  if (exposure === 'in_area') {
+    incident.severity = 'crit';      // CRITICAL: personnel in affected area
+    incident.exposureLevel = 'in_area';
+  } else if (exposure === 'nearby') {
+    incident.severity = 'warn';      // WARNING: personnel nearby
+    incident.exposureLevel = 'nearby';
+  } else {
+    // No personnel impact. Differentiate Watch vs Advisory by intrinsic
+    // event significance from the source.
+    const orig = incident.sourceSeverity;
+    if (orig === 'crit' || orig === 'warn') {
+      incident.severity = 'watch';   // WATCH: significant event elsewhere
+    } else {
+      incident.severity = 'info';    // ADVISORY: minor event elsewhere
+    }
+    incident.exposureLevel = 'none';
+  }
+  return incident;
+}
+
 function updatePersonnelSummary() {
   const sumEl = document.getElementById('personnel-summary');
   if (!sumEl) return;
@@ -8530,7 +9601,7 @@ function getCheckedCategoryISO2Codes() {
 }
 
 function getPersonnelIncidentAlerts() {
-  // Find incidents that are: (a) Critical or Warning severity, (b) within last 24h,
+  // Find incidents that are: (a) Critical/Warning/Watch severity, (b) within last 24h,
   // (c) in a country with checked personnel.
   if (typeof DATA === 'undefined' || !Array.isArray(DATA)) return [];
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
@@ -8540,7 +9611,7 @@ function getPersonnelIncidentAlerts() {
   const alerts = [];
   DATA.forEach(d => {
     if (d.nominal) return;
-    if (d.severity !== 'crit' && d.severity !== 'warn') return;
+    if (d.severity !== 'crit' && d.severity !== 'warn' && d.severity !== 'watch') return;
     if (!d.updated) return;
     const t = new Date(d.updated).getTime();
     if (!t || t < cutoff) return;
@@ -8548,8 +9619,8 @@ function getPersonnelIncidentAlerts() {
     if (!matches || !matches.length) return;
     alerts.push({ incident: d, personnel: matches });
   });
-  // Critical first, then warning; newest first within each severity
-  const sevOrder = { crit: 0, warn: 1 };
+  // Critical first, then warning, then watch; newest first within each severity
+  const sevOrder = { crit: 0, warn: 1, watch: 2 };
   alerts.sort((a, b) => {
     const s = sevOrder[a.incident.severity] - sevOrder[b.incident.severity];
     if (s !== 0) return s;
@@ -8585,8 +9656,9 @@ function renderPersonnelAlertBanner() {
   }
 
   // Compute summary numbers
-  const critCount = alerts.filter(a => a.incident.severity === 'crit').length;
-  const warnCount = alerts.filter(a => a.incident.severity === 'warn').length;
+  const critCount  = alerts.filter(a => a.incident.severity === 'crit').length;
+  const warnCount  = alerts.filter(a => a.incident.severity === 'warn').length;
+  const watchCount = alerts.filter(a => a.incident.severity === 'watch').length;
   const countriesAffected = new Set(alerts.map(a => a.incident.code)).size;
 
   // Summary header (always visible)
@@ -8598,8 +9670,9 @@ function renderPersonnelAlertBanner() {
           <b>${alerts.length}</b> SAF exposure${alerts.length === 1 ? '' : 's'} across <b>${countriesAffected}</b> ${countriesAffected === 1 ? 'country' : 'countries'}
         </div>
         <div class="pep-subline">
-          ${critCount ? `<span class="pep-sev crit">${critCount} CRITICAL</span>` : ''}
-          ${warnCount ? `<span class="pep-sev warn">${warnCount} WARNING</span>` : ''}
+          ${critCount  ? `<span class="pep-sev crit">${critCount} CRITICAL</span>` : ''}
+          ${warnCount  ? `<span class="pep-sev warn">${warnCount} WARNING</span>` : ''}
+          ${watchCount ? `<span class="pep-sev watch">${watchCount} WATCH</span>` : ''}
         </div>
       </div>
       <span class="pep-chevron">${exposurePanelExpanded ? '▾' : '▸'}</span>
@@ -8612,8 +9685,11 @@ function renderPersonnelAlertBanner() {
       const hazardLabel = (incident.subtype || incident.event || 'incident').toLowerCase();
       const subUnitNames = personnel.map(p => p.subUnit.name).slice(0, 3).join(', ');
       const extra = personnel.length > 3 ? ` +${personnel.length - 3} more` : '';
-      const sevClass = incident.severity; // 'crit' or 'warn'
-      const sevLabel = incident.severity === 'crit' ? 'Critical' : 'Warning';
+      const sevClass = incident.severity; // 'crit' | 'warn' | 'watch'
+      const sevLabel = incident.severity === 'crit'  ? 'Critical'
+                     : incident.severity === 'warn'  ? 'Warning'
+                     : incident.severity === 'watch' ? 'Watch'
+                     : incident.severity;
       return `
         <div class="pep-item ${sevClass}" onclick="jumpToCard('${incident.code}-${incident.hazard}')">
           <div class="pep-item-sev sev-${sevClass}">${sevLabel}</div>
@@ -9014,8 +10090,29 @@ function buildStateCard(country, state, showCountry, forceTerminal) {
   const isCountryLevel = !state;
   const unitKey = isCountryLevel ? iso2 : `${iso2}|${state.id}`;
   const rec = personnelPresence[unitKey] || {};
-  const hasOthers    = !!rec.others;
-  const hasExercises = !!rec.exercises;
+  let hasOthers    = !!rec.others;
+  let hasExercises = !!rec.exercises;
+
+  // ROLL-UP: if this is a state card, also check for ticks on cities under it.
+  // City keys look like "FR|FR-IDF|FR-PAR". The state card should reflect that
+  // a city under it is ticked, even if the state itself isn't directly ticked.
+  let rolledUpCityCount = 0;
+  let rolledUpVia = null; // 'direct', 'cities', or 'both'
+  if (!isCountryLevel) {
+    const statePrefix = `${iso2}|${state.id}|`;
+    for (const key of Object.keys(personnelPresence)) {
+      if (!key.startsWith(statePrefix)) continue;
+      const v = personnelPresence[key];
+      if (!v) continue;
+      if (v.others)    { hasOthers    = true; rolledUpCityCount++; }
+      if (v.exercises) { hasExercises = true; rolledUpCityCount++; }
+    }
+    // Determine attribution
+    const directlyTicked = !!rec.others || !!rec.exercises;
+    if (rolledUpCityCount > 0 && directlyTicked) rolledUpVia = 'both';
+    else if (rolledUpCityCount > 0)              rolledUpVia = 'cities';
+    else if (directlyTicked)                     rolledUpVia = 'direct';
+  }
 
   let stateClass = '';
   if (hasOthers && hasExercises) stateClass = 'personnel-present-both';
@@ -9035,6 +10132,13 @@ function buildStateCard(country, state, showCountry, forceTerminal) {
     statusHtml = `<span class="unit-status on-exercises">◉ Exercises Active</span>`;
   } else {
     statusHtml = `<span class="unit-status pending">○ No Personnel</span>`;
+  }
+  // If the status is on but only via city-level ticks (not directly on the state),
+  // append a small note so it's clear where the personnel actually are.
+  if (rolledUpVia === 'cities') {
+    statusHtml += ` <span class="unit-status pending" style="font-size:9px">(via ${rolledUpCityCount} ${rolledUpCityCount === 1 ? 'city' : 'cities'})</span>`;
+  } else if (rolledUpVia === 'both') {
+    statusHtml += ` <span class="unit-status pending" style="font-size:9px">(state + ${rolledUpCityCount} ${rolledUpCityCount === 1 ? 'city' : 'cities'})</span>`;
   }
 
   const displayName = isCountryLevel
@@ -9059,13 +10163,13 @@ function buildStateCard(country, state, showCountry, forceTerminal) {
     <div class="pnl-card terminal ${stateClass}">
       <div class="pnl-checkbox-group">
         <label class="pnl-checkbox exercises" title="Check if SAF exercises are currently running at this location">
-          <input type="checkbox" ${hasExercises ? 'checked' : ''}
+          <input type="checkbox" ${rec.exercises ? 'checked' : ''}
                  onchange="togglePersonnelPresence('${unitKey}', 'exercises', this.checked)" />
           <span class="pnl-checkbox-box"></span>
           <span class="lbl">Exercises</span>
         </label>
         <label class="pnl-checkbox others" title="Check if SAF personnel (non-exercise) are present at this location">
-          <input type="checkbox" ${hasOthers ? 'checked' : ''}
+          <input type="checkbox" ${rec.others ? 'checked' : ''}
                  onchange="togglePersonnelPresence('${unitKey}', 'others', this.checked)" />
           <span class="pnl-checkbox-box"></span>
           <span class="lbl">Others</span>
@@ -9426,6 +10530,15 @@ async function refreshSGDataOnly() {
     if (typeof fetchSGWeatherData === 'function') {
       await fetchSGWeatherData();
     }
+    // Re-fetch temp/rain only if the user has already opened those layers
+    await Promise.all([
+      sgTempLoaded ? fetchOneSGEndpoint('air-temperature').then(r => {
+        if (r && sgWeatherData) { sgWeatherData.temp = parseSGStations(r); layerLastRefresh.temp = new Date().toISOString(); }
+      }).catch(() => {}) : Promise.resolve(),
+      sgRainLoaded ? fetchOneSGEndpoint('rainfall').then(r => {
+        if (r && sgWeatherData) { sgWeatherData.rain = parseSGStations(r); layerLastRefresh.rain = new Date().toISOString(); }
+      }).catch(() => {}) : Promise.resolve(),
+    ]);
     if (typeof renderSGMap === 'function')        renderSGMap();
     if (typeof renderSingaporeView === 'function') renderSingaporeView();
     if (typeof updateSGLastUpdated === 'function') updateSGLastUpdated();
@@ -9528,19 +10641,9 @@ function startAutoRefreshTimers() {
     refreshSGDataOnly();
   }, AUTO_REFRESH_SG_MS);
 
-  // Temperature stations refresh — every 5 minutes, lightweight
-  if (autoRefreshTempTimer) clearInterval(autoRefreshTempTimer);
-  autoRefreshTempTimer = setInterval(() => {
-    if (document.hidden) return;
-    refreshTempStationsOnly();
-  }, AUTO_REFRESH_TEMP_MS);
-
-  // Rainfall stations refresh — every 5 minutes (NEA publishes every 5 min)
-  if (autoRefreshRainTimer) clearInterval(autoRefreshRainTimer);
-  autoRefreshRainTimer = setInterval(() => {
-    if (document.hidden) return;
-    refreshRainStationsOnly();
-  }, AUTO_REFRESH_RAIN_MS);
+  // Temperature and Rainfall timers are NOT started here.
+  // They are started lazily the first time the user opens those layers
+  // (see maybeLazyLoadWeatherLayer). This avoids rate-limiting on boot.
 
   // When the tab regains focus after being hidden, run any refresh that's
   // overdue. This catches the case where someone leaves the dashboard up
@@ -9556,17 +10659,17 @@ function startAutoRefreshTimers() {
       console.log('[auto-refresh] SG refresh overdue on tab focus — running now');
       refreshSGDataOnly();
     }
-    if (now - lastTempAutoRefresh > AUTO_REFRESH_TEMP_MS) {
+    if (now - lastTempAutoRefresh > AUTO_REFRESH_TEMP_MS && sgTempLoaded) {
       console.log('[auto-refresh] Temperature refresh overdue on tab focus — running now');
       refreshTempStationsOnly();
     }
-    if (now - lastRainAutoRefresh > AUTO_REFRESH_RAIN_MS) {
+    if (now - lastRainAutoRefresh > AUTO_REFRESH_RAIN_MS && sgRainLoaded) {
       console.log('[auto-refresh] Rainfall refresh overdue on tab focus — running now');
       refreshRainStationsOnly();
     }
   });
 
-  console.log(`[auto-refresh] Scheduled — hazards every ${AUTO_REFRESH_HAZARD_MS/60000}min, SG full every ${AUTO_REFRESH_SG_MS/60000}min, temperature every ${AUTO_REFRESH_TEMP_MS/60000}min, rainfall every ${AUTO_REFRESH_RAIN_MS/60000}min`);
+  console.log(`[auto-refresh] Scheduled — hazards every ${AUTO_REFRESH_HAZARD_MS/60000}min, SG full every ${AUTO_REFRESH_SG_MS/60000}min. Temperature & Rainfall timers start lazily on first layer activation.`);
 }
 
 // ============================================================
@@ -9675,7 +10778,6 @@ async function bootApp() {
   initMap();
   renderAll();
   setSourceStatusUI(false);
-  wireCommandBar();
   update24hButton();
   await refreshAllLiveData();
   // After the first manual fetch, mark both timers as 'just refreshed' so they
@@ -9692,6 +10794,9 @@ async function bootApp() {
   // World Clocks sync (shared global) — fetch on boot, poll while tab is active
   if (typeof fetchClocksFromBridge === 'function') fetchClocksFromBridge();
   if (typeof startClocksPolling === 'function')    startClocksPolling();
+  // Recorded events sync (team-wide REC ticks) — fetch on boot + every 60s
+  syncRecordedFromWorker({ force: true });
+  setInterval(() => syncRecordedFromWorker(), 60 * 1000);
   // Eager-load the country list so it's ready when user unlocks the Personnel tab
   if (typeof loadGeoCountries === 'function') loadGeoCountries();
   // Check for personnel × incident cross-refs after boot

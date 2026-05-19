@@ -4,14 +4,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Global Environmental Force Monitoring Advisory Dashboard</title>
+<title>Global Environmental Force Monitoring Dashboard</title>
 
 <!-- Favicon: simple globe icon, inline SVG so no external request needed. -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8F%3C/text%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
@@ -48,7 +48,7 @@
     margin: 0; padding: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 14px;
     line-height: 1.5;
     min-height: 100vh;
@@ -64,15 +64,15 @@
     z-index: 0;
   }
 
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  .serif { font-family: 'Fraunces', serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .serif { font-family: 'IBM Plex Mono', monospace; }
 
   /* Classification banner */
   .class-bar {
     background: #2a5c3a;
     color: #e6ffe8;
     text-align: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-weight: 600;
     font-size: 11px;
     letter-spacing: 0.15em;
@@ -97,7 +97,7 @@
     border: 1px solid var(--accent);
     display: grid; place-items: center;
     color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-weight: 700;
     font-size: 24px;
     line-height: 1;
@@ -105,13 +105,13 @@
   }
   header.app h1 {
     margin: 0;
-    font-family: 'Fraunces', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-weight: 600;
     font-size: 20px;
     letter-spacing: -0.01em;
   }
   header.app .sub {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.1em;
@@ -119,7 +119,7 @@
     margin-top: 2px;
   }
   header.app .clock {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     text-align: right;
     font-size: 12px;
     color: var(--text-dim);
@@ -140,21 +140,21 @@
     padding: 16px 20px;
   }
   .stat .lbl {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
   .stat .val {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 28px;
     font-weight: 600;
     margin-top: 4px;
     line-height: 1;
   }
   .stat .delta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--text-dim);
     margin-top: 4px;
@@ -190,7 +190,7 @@
     background: transparent;
     border: none;
     color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.08em;
@@ -214,7 +214,7 @@
     flex-wrap: wrap;
   }
   .chip {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     padding: 6px 10px;
     border: 1px solid var(--line-2);
@@ -274,7 +274,7 @@
   }
   .ocean-label {
     fill: #243447;
-    font-family: 'Fraunces', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-style: italic;
     font-size: 11px;
     letter-spacing: 0.15em;
@@ -283,7 +283,7 @@
   }
   .continent-label {
     fill: #34465c;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.2em;
@@ -306,7 +306,7 @@
   .marker-dot:hover { stroke-width: 2.5; }
   .marker-label {
     fill: #a8b8cc;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-weight: 500;
     pointer-events: none;
     text-anchor: middle;
@@ -344,7 +344,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -357,7 +357,7 @@
     border-radius: 50%;
   }
   #map-popup .popup-country {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.12em;
@@ -369,7 +369,7 @@
     line-height: 1.3;
   }
   #map-popup .pm {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     margin-bottom: 8px;
@@ -384,7 +384,7 @@
     border-left: 3px solid var(--accent);
     padding: 8px 10px;
     margin-bottom: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
   }
   #map-popup .popup-ts-label {
     font-size: 9px;
@@ -412,7 +412,7 @@
     border-bottom: 1px dashed var(--line-2);
   }
   #map-popup .popup-meta-row {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-dim);
     margin-top: 4px;
@@ -429,14 +429,14 @@
     gap: 1px;
   }
   #map-popup .popup-k {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-mute);
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
   #map-popup .popup-v {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 600;
     color: var(--text);
@@ -448,7 +448,7 @@
     margin-bottom: 10px;
   }
   #map-popup .popup-action {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     padding: 3px 7px;
     border: 1px solid var(--line-2);
@@ -465,7 +465,7 @@
     margin-top: 4px;
     background: var(--accent); color: var(--bg);
     border: none; padding: 6px 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px; font-weight: 600;
     cursor: pointer;
     text-transform: uppercase;
@@ -536,7 +536,7 @@
     flex-wrap: wrap;
   }
   .personnel-exposure-panel .pep-sev {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -570,7 +570,7 @@
   .personnel-exposure-panel .pep-item.warn { border-left: 3px solid var(--warn); }
   .personnel-exposure-panel .pep-item.watch { border-left: 3px solid var(--watch); }
   .personnel-exposure-panel .pep-item-sev {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -593,13 +593,105 @@
   }
   .personnel-exposure-panel .pep-item-title b { color: var(--text); font-weight: 600; }
   .personnel-exposure-panel .pep-item-detail {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-dim);
     margin-top: 2px;
   }
+  /* Supporting news links that got merged into a card entry. Subtle, but
+     accent-coloured so the watch officer can see them at a glance. */
+  .personnel-exposure-panel .pep-item-related-news {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-mute);
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed var(--line-2);
+    line-height: 1.5;
+  }
+  .personnel-exposure-panel .pep-item-related-news a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .personnel-exposure-panel .pep-item-related-news a:hover {
+    text-decoration: underline;
+  }
+  /* Multi-source styling: when a card alert ALSO has news coverage,
+     visually emphasize it so the watch officer sees the corroboration. */
+  .personnel-exposure-panel .pep-item.pep-multi-source {
+    border-left-width: 4px;
+    background: linear-gradient(90deg, rgba(79,209,197,0.04) 0%, transparent 30%);
+  }
+  .personnel-exposure-panel .pep-multi-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 2px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+  .personnel-exposure-panel .pep-news-block {
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: rgba(79,209,197,0.06);
+    border-left: 2px solid var(--accent);
+    border-radius: 2px;
+  }
+  .personnel-exposure-panel .pep-news-block-header {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .personnel-exposure-panel .pep-news-link {
+    display: block;
+    padding: 3px 0;
+    text-decoration: none;
+    line-height: 1.4;
+    border-top: 1px dotted rgba(79,209,197,0.15);
+  }
+  .personnel-exposure-panel .pep-news-link:first-of-type {
+    border-top: none;
+  }
+  .personnel-exposure-panel .pep-news-link:hover .pep-news-headline {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  .personnel-exposure-panel .pep-news-src {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-right: 6px;
+    opacity: 0.9;
+  }
+  .personnel-exposure-panel .pep-news-headline {
+    font-size: 10px;
+    color: var(--text-dim);
+    transition: color 0.15s;
+  }
+  .personnel-exposure-panel .pep-news-more {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    color: var(--text-mute);
+    margin-top: 3px;
+    padding-top: 3px;
+    border-top: 1px dotted rgba(79,209,197,0.15);
+    font-style: italic;
+  }
   .personnel-exposure-panel .pep-item-action {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     font-weight: 600;
     color: var(--accent);
@@ -642,7 +734,7 @@
     background: rgba(17,24,33,0.95);
     border: 1px solid var(--line-2);
     color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -705,7 +797,7 @@
     gap: 12px;
   }
   .recent-panel-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -766,7 +858,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -778,7 +870,7 @@
     width: 5px; height: 5px; border-radius: 50%;
   }
   .recent-item .ri-time {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--accent);
   }
@@ -790,7 +882,7 @@
     margin-bottom: 3px;
   }
   .recent-item .ri-meta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-dim);
   }
@@ -805,7 +897,7 @@
     border: 1px solid var(--line-2);
     color: var(--text);
     width: 34px; height: 34px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 18px;
     font-weight: 600;
     cursor: pointer;
@@ -820,7 +912,7 @@
     border-color: var(--accent);
   }
   .map-zoom-controls .map-zoom-level {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-dim);
     text-align: center;
@@ -841,7 +933,7 @@
     background: rgba(17,24,33,0.95);
     border: 1px solid var(--line-2);
     padding: 12px 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     z-index: 500;
     backdrop-filter: blur(8px);
@@ -890,7 +982,7 @@
     background: transparent;
     border: none;
     color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
     padding: 10px 14px;
     outline: none;
@@ -908,7 +1000,7 @@
   }
   .table-search-clear:hover { color: var(--accent); }
   .table-search-results {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.08em;
@@ -918,7 +1010,7 @@
   /* "REC" column on the Table tab — duty-officer checkbox column.
      Visually distinct from sortable headers (no hover, no underline). */
   .table-recorded-counter {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.08em;
@@ -985,7 +1077,7 @@
   table.data thead th {
     text-align: left;
     padding: 10px 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -1030,7 +1122,7 @@
     background: var(--panel);
     border: 1px solid var(--line-2);
     display: grid; place-items: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-dim);
     flex-shrink: 0;
@@ -1040,7 +1132,7 @@
   .sev {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 3px 9px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -1099,13 +1191,13 @@
     gap: 12px;
   }
   .card .title {
-    font-family: 'Fraunces', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 17px;
     font-weight: 600;
     line-height: 1.25;
   }
   .card .country {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.12em;
@@ -1114,7 +1206,7 @@
   }
   .card .meta {
     display: flex; gap: 14px; flex-wrap: wrap;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-dim);
     word-spacing: 0.08em;
@@ -1148,7 +1240,7 @@
   }
   .card .ai-head {
     display: flex; justify-content: space-between; align-items: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--accent);
     letter-spacing: 0.12em;
@@ -1175,7 +1267,7 @@
   }
   .card .ai-body .label {
     color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -1189,7 +1281,7 @@
     display: flex; gap: 6px; flex-wrap: wrap;
   }
   .action {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     padding: 5px 10px;
     border: 1px solid var(--line-2);
@@ -1209,7 +1301,7 @@
     gap: 14px;
     align-items: center;
     flex-wrap: wrap;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
   }
   .source-status .src {
@@ -1252,7 +1344,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.12em;
     color: var(--accent);
@@ -1280,7 +1372,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.06em;
     border: 1px solid var(--line-2);
@@ -1317,7 +1409,7 @@
     border: 1px solid var(--accent);
     border-left: 4px solid var(--accent);
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     letter-spacing: 0.06em;
     padding: 12px 22px;
@@ -1354,7 +1446,7 @@
 
   .src-badge {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     padding: 2px 6px;
     border: 1px solid currentColor;
@@ -1367,7 +1459,7 @@
   .src-badge.mock { color: var(--text-mute); }
   .saf-flag {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     padding: 2px 6px;
     background: var(--info-bg);
@@ -1397,7 +1489,7 @@
     margin-bottom: 10px;
   }
   .aq-head > span {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--accent);
     letter-spacing: 0.12em;
@@ -1408,7 +1500,7 @@
     background: transparent;
     border: 1px solid var(--line-2);
     color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     font-weight: 500;
     padding: 4px 11px;
@@ -1434,13 +1526,13 @@
     position: absolute; inset: 0;
     display: grid; place-items: center;
     color: var(--text-mute);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
   }
   .aq-stats {
     margin-top: 8px;
     display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-dim);
   }
@@ -1474,7 +1566,7 @@
     border-bottom: 1px solid var(--line);
   }
   .clocks-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 22px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -1504,7 +1596,7 @@
     border: 1px solid var(--line-2);
     color: var(--text);
     padding: 10px 36px 10px 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
   }
   .clocks-search-bar input:focus {
@@ -1550,7 +1642,7 @@
   .clocks-search-results .csr-name b { color: var(--accent); }
   .clocks-search-results .csr-meta {
     color: var(--text-mute);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
   }
   .clocks-search-results .csr-add {
@@ -1559,7 +1651,7 @@
     border: none;
     padding: 6px 12px;
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1599,7 +1691,7 @@
     background: var(--bg);
     border: 1px solid var(--line-2);
     color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -1639,7 +1731,7 @@
     position: absolute;
     bottom: 8px;
     left: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.12em;
     color: var(--warn);
@@ -1669,7 +1761,7 @@
     padding-right: 36px;
   }
   .clock-card .city {
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 15px;
     font-weight: 600;
     color: var(--text);
@@ -1677,14 +1769,14 @@
     word-break: break-word;
   }
   .clock-card .country-code {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.1em;
     margin-top: 2px;
   }
   .clock-card .time {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 22px;
     font-weight: 500;
     color: var(--accent);
@@ -1692,7 +1784,7 @@
     line-height: 1;
   }
   .clock-card .date {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--text-dim);
     margin-top: 3px;
@@ -1701,7 +1793,7 @@
     position: absolute;
     bottom: 12px;
     right: 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-mute);
     padding: 2px 6px;
@@ -1722,7 +1814,7 @@
 
   .clocks-footnote {
     margin-top: 16px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.05em;
@@ -1773,7 +1865,7 @@
     opacity: 0.85;
   }
   .gate-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 22px;
     font-weight: 600;
     color: var(--text);
@@ -1786,7 +1878,7 @@
     margin-bottom: 16px;
   }
   .gate-classif {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.18em;
     color: var(--warn);
@@ -1806,7 +1898,7 @@
     background: var(--bg);
     border: 1px solid var(--line-2);
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
     padding: 11px 14px;
     outline: none;
@@ -1817,7 +1909,7 @@
     color: var(--bg);
     border: none;
     padding: 0 20px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -1826,13 +1918,13 @@
   }
   .gate-error {
     color: var(--crit);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     min-height: 16px;
     margin-bottom: 14px;
   }
   .gate-hint {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     line-height: 1.5;
@@ -1862,7 +1954,7 @@
     flex-wrap: wrap;
   }
   .personnel-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 22px;
     font-weight: 600;
     color: var(--text);
@@ -1874,7 +1966,7 @@
   }
   .personnel-classif {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.15em;
     color: var(--warn);
@@ -1887,7 +1979,7 @@
     background: transparent;
     border: 1px solid var(--line-2);
     color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.08em;
     padding: 8px 14px;
@@ -1903,7 +1995,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     flex-wrap: wrap;
   }
@@ -1962,7 +2054,7 @@
     margin-bottom: 6px;
   }
   .pnl-card .name {
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 15px;
     font-weight: 600;
     color: var(--text);
@@ -1970,7 +2062,7 @@
     margin-bottom: 4px;
   }
   .pnl-card .abbr {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.1em;
@@ -1983,7 +2075,7 @@
     color: var(--accent);
     padding: 5px 10px;
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1999,14 +2091,14 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--accent);
     border: 1px solid var(--accent);
     padding: 2px 7px;
   }
   .pnl-card .unit-meta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     margin-top: 10px;
@@ -2016,7 +2108,7 @@
   .pnl-card .unit-meta .mv { color: var(--text); }
   .pnl-card .unit-status {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.12em;
     padding: 2px 7px;
@@ -2042,7 +2134,7 @@
     background: transparent;
     border: none;
     color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
     padding: 10px 14px;
     outline: none;
@@ -2069,7 +2161,7 @@
     align-items: center;
   }
   .personnel-filter-row .pf-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.12em;
@@ -2082,7 +2174,7 @@
     border: 1px solid var(--line-2);
     padding: 6px 12px;
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -2117,7 +2209,7 @@
 
   /* Search results helper label */
   .personnel-search-results-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.1em;
@@ -2155,7 +2247,7 @@
     align-items: center;
     gap: 5px;
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -2235,7 +2327,7 @@
   .pnl-card .unit-status.on-exercises { color: #ff6fb5; border-color: #ff6fb5; background: rgba(255,111,181,0.08); }
 
   .personnel-summary {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--text-dim);
     margin-top: 12px;
@@ -2245,7 +2337,7 @@
     display: inline-block;
   }
   .personnel-sync-badge {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
     margin-top: 8px;
@@ -2260,7 +2352,7 @@
   .personnel-sync-badge.err        { color: var(--warn);     border-color: var(--warn); }
 
   .clocks-sync-badge {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
     padding: 5px 10px;
@@ -2282,7 +2374,7 @@
     flex-wrap: wrap;
   }
   .news-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 14px;
     color: var(--accent);
     letter-spacing: 0.15em;
@@ -2296,7 +2388,7 @@
     border: 1px solid var(--line-2);
     color: var(--text-dim);
     padding: 6px 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
     cursor: pointer;
@@ -2321,6 +2413,45 @@
     font-size: 14px;
   }
   .news-refresh:hover { color: var(--accent); border-color: var(--accent); }
+  .news-search {
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    color: var(--text);
+    padding: 6px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    width: 220px;
+    outline: none;
+    transition: all 0.15s;
+  }
+  .news-search:focus {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .news-search::placeholder {
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+    font-size: 10px;
+  }
+  .news-search-clear {
+    background: transparent;
+    border: 1px solid var(--line-2);
+    color: var(--text-mute);
+    width: 26px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: -1px;
+  }
+  .news-search-clear:hover { color: var(--accent); border-color: var(--accent); }
+  .news-item mark.ni-hit {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 0 2px;
+    border-radius: 1px;
+    font-weight: 600;
+  }
   #news-list {
     display: grid;
     gap: 1px;
@@ -2331,7 +2462,7 @@
     background: var(--bg-2);
     padding: 12px 16px;
     display: grid;
-    grid-template-columns: 90px 1fr 100px;
+    grid-template-columns: 28px 90px 1fr 100px;
     gap: 14px;
     align-items: start;
     transition: background 0.1s;
@@ -2340,8 +2471,27 @@
   .news-item.personnel-relevant {
     border-left: 3px solid var(--crit);
   }
+  /* REC checkbox cell for news items — visually matches the cards table. */
+  .news-item .ni-rec {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 2px;
+  }
+  /* When recorded, fade everything except the checkbox so user can still
+     find/uncheck it without it dominating the list. */
+  .news-item.recorded .ni-src,
+  .news-item.recorded .ni-body,
+  .news-item.recorded .ni-time {
+    opacity: 0.42;
+  }
+  .news-item.recorded:hover .ni-src,
+  .news-item.recorded:hover .ni-body,
+  .news-item.recorded:hover .ni-time {
+    opacity: 0.7;
+  }
   .news-item .ni-src {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.1em;
     color: var(--text-mute);
@@ -2350,10 +2500,15 @@
     background: var(--bg);
     text-align: center;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .news-item .ni-src.bbc      { color: #ff4d4d; border-color: #ff4d4d; }
   .news-item .ni-src.cna      { color: #4fd1c5; border-color: #4fd1c5; }
   .news-item .ni-src.al       { color: #ffa336; border-color: #ffa336; }
+  .news-item .ni-src.st       { color: #6ba6ff; border-color: #6ba6ff; }
   .news-item .ni-body { min-width: 0; }
   .news-item .ni-title {
     color: var(--text);
@@ -2380,7 +2535,7 @@
     flex-wrap: wrap;
   }
   .news-item .ni-tag {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.08em;
     padding: 2px 6px;
@@ -2393,7 +2548,7 @@
     font-weight: 700;
   }
   .news-item .ni-time {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     text-align: right;
@@ -2421,13 +2576,13 @@
     gap: 12px;
   }
   .sg-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 20px;
     font-weight: 600;
     letter-spacing: -0.01em;
   }
   .sg-meta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.08em;
@@ -2445,7 +2600,7 @@
     background: var(--bg-3);
     border: 1px solid var(--line-2);
     border-left: 3px solid var(--accent);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     flex-wrap: wrap;
   }
@@ -2479,7 +2634,7 @@
     color: var(--bg);
     border: none;
     padding: 6px 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -2504,14 +2659,14 @@
   .sg-stat-big.info  { border-left-color: var(--info); }
   .sg-stat-big.ok    { border-left-color: var(--ok); }
   .sg-stat-big .lbl {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
   .sg-stat-big .val {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 56px;
     font-weight: 600;
     line-height: 1;
@@ -2523,7 +2678,7 @@
   .sg-stat-big.info  .val { color: var(--info); }
   .sg-stat-big.ok    .val { color: var(--ok); }
   .sg-stat-big .band {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -2532,7 +2687,7 @@
     margin-bottom: 4px;
   }
   .sg-stat-big .meta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
   }
@@ -2555,7 +2710,7 @@
   .sg-temp-marker {
     width: 44px; height: 26px;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -2584,7 +2739,7 @@
     border: none;
     border-right: 1px solid var(--line-2);
     color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.08em;
@@ -2607,7 +2762,7 @@
     background: rgba(17,24,33,0.95);
     border: 1px solid var(--line-2);
     padding: 10px 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     z-index: 500;
     backdrop-filter: blur(8px);
@@ -2632,7 +2787,7 @@
   }
   .sg-map-legend .legend-subhead {
     color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -2647,7 +2802,7 @@
     background: rgba(17,24,33,0.92);
     border: 1px solid var(--line-2);
     padding: 6px 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-dim);
     z-index: 500;
@@ -2666,7 +2821,7 @@
     background: rgba(17, 24, 33, 0.92);
     border: 1px solid var(--line-2);
     padding: 4px 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     display: inline-flex;
     align-items: center;
@@ -2688,7 +2843,7 @@
   /* Leaflet customisation */
   .leaflet-container {
     background: #0a0f15 !important;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
   }
   .leaflet-popup-content-wrapper {
     background: var(--panel);
@@ -2699,18 +2854,18 @@
   .leaflet-popup-tip { background: var(--panel); border: 1px solid var(--line-2); }
   .leaflet-popup-content {
     margin: 10px 12px;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
   }
   .leaflet-popup-content .pt { font-weight: 600; margin-bottom: 4px; }
   .leaflet-popup-content .pv {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 16px;
     font-weight: 600;
     margin: 4px 0;
   }
   .leaflet-popup-content .pm {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     text-transform: uppercase;
@@ -2736,7 +2891,7 @@
     border-radius: 4px !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55) !important;
     color: #fff !important;
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: 'IBM Plex Mono', monospace !important;
     font-size: 11px !important;
     font-weight: 700 !important;
     letter-spacing: 0.06em !important;
@@ -2745,7 +2900,7 @@
   }
   .sg-region-label::before { display: none !important; }
   .sg-section-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--text-dim);
     letter-spacing: 0.15em;
@@ -2767,7 +2922,7 @@
     padding: 10px 14px;
     background: #1a2232;
     border: 1px solid var(--line-2);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
   }
   .sg-region .name {
@@ -2819,7 +2974,7 @@
     background: transparent;
     border: 1px solid var(--line-2);
     color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     font-weight: 500;
     padding: 5px 12px;
@@ -2836,7 +2991,7 @@
     border-color: var(--accent);
   }
   .sg-chart-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-dim);
     text-transform: uppercase;
@@ -2844,7 +2999,7 @@
     margin: 10px 0 6px;
   }
   .sg-chart-source {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-mute);
     margin-top: 6px;
@@ -2867,8 +3022,8 @@
   }
   .sg-thresh.warn  { border-left-color: var(--warn); }
   .sg-thresh.crit  { border-left-color: var(--crit); }
-  .sg-thresh .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
-  .sg-thresh .status { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+  .sg-thresh .label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .sg-thresh .status { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
   .sg-thresh.ok   .status { color: var(--ok); }
   .sg-thresh.warn .status { color: var(--warn); }
   .sg-thresh.crit .status { color: var(--crit); }
@@ -2890,7 +3045,7 @@
     margin-bottom: 8px;
   }
   .sg-ra-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--text);
     letter-spacing: 0.1em;
@@ -2898,7 +3053,7 @@
     font-weight: 700;
   }
   .sg-ra-badge {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     padding: 2px 7px;
     letter-spacing: 0.08em;
@@ -2922,7 +3077,7 @@
     padding: 10px 12px;
   }
   .sg-ra-pop-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     text-transform: uppercase;
@@ -2948,7 +3103,7 @@
     line-height: 1.5;
   }
   .sg-ra-trend .ti {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     flex-shrink: 0;
     width: 14px;
@@ -2960,7 +3115,7 @@
   .sg-ra-trend b { color: var(--text); font-weight: 600; }
   .sg-ra-foot {
     margin-top: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-mute);
     letter-spacing: 0.08em;
@@ -2985,7 +3140,7 @@
     border: 1px solid var(--line-2);
   }
   .sg-temp-table-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.12em;
     color: var(--text-mute);
@@ -2998,7 +3153,7 @@
     font-size: 12px;
   }
   table.sg-temp-table th {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.06em;
     color: var(--text-mute);
@@ -3017,13 +3172,13 @@
     padding: 6px 6px;
     border-bottom: 1px solid var(--line);
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
   }
   table.sg-temp-table tr:last-child td { border-bottom: none; }
   table.sg-temp-table .row-label {
     text-align: left;
     color: var(--text-dim);
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-weight: 500;
     font-size: 12px;
   }
@@ -3038,7 +3193,7 @@
     border: 1px solid var(--line-2);
   }
   .sg-forecast-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.12em;
     color: var(--text-mute);
@@ -3091,7 +3246,7 @@
     border: 1px solid var(--line);
   }
   .sg-fd-day {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
     color: var(--text-dim);
@@ -3119,7 +3274,7 @@
   }
   .sg-forecast-src {
     margin-top: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-mute);
     letter-spacing: 0.06em;
@@ -3154,7 +3309,7 @@
     border-bottom: 1px solid var(--line);
   }
   .sg-assess-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--accent);
     letter-spacing: 0.15em;
@@ -3162,7 +3317,7 @@
     flex: 1;
   }
   .sg-assess-risk {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     padding: 3px 8px;
     letter-spacing: 0.12em;
@@ -3187,7 +3342,7 @@
     border-color: var(--accent);
   }
   .sg-assess-headline {
-    font-family: 'IBM Plex Serif', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 15px;
     line-height: 1.5;
     color: var(--text);
@@ -3203,7 +3358,7 @@
   }
   .sg-assess-section { }
   .sg-assess-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.15em;
     color: var(--text-dim);
@@ -3231,7 +3386,7 @@
     margin-top: 12px;
     padding-top: 8px;
     border-top: 1px solid var(--line);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 9px;
     color: var(--text-mute);
     letter-spacing: 0.08em;
@@ -3254,7 +3409,7 @@
     padding: 14px 28px;
     background: var(--bg-2);
     display: flex; justify-content: space-between;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     color: var(--text-mute);
     letter-spacing: 0.08em;
@@ -3319,7 +3474,7 @@
     line-height: 1.6;
   }
   .paste-step-header {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
     color: var(--accent);
@@ -3341,7 +3496,7 @@
     margin-bottom: 5px;
   }
   .paste-source-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 600;
     color: var(--text);
@@ -3350,7 +3505,7 @@
   }
   .paste-source-head a {
     color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     text-decoration: none;
     border: 1px solid var(--line-2);
@@ -3366,7 +3521,7 @@
     background: var(--bg);
     border: 1px solid var(--line-2);
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     padding: 8px 10px;
     outline: none;
@@ -3378,7 +3533,7 @@
   }
   #paste-status {
     margin-top: 10px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     line-height: 1.5;
   }
@@ -3395,7 +3550,7 @@
     background: var(--bg-3);
   }
   .modal-btn-primary, .modal-btn-secondary {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -3449,7 +3604,7 @@
   <div class="brand">
     <div class="logo">🌏</div>
     <div>
-      <h1>Global Environmental Force Monitoring Advisory Dashboard</h1>
+      <h1>Global Environmental Force Monitoring Dashboard</h1>
       <div class="sub">Country-level personnel data</div>
     </div>
   </div>
@@ -3613,7 +3768,7 @@
     <table class="data">
       <thead>
         <tr>
-          <th class="th-recorded" title="Mark events as recorded once you've logged them"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">REC</span></th>
+          <th class="th-recorded" title="Mark events as recorded once you've logged them"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;">REC</span></th>
           <th class="sortable" data-sort-key="name"      onclick="sortTableBy('name')">Country <span class="sort-ind"></span></th>
           <th class="sortable" data-sort-key="event"     onclick="sortTableBy('event')">Hazard <span class="sort-ind"></span></th>
           <th class="sortable" data-sort-key="severity"  onclick="sortTableBy('severity')">Severity <span class="sort-ind"></span></th>
@@ -3643,6 +3798,8 @@
           </div>
         </div>
         <div class="news-actions">
+          <input type="text" id="news-search-input" class="news-search" placeholder="🔍 SEARCH KEYWORDS…" autocomplete="off" spellcheck="false">
+          <button class="news-search-clear" id="news-search-clear" title="Clear search">✕</button>
           <button class="news-filter-btn active" data-filter="all">ALL DISASTERS</button>
           <button class="news-filter-btn" data-filter="personnel">PERSONNEL LOCATIONS ONLY</button>
           <button class="news-refresh" onclick="fetchNewsFeed()" title="Force refresh">↻</button>
@@ -4257,28 +4414,45 @@ let climateData = { latest: null, last3: [], lastFetch: null, fetching: false };
 // "emergency", "rescue", "evacuation" — these match conflict and accident
 // stories too readily. We rely on the specific category keywords alone.
 const NEWS_DISASTER_KEYWORDS = [
-  // Seismic events
-  'earthquake','quake','tsunami','tremor','aftershock','seismic',
-  // Volcanic activity
-  'volcano','volcanic','eruption','volcanic ash','lava flow',
-  // Disastrous weather
+  // 1) WEATHER — severe weather events
   'cyclone','typhoon','hurricane','tornado','tropical storm','tropical depression',
   'storm surge','blizzard','ice storm','hailstorm','dust storm','sandstorm',
-  'severe storm','thunderstorm','snowstorm','rainstorm',
-  // Flood
-  'flood','flooding','floods','flash flood','flash floods',
-  'landslide','landslides','mudslide','mudslides','avalanche','avalanches',
-  // Wildfire
-  'wildfire','wildfires','bushfire','bushfires','forest fire','forest fires','blaze','blazes',
-  // Temperature extremes / drought
-  'drought','heatwave','heat wave','cold wave','heat dome','extreme heat',
-  // Health-related disasters
-  'epidemic','outbreak','outbreaks','cholera','dengue','ebola','mpox','pandemic','plague',
-  'viral outbreak','disease outbreak','measles outbreak','typhoid',
-  // Air quality
-  'haze','smog','transboundary haze','wildfire smoke','choking smog','air pollution crisis',
-  // Disaster catch-all (specific enough)
-  'natural disaster','natural disasters',
+  'severe storm','thunderstorm','snowstorm','rainstorm','monsoon',
+  'torrential rain','torrential rains','deluge','downpour','squall',
+  'heatwave','heat wave','heat dome','extreme heat','extreme cold',
+  'cold wave','polar vortex','drought',
+  // 2) AIR QUALITY
+  'haze','smog','transboundary haze','wildfire smoke','choking smog',
+  'air pollution crisis','hazardous air','air quality alert','pm2.5','pm10',
+  // 3) SEISMIC
+  'earthquake','quake','tsunami','tremor','aftershock','seismic',
+  'magnitude','richter','epicentre','epicenter','fault line',
+  // 4) FLOOD (incl. mass-movement events triggered by water)
+  'flood','flooding','floods','flash flood','flash floods','river overflow',
+  'landslide','landslides','mudslide','mudslides','rockslide','sinkhole',
+  'avalanche','avalanches',
+  // 5) WILDFIRE
+  'wildfire','wildfires','bushfire','bushfires','forest fire','forest fires',
+  'blaze','blazes','firestorm','wildland fire',
+  // 6) VOLCANIC
+  'volcano','volcanic','eruption','volcanic ash','lava flow','lahar','pyroclastic',
+  // 7) HEALTH — disease outbreaks and public-health emergencies
+  'epidemic','outbreak','outbreaks','pandemic','plague',
+  'cholera','dengue','ebola','mpox','monkeypox','measles','typhoid','malaria',
+  'covid','covid-19','coronavirus','sars','mers',
+  'h5n1','h7n9','bird flu','avian flu','swine flu','influenza',
+  'nipah','marburg','hantavirus','lassa','zika','chikungunya','yellow fever',
+  'viral outbreak','disease outbreak','measles outbreak','superbug',
+  // Cross-category: warnings, advisories, alerts for the above 7
+  'weather warning','severe weather warning','red warning','amber warning',
+  'storm warning','flood warning','tsunami warning','tsunami advisory',
+  'volcano alert','volcanic alert','health alert','disease alert',
+  'cyclone warning','typhoon warning','hurricane warning',
+  // Cross-category: casualties / consequences indicating active emergency
+  'death toll','death tolls','casualties','fatalities','mass casualty',
+  'evacuated','evacuation','evacuations','displaced',
+  'state of emergency','emergency declared','disaster declared',
+  'natural disaster','natural disasters','disaster relief','disaster zone',
 ];
 
 // =============================================================
@@ -4623,14 +4797,14 @@ async function fetchAirQuality() {
 // Surfaces mainstream-media disaster coverage. Used to alert watch officers
 // to events affecting personnel in any country (worldwide scope). Does NOT
 // generate alert cards — purely informational.
-// News feed (BBC/CNA/AJ) — fetched separately from disaster sources.
+// News feed (BBC/CNA/AJ/ST) — fetched separately from disaster sources.
 // ACCUMULATES items into a rolling 3-day window across refreshes so the
 // watch officer can see news that has already aged out of the upstream
 // RSS feeds. Persisted to localStorage for continuity across page reloads.
-// Polls automatically every 5 minutes.
+// Polls automatically every 10 minutes.
 const NEWS_STORAGE_KEY = 'hadr_news_v1';
 const NEWS_RETENTION_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
-const NEWS_REFRESH_MS   = 5 * 60 * 1000;            // 5 minutes
+const NEWS_REFRESH_MS   = 10 * 60 * 1000;           // 10 minutes
 let newsData = { items: [], lastFetch: null, fetching: false };
 
 function loadNewsFromStorage() {
@@ -4641,10 +4815,11 @@ function loadNewsFromStorage() {
     if (!Array.isArray(arr)) return [];
     // Drop anything older than retention window OR not disaster-related
     // (the latter handles items stored before disaster-only intake).
+    // Items with unparseable/missing pubDate are KEPT — treated as recent.
     const cutoff = Date.now() - NEWS_RETENTION_MS;
     return arr.filter(it => {
       const t = new Date(it.pubDate || 0).getTime();
-      if (!isFinite(t) || t < cutoff) return false;
+      if (isFinite(t) && t > 0 && t < cutoff) return false; // genuinely old
       if (!newsItemPasses(it)) return false;
       return true;
     });
@@ -4665,14 +4840,119 @@ function saveNewsToStorage(items) {
   }
 }
 
-// Stable dedupe key for a news item — prefer link, fall back to title+source.
+// Exact-match dedup key — collapses literal duplicates (same article fetched
+// in successive worker polls). Cross-outlet event dedup is handled
+// separately in dedupCrossOutlet() below using fuzzy title similarity.
 function newsItemKey(it) {
   return (it.link && it.link.trim()) || ((it.title || '') + '|' + (it.source || ''));
 }
 
-// Bootstrap from storage so the first paint shows accumulated items.
-newsData.items = loadNewsFromStorage();
-console.log(`[news] bootstrapped ${newsData.items.length} items from localStorage`);
+// ============================================================
+//  CROSS-OUTLET DEDUPLICATION
+// ============================================================
+// When BBC, CNA, AJ, and ST all cover the same event (e.g. China
+// earthquake), they each publish their own URL with their own title.
+// Link-based dedup can't catch this. We use a fuzzy title-similarity
+// approach: titles are normalised down to a set of "significant words"
+// and two items represent the same event if their word sets overlap
+// enough AND their pubDates are within a tight time window.
+//
+// Tuning: high overlap threshold (0.6) + small time window (6h) keeps
+// false positives low — it's better to occasionally show two articles
+// for the same event than to collapse genuinely different stories.
+
+const NEWS_DEDUP_STOPWORDS = new Set([
+  'a','an','the','and','or','but','of','on','in','at','to','for','from','by','with','as','is','are','was','were',
+  'be','been','being','has','have','had','do','does','did','will','would','can','could','should','may','might',
+  'this','that','these','those','it','its','their','they','them','he','she','his','her','us','our','we','i',
+  'after','before','during','over','under','up','down','out','off','than','then','so','if','about','into','via',
+  'new','says','said','reports','report','reported','tells','told','amid','as','via','plus','more','one','two',
+  'first','last','still','now','today','yesterday','tomorrow','year','years','month','months','week','weeks',
+  'day','days','hour','hours','breaking',
+]);
+
+function newsTitleWords(title) {
+  return (title || '')
+    .toLowerCase()
+    // Strip punctuation, keep letters/digits/spaces
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 3 && !NEWS_DEDUP_STOPWORDS.has(w));
+}
+
+// Jaccard similarity between two word arrays: |intersection| / |union|.
+function jaccard(a, b) {
+  if (!a.length || !b.length) return 0;
+  const setA = new Set(a);
+  const setB = new Set(b);
+  let intersect = 0;
+  setA.forEach(w => { if (setB.has(w)) intersect++; });
+  const union = setA.size + setB.size - intersect;
+  return union === 0 ? 0 : intersect / union;
+}
+
+const NEWS_DEDUP_SIMILARITY = 0.55;          // word-set overlap threshold
+const NEWS_DEDUP_WINDOW_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+// Source preference order — when duplicates are collapsed, we keep the
+// item from the source closer to the top of this list. Adjust to your
+// editorial preference. Reuters/AP-grade reach first, regional next.
+const NEWS_SOURCE_RANK = {
+  'BBC World': 1, 'BBC Asia': 2,
+  'Al Jazeera': 3,
+  'CNA World': 4, 'CNA Asia': 5,
+  'Straits Times World': 6, 'Straits Times Asia': 7,
+};
+function newsSourceRank(src) {
+  return NEWS_SOURCE_RANK[src] != null ? NEWS_SOURCE_RANK[src] : 99;
+}
+
+// Collapse cross-outlet duplicates. Returns a new array. Input must
+// already be sorted by recency (newest first); we iterate top-down and
+// for each item, check if it's the "same event" as any item already
+// kept. If so, optionally swap in this version if it's from a preferred
+// source, otherwise drop it.
+function dedupCrossOutlet(items) {
+  if (items.length < 2) return items.slice();
+  // Pre-compute word sets and timestamps
+  const enriched = items.map(it => ({
+    item: it,
+    words: newsTitleWords(it.title),
+    ts: new Date(it.pubDate || 0).getTime(),
+    rank: newsSourceRank(it.source),
+  }));
+  const kept = []; // each entry is the enriched object
+  let collapsed = 0;
+  for (const cand of enriched) {
+    // Find an existing kept item that represents the same event
+    let dupIdx = -1;
+    for (let i = 0; i < kept.length; i++) {
+      const k = kept[i];
+      // Time window check: only consider items published within window
+      if (Number.isFinite(cand.ts) && Number.isFinite(k.ts) &&
+          Math.abs(cand.ts - k.ts) > NEWS_DEDUP_WINDOW_MS) continue;
+      // Word-set similarity
+      if (jaccard(cand.words, k.words) >= NEWS_DEDUP_SIMILARITY) {
+        dupIdx = i;
+        break;
+      }
+    }
+    if (dupIdx === -1) {
+      kept.push(cand);
+    } else {
+      collapsed++;
+      // Prefer the higher-ranked source (lower number); if tied, keep
+      // the existing (which is more recent due to top-down iteration).
+      if (cand.rank < kept[dupIdx].rank) kept[dupIdx] = cand;
+    }
+  }
+  if (collapsed > 0) console.log(`[news] cross-outlet dedup: collapsed ${collapsed} duplicate event(s)`);
+  return kept.map(k => k.item);
+}
+
+// Bootstrap is deferred until after the filter constants/functions are
+// defined further down — otherwise loadNewsFromStorage() throws because it
+// calls newsItemPasses() which references NEWS_KEYWORD_REGEXES.
 
 async function fetchNewsFeed() {
   if (newsData.fetching) return newsData;
@@ -4697,24 +4977,53 @@ async function fetchNewsFeed() {
     // Then new items — they replace existing copies with the same key.
     // Skip anything that doesn't pass the disaster keyword filter.
     let added = 0, skippedNonDisaster = 0;
+    const rejectedSamples = []; // first 10 rejected titles for diagnostics
     for (const it of fresh) {
-      if (!newsItemPasses(it)) { skippedNonDisaster++; continue; }
+      if (!newsItemPasses(it)) {
+        skippedNonDisaster++;
+        if (rejectedSamples.length < 10) rejectedSamples.push(it.title || '(no title)');
+        continue;
+      }
       const k = newsItemKey(it);
       if (!seen.has(k)) added++;
       seen.set(k, it);
     }
-    // Apply 3-day window + sort newest first
+    // Apply 3-day window + sort newest first. Items with missing or
+    // unparseable pubDate are KEPT (treated as recent, sorted to the
+    // bottom) rather than silently dropped — some Atom feeds use
+    // non-standard date formats that Date() can't parse.
     const cutoff = Date.now() - NEWS_RETENTION_MS;
-    const merged = [...seen.values()]
+    let droppedOldCount = 0;
+    let merged = [...seen.values()]
       .filter(it => {
         const t = new Date(it.pubDate || 0).getTime();
-        return isFinite(t) && t >= cutoff;
+        if (!isFinite(t)) return true; // unparseable — keep
+        if (t === 0) return true;       // missing — keep (treat as undated, recent)
+        if (t < cutoff) { droppedOldCount++; return false; }
+        return true;
       })
-      .sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
+      .sort((a, b) => {
+        const ta = new Date(a.pubDate || 0).getTime();
+        const tb = new Date(b.pubDate || 0).getTime();
+        // Items without valid dates sort to the bottom
+        const va = isFinite(ta) && ta > 0 ? ta : -Infinity;
+        const vb = isFinite(tb) && tb > 0 ? tb : -Infinity;
+        return vb - va;
+      });
+
+    // Cross-outlet event dedup — collapse the same story reported by
+    // multiple outlets into a single item, preferring higher-ranked
+    // sources. Must run AFTER recency sort.
+    const beforeDedup = merged.length;
+    merged = dedupCrossOutlet(merged);
+    const collapsedCount = beforeDedup - merged.length;
 
     newsData = { items: merged, lastFetch: Date.now(), fetching: false };
     saveNewsToStorage(merged);
-    console.log(`[news] fetched ${fresh.length} fresh, ${skippedNonDisaster} non-disaster filtered out, ${added} new disasters; ${merged.length} total in 3-day window`);
+    console.log(`[news] funnel: ${fresh.length} fresh from worker → ${fresh.length - skippedNonDisaster} passed filter → ${added} new → ${beforeDedup} in 3-day window → ${merged.length} after cross-outlet dedup (${droppedOldCount} aged out, ${skippedNonDisaster} did not match a disaster keyword, ${collapsedCount} cross-outlet duplicates collapsed)`);
+    if (rejectedSamples.length) {
+      console.log('[news] sample of rejected (non-disaster) headlines:', rejectedSamples);
+    }
     if (typeof renderNewsFeed === 'function') {
       try { renderNewsFeed(); } catch (e) {}
     }
@@ -4729,7 +5038,7 @@ async function fetchNewsFeed() {
   return newsData;
 }
 
-// Auto-poll every 5 minutes. Kicks off after dashboard boot.
+// Auto-poll every 10 minutes. Kicks off after dashboard boot.
 let newsPollTimer = null;
 function startNewsPolling() {
   if (newsPollTimer) return;
@@ -4779,10 +5088,16 @@ const NEWS_ANALYTICAL_PHRASES = [
   // Question-headline retrospectives
   'how worrying','how dangerous','how serious','how bad','how concerning',
   'what we know','what to know','what next','what now','what happens next',
-  'why is','why are','why does','why did',
-  // Image/video collections
-  'video shows','videos show','video reveals','videos reveal',
-  'pictures show','photos show','in pictures','in photos','in maps',
+  'what is','what are','what was','what makes','what does','what do',
+  'why is','why are','why does','why did','why has','why have',
+  'here\'s why','heres why','here is why',
+  // Trend / pattern explainers
+  'falling out of','rising in popularity','on the rise','on the decline',
+  // Image/video collections — only flag explicit "in pictures/photos/maps"
+  // retrospectives. Phrases like "video shows" and "photos show" too often
+  // catch legitimate breaking-news reports with footage (e.g. "Video shows
+  // helicopters dumping water on California wildfire"). Removed.
+  'in pictures','in photos','in maps','in graphics','in charts',
   // Temporal retrospectives — articles ABOUT past events
   'years after','months after','days after','weeks after',
   'one year on','one month on','one week on',
@@ -4799,8 +5114,9 @@ const NEWS_ANALYTICAL_PHRASES = [
   'evolving tactics','changing tactics','new tactics',
   'transformed war','transforming war',
   'the rise of','the fall of','the return of',
-  // Speculative future framing
-  'could be','might be','may be the','may have been',
+  // (Removed 'could be','might be','may be','may have been' — these block
+  //  legitimate forecast headlines like "cyclone could intensify" or
+  //  "outbreak may spread", which the user explicitly wants surfaced.)
 ];
 
 // Pre-compile substring checks (these are mostly multi-word; bare-word ones
@@ -4819,35 +5135,47 @@ function newsItemIsAnalytical(item) {
   return NEWS_ANALYTICAL_REGEXES.some(k => k.test(haystack));
 }
 
-// Political/conflict phrases. Even if a disaster keyword matches (e.g.
-// "flood of refugees" — 'flood' alone), these phrases disqualify the
-// article as political/conflict rather than natural disaster. Acts as a
-// safety net for borderline cases.
+// Political/conflict phrases. Even if a disaster keyword matches, these
+// phrases disqualify the article as political/conflict rather than natural
+// disaster.
+//
+// Deliberately NOT included (would block real disasters in conflict
+// contexts): 'civil war', 'war zone', 'war-torn', 'parliament', 'senate',
+// 'trump says/warns/delays', 'biden says', 'administration says'. A flood
+// in a war-torn country is still a flood; the dashboard should surface it.
 const NEWS_POLITICAL_PHRASES = [
-  // War & armed conflict
-  'world war','civil war','cold war','trade war','price war','culture war','turf war',
-  'war live','war zone','war crimes','war effort','war games','war torn','war-torn',
+  // Clearly political "wars" (metaphorical or specific category)
+  'world war','cold war','trade war','price war','culture war','turf war',
+  'war live','war crimes','war effort','war games',
+  // Armed conflict (specific phrasing — narrower than just "war")
   'armed conflict','military conflict','sectarian conflict',
   'conflict between','israeli strike','israeli strikes',
-  // Strikes/attacks (when about military/political action)
+  // Military strikes / attacks (clearly war)
   'airstrike','air strike','drone strike','missile strike','rocket attack',
   'shelling','artillery','bombing','bombed','ceasefire','truce',
-  // Hostages/kidnapping (political context)
-  'hostages','hostage','kidnapped','abducted',
+  // Hostage situations (user's stated direction — political conflict)
+  'hostages','hostage',
   // Refugees as political topic
-  'refugee crisis','asylum seekers','migrants',
+  'refugee crisis','asylum seekers','migrant crisis',
   // Protests / civil unrest
   'protest','protesters','protests','protest march','demonstrators','demonstration',
-  'rally','rallies','riots','riot',
-  // Politics / elections / governance
-  'election','elections','campaign','candidate','voters','voted','voting',
-  'parliament','senate','congress','administration says','administration has',
-  'summit','negotiations','diplomatic','peace talks',
-  'court','indicted','arrested','charged with','sentenced to',
+  'rally','rallies','riots','riot','clashes between',
+  // Elections / political process
+  'election','elections','voters','voted','voting',
+  // Diplomacy
+  'summit','negotiations','diplomatic','peace talks','talks between',
+  // Legal/political action
+  'indicted','arrested','charged with','sentenced to',
   'sanctions','tariff','trade dispute',
-  // Specific politicians as title leads (signals political story)
-  'trump says','trump warns','trump delays','trump administration',
-  'biden says','biden administration',
+  // Social media / viral / influencer content (user-requested exclusion)
+  'tiktok','instagram','twitter','x.com','reels','viral video','viral clip',
+  'goes viral','went viral','viral post','trending on','viral on',
+  'influencer','influencers','youtuber','streamer','social media post',
+  'social media users','online backlash','online uproar',
+  // Entertainment / sports / celebrity (not disaster-relevant)
+  'celebrity','celebrities','red carpet','box office','movie review',
+  'concert','tour dates','album release','grammy','oscar','cannes',
+  'world cup','olympics','premier league','formula 1','f1 grand prix',
 ];
 
 const NEWS_POLITICAL_REGEXES = NEWS_POLITICAL_PHRASES.map(p => {
@@ -4864,14 +5192,113 @@ function newsItemIsPolitical(item) {
   return NEWS_POLITICAL_REGEXES.some(k => k.test(haystack));
 }
 
+// Climate-driver phrases are globally relevant by nature (e.g. "El Niño
+// returns") and don't require a country mention. Exempted from the place
+// filter so these forecasts surface even without a specific location.
+const NEWS_GLOBAL_RELEVANCE_PHRASES = [
+  'el niño','el nino','la niña','la nina','enso',
+  'indian ocean dipole','iod positive','iod negative',
+  'madden-julian','arctic oscillation',
+  'oceanic niño index','oni index','enso cycle',
+  'climate driver','climate drivers',
+];
+
+function newsItemIsGloballyRelevant(item) {
+  const hay = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  return NEWS_GLOBAL_RELEVANCE_PHRASES.some(p => hay.includes(p));
+}
+
+// Attention-worthy signals — phrases indicating the article describes an
+// active, worsening, or warning-stage event rather than informational
+// coverage. An item must contain at least one of these (or the title must
+// contain a strong-enough disaster keyword on its own, like "earthquake"
+// which is inherently attention-worthy).
+//
+// Filters OUT:
+//   ✗ "Tokyo's new typhoon preparedness app launches"        (info, no urgency)
+//   ✗ "Why do hurricanes form?"                              (explainer)
+//   ✗ "Singapore unveils dengue prevention campaign"         (proactive, no incident)
+// Keeps:
+//   ✓ "Typhoon Halong intensifies, 200,000 evacuated"        (active, worsening)
+//   ✓ "Magnitude 6.3 earthquake hits northern Japan"         (event happened)
+//   ✓ "DR Congo Ebola death toll rises to 131"               (escalation)
+//   ✓ "Tsunami warning issued for Sumatra"                   (active warning)
+const NEWS_ATTENTION_PHRASES = [
+  // Casualties and human impact
+  'killed','dead','dies','died','death','deaths','deceased',
+  'death toll','casualties','fatalities','injured','wounded',
+  'missing','trapped','rescued','stranded','displaced',
+  'mass casualty','homeless',
+  // Active emergency actions
+  'evacuat','emergency','disaster declared','disaster zone',
+  'state of emergency','red alert','red warning','amber warning',
+  'shelter in place','curfew','lockdown',
+  // Worsening / escalation
+  'intensif','worsen','escalat','spread','spreading','spreads',
+  'surge','surging','surged','spike','spiking','spiked',
+  'rises to','climbs to','jumps to','soars','rising',
+  'devastat','ravage','ravaged','ravages','ravaging',
+  'destroy','destroyed','destroys','destroying','destruction',
+  'wreck','wrecked','wrecks','wreckage','collapse','collapsed','collapses','collapsing',
+  'engulf','engulfed','engulfs','swept away','washed away',
+  // Severity descriptors
+  'severe','catastrophic','deadly','fatal','tragic','tragedy',
+  'massive','widespread','unprecedented','record-breaking',
+  'worst','dire','grim','critical condition',
+  // Warning-stage language (imminent threat)
+  'warning','warnings','alert','alerts','advisory','advisories',
+  'threat','threatens','threatening','imminent',
+  'approaching','heading toward','heading towards','bearing down',
+  'makes landfall','made landfall','expected to hit',
+  'brace','braces','bracing','prepares for','preparing for',
+  'forecast to','predicted to','set to',
+  // Disease-specific escalation
+  'cases rise','cases surge','cases climb','new cases',
+  'first case','suspected case','confirmed case',
+  'spreads to','reported in','infections',
+];
+
+// Use substring match for phrases, word-boundary for single short words
+const NEWS_ATTENTION_REGEXES = NEWS_ATTENTION_PHRASES.map(p => {
+  if (p.includes(' ') || p.includes('-') || p.length > 6) {
+    return { p, test: (s) => s.includes(p) };
+  }
+  const escaped = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('\\b' + escaped + '\\b', 'i');
+  return { p, test: (s) => re.test(s) };
+});
+
+function newsItemIsAttentionWorthy(item) {
+  const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  return NEWS_ATTENTION_REGEXES.some(r => r.test(haystack));
+}
+
+// "Inherently attention-worthy" disaster keywords — events that, when
+// reported as a real-world incident, are by definition concerning. If the
+// title contains these, we don't require an additional attention signal.
+// (Generic words like "weather" or "outbreak" are NOT here because they can
+// appear in informational contexts; words like "earthquake" or "tsunami"
+// virtually never do.)
+const NEWS_INHERENTLY_URGENT = [
+  'earthquake','quake','tsunami','eruption','wildfire','wildfires',
+  'bushfire','bushfires','cyclone','typhoon','hurricane','tornado',
+  'flood','flooding','flash flood','landslide','mudslide','avalanche',
+  'pandemic','epidemic','outbreak',
+];
+
+function newsItemHasUrgentKeyword(item) {
+  const title = (item.title || '').toLowerCase();
+  return NEWS_INHERENTLY_URGENT.some(k => title.includes(k));
+}
+
 function newsItemPasses(item) {
   const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
-  // Must match at least one natural disaster / health / environment keyword
+  // 1) Must mention a disaster keyword (weather/air/seismic/flood/wildfire/volcanic/health)
   if (!NEWS_KEYWORD_REGEXES.some(k => k.test(haystack))) return false;
-  // Must NOT match analytical/retrospective framing
+  // 2) Must NOT be an explainer / analysis / retrospective. Catches headlines
+  //    like "What is Ebola and why...", "How worrying is...", "Inside the...",
+  //    "Years after the earthquake...", "Here's why tourists are leaving..."
   if (newsItemIsAnalytical(item)) return false;
-  // Must NOT match political/conflict framing
-  if (newsItemIsPolitical(item)) return false;
   return true;
 }
 
@@ -4881,20 +5308,139 @@ function newsMentionsPersonnelCountry(item) {
   const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
   // Collect country names from personnel ticks
   const personnelCountries = new Set();
+  const personnelISOs = new Set();
   try {
     Object.keys(personnelPresence || {}).forEach(key => {
       if (!personnelPresence[key]) return;
       const iso2 = key.split('|')[0];
       if (iso2 && typeof ISO2_TO_NAME !== 'undefined' && ISO2_TO_NAME[iso2]) {
         personnelCountries.add(ISO2_TO_NAME[iso2]);
+        personnelISOs.add(iso2);
       }
     });
   } catch (e) {}
+  // Pass 1: direct country name mention
   for (const name of personnelCountries) {
     if (haystack.includes(name.toLowerCase())) return name;
   }
+  // Pass 2: state/province mention for federations whose headlines rarely
+  // name the parent country. e.g. US news says "California", not "United
+  // States". If we have personnel in the US and the haystack mentions any
+  // US state, flag the country as matched.
+  if (personnelISOs.has('US') && typeof US_STATE_TO_ISO !== 'undefined') {
+    for (const stateName of Object.keys(US_STATE_TO_ISO)) {
+      // Use word-boundary match — short state names like "Maine" shouldn't
+      // false-match within other words. "California" is unambiguous either
+      // way, but the boundary check is safe.
+      const re = new RegExp('\\b' + stateName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+      if (re.test(haystack)) return ISO2_TO_NAME['US'] || 'United States';
+    }
+  }
   return null;
 }
+
+// =============================================================
+//  PLACE DETECTION — for filtering placeless news items
+// =============================================================
+// A news item is only relevant if it's anchored to a place — country,
+// region, or major city. Otherwise, generic headlines like "Five tips for
+// surviving a heatwave" or "Why hurricanes are getting stronger" pass the
+// disaster-keyword filter despite being non-actionable.
+//
+// We build a lookup at first use rather than at module load, so it picks up
+// any future additions to ISO2_TO_NAME automatically.
+let NEWS_PLACE_PATTERNS = null;
+function buildNewsPlacePatterns() {
+  if (NEWS_PLACE_PATTERNS) return NEWS_PLACE_PATTERNS;
+  const out = [];
+  // Full country names (case-insensitive substring is fine — country names
+  // are distinctive enough that "France" won't match anything else).
+  // Skip very short names ("Chad", "Mali", "Iran", "Iraq", "Cuba", etc. are
+  // fine as substrings, but we use word-boundary for 2-3 letter codes).
+  if (typeof ISO2_TO_NAME !== 'undefined') {
+    for (const [iso, name] of Object.entries(ISO2_TO_NAME)) {
+      if (!name) continue;
+      out.push({ kind: 'country', value: name.toLowerCase(), needsBoundary: false });
+    }
+  }
+  // Common short country aliases that headlines actually use.
+  // These need word boundaries because they're short and ambiguous.
+  const aliases = [
+    'US','USA','U.S.','UK','U.K.','UAE','DRC','PNG','NZ',
+    'America','American','Britain','British','England','Scotland','Wales',
+    'Russia','Russian','Korea','Korean','Taiwan','Taiwanese',
+  ];
+  for (const a of aliases) {
+    out.push({ kind: 'alias', value: a.toLowerCase(), needsBoundary: true });
+  }
+  // Regions & continents (lower-case substring matches).
+  const regions = [
+    'africa','asia','europe','oceania',
+    'north america','south america','central america','latin america',
+    'southeast asia','south asia','east asia','central asia','west asia',
+    'middle east','sub-saharan','horn of africa','caribbean','balkans',
+    'sahel','arctic','antarctic','mediterranean','pacific','atlantic',
+    'gulf coast','west coast','east coast','silicon valley',
+    'european union',' eu ',
+  ];
+  for (const r of regions) {
+    out.push({ kind: 'region', value: r, needsBoundary: false });
+  }
+  // Major cities that frequently appear in disaster headlines without the
+  // country being named (e.g. "Tokyo quake", "Manila flooding"). Kept
+  // conservative — very common-word cities like "Mobile" or "Reading"
+  // excluded to avoid false positives.
+  const cities = [
+    'tokyo','osaka','kyoto','seoul','busan','beijing','shanghai','guangzhou',
+    'hong kong','taipei','manila','jakarta','surabaya','bandung','medan',
+    'kuala lumpur','singapore','bangkok','phuket','chiang mai','hanoi',
+    'ho chi minh','phnom penh','vientiane','yangon','naypyidaw',
+    'mumbai','delhi','new delhi','kolkata','chennai','bengaluru','bangalore',
+    'hyderabad','karachi','lahore','islamabad','dhaka','colombo','kathmandu',
+    'kabul','tehran','baghdad','damascus','riyadh','dubai','abu dhabi','doha',
+    'jerusalem','tel aviv','beirut','amman','istanbul','ankara',
+    'cairo','alexandria','tripoli','tunis','casablanca','nairobi','addis ababa',
+    'lagos','abuja','accra','dakar','kinshasa','johannesburg','cape town',
+    'london','paris','berlin','munich','rome','milan','madrid','barcelona',
+    'lisbon','amsterdam','brussels','vienna','prague','warsaw','budapest',
+    'athens','stockholm','oslo','copenhagen','helsinki','dublin','edinburgh',
+    'moscow','kyiv','kiev','minsk','st petersburg',
+    'new york','los angeles','chicago','houston','phoenix','philadelphia',
+    'san francisco','seattle','boston','miami','atlanta','dallas','denver',
+    'washington dc','toronto','vancouver','montreal','mexico city',
+    'havana','san juan','bogota','caracas','lima','santiago','buenos aires',
+    'rio de janeiro','sao paulo','brasilia',
+    'sydney','melbourne','brisbane','perth','auckland','wellington','suva',
+    'port moresby','dili','honiara',
+  ];
+  for (const c of cities) {
+    out.push({ kind: 'city', value: c, needsBoundary: false });
+  }
+  NEWS_PLACE_PATTERNS = out;
+  return out;
+}
+
+function newsItemHasPlace(item) {
+  const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  const patterns = buildNewsPlacePatterns();
+  for (const p of patterns) {
+    if (p.needsBoundary) {
+      // Word-boundary check for short aliases
+      const escaped = p.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp('\\b' + escaped + '\\b', 'i');
+      if (re.test(haystack)) return true;
+    } else {
+      if (haystack.includes(p.value)) return true;
+    }
+  }
+  return false;
+}
+
+// Bootstrap from storage so the first paint shows accumulated items. Must
+// run AFTER all filter helpers above are initialized — loadNewsFromStorage
+// calls newsItemPasses, which may reference any of the above constants.
+newsData.items = loadNewsFromStorage();
+console.log(`[news] bootstrapped ${newsData.items.length} items from localStorage`);
 
 // =============================================================
 //  COUNTRY CENTROIDS — for plotting news markers on the map
@@ -4988,6 +5534,55 @@ function getPersonnelNewsMapEvents() {
       source: 'NEWS · ' + (item.source || 'unknown'),
       url: item.link,
       newsItem: item, // reference for popup
+    });
+  }
+  return events;
+}
+
+// Detect any country mentioned in a news item — broader than the personnel
+// variant. Returns the matched country's ISO2 code, or null. Used by the
+// map to flag ALL news items, not just personnel-relevant ones.
+function newsDetectCountry(item) {
+  const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  // Sort country names by length desc so we match more-specific names first
+  // (e.g. "South Korea" before "Korea") — prevents misclassification.
+  const sortedNames = Object.entries(ISO2_TO_NAME)
+    .sort((a, b) => b[1].length - a[1].length);
+  for (const [iso, name] of sortedNames) {
+    if (haystack.includes(name.toLowerCase())) return iso;
+  }
+  return null;
+}
+
+// Return ALL news items as map events (not filtered to personnel countries).
+// Used when the user wants every news headline reflected on the map.
+function getAllNewsMapEvents() {
+  if (!Array.isArray(newsData.items) || newsData.items.length === 0) return [];
+  const events = [];
+  const seenKey = new Set(); // one marker per country — use the most recent item
+  for (const item of newsData.items) {
+    const iso = newsDetectCountry(item);
+    if (!iso) continue;
+    const centroid = COUNTRY_CENTROIDS[iso];
+    if (!centroid) continue;
+    if (seenKey.has(iso)) continue;
+    seenKey.add(iso);
+    events.push({
+      news: true,
+      id: 'news-' + iso + '-' + Date.parse(item.pubDate || 0),
+      code: iso,
+      name: ISO2_TO_NAME[iso],
+      lat: centroid[0],
+      lng: centroid[1],
+      hazard: 'news',
+      subtype: 'News Coverage',
+      severity: 'watch',
+      event: item.title || 'News headline',
+      desc: item.description || '',
+      updated: item.pubDate || new Date().toISOString(),
+      source: 'NEWS · ' + (item.source || 'unknown'),
+      url: item.link,
+      newsItem: item,
     });
   }
   return events;
@@ -5140,6 +5735,29 @@ function rebuildDATA() {
 
   DATA = deduped;
   activeAlerts = DATA;
+
+  // Sync badge counts with what's actually displayed (post 30-day cutoff +
+  // dedup), so the LIVE … <count> matches the number of cards on screen.
+  // Only update counts for sources currently in 'ok' state — don't overwrite
+  // pending/fail status. Live air-quality events use source 'OpenMeteo'.
+  const displayedCounts = { usgs: 0, gdacs: 0, airquality: 0 };
+  DATA.forEach(d => {
+    if (d.source === 'USGS') displayedCounts.usgs++;
+    else if (d.source === 'GDACS') displayedCounts.gdacs++;
+    else if (d.source === 'OpenMeteo') displayedCounts.airquality++;
+  });
+  Object.keys(displayedCounts).forEach(k => {
+    if (dataSourceStatus[k] && dataSourceStatus[k].status === 'ok') {
+      dataSourceStatus[k].count = displayedCounts[k];
+    }
+  });
+  // Re-render the source badges, preserving the in-flight refresh state
+  // (the orchestrator toggles it back to false when all fetches are done).
+  if (typeof setSourceStatusUI === 'function') {
+    const refreshBtn = document.getElementById('refresh-btn');
+    const isRefreshing = refreshBtn ? refreshBtn.disabled : false;
+    setSourceStatusUI(isRefreshing);
+  }
 }
 
 let refreshStartTime = null;
@@ -5613,14 +6231,14 @@ function renderTrendChart(svgId, dataPoints, opts) {
     const y = pad.top + ch * (1 - i / 4);
     const v = Math.round(minVal + (maxVal - minVal) * (i / 4));
     yLabels += `<line x1="${pad.left}" y1="${y}" x2="${W - pad.right}" y2="${y}" stroke="#1f2a38" stroke-width="0.5"/>`;
-    yLabels += `<text x="${pad.left - 4}" y="${y + 3}" fill="#5a6b7e" font-size="9" font-family="JetBrains Mono" text-anchor="end">${v}</text>`;
+    yLabels += `<text x="${pad.left - 4}" y="${y + 3}" fill="#5a6b7e" font-size="9" font-family="IBM Plex Mono" text-anchor="end">${v}</text>`;
   }
   let threshLines = '';
   (opts.thresholds || []).forEach(t => {
     if (t.value > maxVal) return;
     const y = pad.top + ch - ((t.value - minVal) / (maxVal - minVal)) * ch;
     threshLines += `<line x1="${pad.left}" y1="${y}" x2="${W - pad.right}" y2="${y}" stroke="${t.color}" stroke-dasharray="3 3" stroke-width="0.7" opacity="0.6"/>`;
-    threshLines += `<text x="${W - pad.right + 4}" y="${y + 3}" fill="${t.color}" font-size="9" font-family="JetBrains Mono">${t.label}</text>`;
+    threshLines += `<text x="${W - pad.right + 4}" y="${y + 3}" fill="${t.color}" font-size="9" font-family="IBM Plex Mono">${t.label}</text>`;
   });
   let xLabels = '';
   const labelStep = Math.max(1, Math.floor(dataPoints.length / 5));
@@ -5649,7 +6267,7 @@ function renderTrendChart(svgId, dataPoints, opts) {
       } else {
         lbl = sgtHourFmt.format(t).split(':')[0] + ':00';
       }
-      xLabels += `<text x="${x}" y="${H - 8}" fill="#5a6b7e" font-size="9" font-family="JetBrains Mono" text-anchor="middle">${lbl}</text>`;
+      xLabels += `<text x="${x}" y="${H - 8}" fill="#5a6b7e" font-size="9" font-family="IBM Plex Mono" text-anchor="middle">${lbl}</text>`;
     }
   });
   const last = points[points.length - 1];
@@ -5658,7 +6276,7 @@ function renderTrendChart(svgId, dataPoints, opts) {
     <path d="${areaPath}" fill="${opts.color}" opacity="0.12"/>
     <path d="${linePath}" fill="none" stroke="${opts.color}" stroke-width="1.6" stroke-linejoin="round"/>
     <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${lastBand.color}" stroke="#0b0f14" stroke-width="1.5"/>
-    <text x="${last[0] - 6}" y="${last[1] - 8}" fill="${lastBand.color}" font-size="11" font-weight="600" font-family="JetBrains Mono" text-anchor="end">${last[2]}</text>
+    <text x="${last[0] - 6}" y="${last[1] - 8}" fill="${lastBand.color}" font-size="11" font-weight="600" font-family="IBM Plex Mono" text-anchor="end">${last[2]}</text>
     ${xLabels}`;
 }
 
@@ -5698,7 +6316,7 @@ async function setSGRange(range, btnEl) {
   if (labelPm)   labelPm.textContent   = `PM2.5 National · ${rangeLabels[range]}`;
   if (labelTemp) labelTemp.textContent = `Air Temperature · ${rangeLabels[range]}`;
 
-  const loadingMsg = '<text x="300" y="100" text-anchor="middle" fill="#5a6b7e" font-family="JetBrains Mono" font-size="12">◌ Loading…</text>';
+  const loadingMsg = '<text x="300" y="100" text-anchor="middle" fill="#5a6b7e" font-family="IBM Plex Mono" font-size="12">◌ Loading…</text>';
   if (psiSvg)  psiSvg.innerHTML  = loadingMsg;
   if (pmSvg)   pmSvg.innerHTML   = loadingMsg;
   if (tempSvg) tempSvg.innerHTML = loadingMsg;
@@ -8315,6 +8933,66 @@ document.querySelectorAll('.views button').forEach(b => {
 //  News Feed Renderer
 // ============================================================
 let newsActiveFilter = 'all'; // 'all' (all disaster items) | 'personnel' (subset mentioning personnel countries)
+let newsSearchQuery = '';     // free-text search; space-separated tokens all required (AND)
+
+// Lightweight category classifier — used for diversity-aware ordering only,
+// not for filtering. Returns the first matching bucket, or 'other'.
+// Order matters: most-specific keywords first.
+const NEWS_CATEGORY_PATTERNS = [
+  { name: 'health',   patterns: ['ebola','mpox','monkeypox','cholera','dengue','covid','coronavirus','h5n1','bird flu','swine flu','hantavirus','marburg','nipah','lassa','zika','chikungunya','malaria','measles','typhoid','plague','outbreak','epidemic','pandemic','disease','virus','superbug'] },
+  { name: 'seismic',  patterns: ['earthquake','quake','tsunami','tremor','aftershock','seismic','magnitude','richter','epicent','fault line'] },
+  { name: 'volcanic', patterns: ['volcano','volcanic','eruption','lava','lahar','pyroclastic'] },
+  { name: 'wildfire', patterns: ['wildfire','bushfire','forest fire','blaze','firestorm','wildland fire'] },
+  { name: 'flood',    patterns: ['flood','flash flood','landslide','mudslide','avalanche','rockslide','sinkhole','river overflow'] },
+  { name: 'weather',  patterns: ['cyclone','typhoon','hurricane','tornado','tropical storm','tropical depression','storm surge','blizzard','ice storm','hailstorm','dust storm','sandstorm','monsoon','torrential','deluge','downpour','squall'] },
+  { name: 'heatcold', patterns: ['heatwave','heat wave','heat dome','extreme heat','cold wave','polar vortex','frost','freeze warning','drought'] },
+  { name: 'climate',  patterns: ['el niño','el nino','la niña','la nina','enso','oceanic niño','oni index','indian ocean dipole','madden-julian','arctic oscillation','sea surface temperature','marine heatwave','coral bleaching','climate driver'] },
+  { name: 'air',      patterns: ['haze','smog','wildfire smoke','choking smog','air pollution','pm2.5','pm10','hazardous air','air quality alert'] },
+  { name: 'environ',  patterns: ['oil spill','chemical spill','toxic leak','toxic spill','industrial disaster','environmental disaster','famine','starvation','food crisis'] },
+];
+
+function newsCategory(item) {
+  const hay = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  for (const cat of NEWS_CATEGORY_PATTERNS) {
+    if (cat.patterns.some(p => hay.includes(p))) return cat.name;
+  }
+  return 'other';
+}
+
+// Diversity-aware reordering. Preserves recency overall but breaks up
+// consecutive runs of the same category by pulling forward items from
+// under-represented categories. Greedy round-robin with a per-category
+// "cooldown" — after picking from a category, wait at least 2 picks before
+// picking from it again, unless no other category is available.
+function reorderForCategoryDiversity(items) {
+  // Group by category, preserving original order within each
+  const buckets = new Map();
+  for (const item of items) {
+    const cat = newsCategory(item);
+    if (!buckets.has(cat)) buckets.set(cat, []);
+    buckets.get(cat).push(item);
+  }
+  if (buckets.size < 2) return items; // nothing to diversify
+
+  // Build round-robin: take 1 from each non-empty bucket per round.
+  // Within a round, iterate buckets in original "head item recency" order
+  // so the freshest stories from each category land near the top.
+  const result = [];
+  while (result.length < items.length) {
+    // Get categories sorted by their head item's pubDate (newest first)
+    const live = [...buckets.entries()]
+      .filter(([_, arr]) => arr.length > 0)
+      .sort(([_a, a], [_b, b]) => new Date(b[0].pubDate || 0) - new Date(a[0].pubDate || 0));
+    if (!live.length) break;
+    for (const [_cat, arr] of live) {
+      if (arr.length > 0) result.push(arr.shift());
+    }
+  }
+  return result;
+}
+
+// Escape regex special chars in user input so a token like "covid-19" works
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 function renderNewsFeed() {
   const listEl = document.getElementById('news-list');
@@ -8326,7 +9004,7 @@ function renderNewsFeed() {
       statusEl.textContent = '◌ Fetching…';
     } else if (newsData.lastFetch) {
       const lastTime = new Date(newsData.lastFetch).toLocaleTimeString('en-GB', { timeZone:'Asia/Singapore', hour12:false });
-      statusEl.innerHTML = `◉ <b>LIVE</b> · Auto-refresh every 5 min · Last fetch: <b>${lastTime} SGT</b> · <b>${newsData.items.length}</b> items in past 3 days`;
+      statusEl.innerHTML = `◉ <b>LIVE</b> · Auto-refresh every 10 min · Last fetch: <b>${lastTime} SGT</b> · <b>${newsData.items.length}</b> items in past 3 days`;
     } else {
       statusEl.textContent = '◌ Loading…';
     }
@@ -8338,29 +9016,89 @@ function renderNewsFeed() {
   if (newsActiveFilter === 'personnel') {
     items = items.filter(item => newsMentionsPersonnelCountry(item) !== null);
   }
+  // Apply free-text search (AND semantics — all tokens must appear in
+  // title+description). Case-insensitive substring per token.
+  let searchTokens = [];
+  if (newsSearchQuery && newsSearchQuery.trim()) {
+    searchTokens = newsSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    items = items.filter(item => {
+      const hay = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+      return searchTokens.every(t => hay.includes(t));
+    });
+  }
+
+  // Category diversity: when a single category (e.g. Ebola, mpox) saturates
+  // the top of a recency-sorted feed, headlines from other categories get
+  // buried. We interleave: still recency-sorted overall, but if more than
+  // ~3 consecutive items from the same category have appeared near the top,
+  // push the next same-category item further down so other categories can
+  // surface. Skipped during search (recency-only is more useful then).
+  if (!searchTokens.length && items.length > 8) {
+    items = reorderForCategoryDiversity(items);
+  }
+
   // Cap displayed items
   items = items.slice(0, 60);
 
   if (!items.length) {
-    const msg = newsActiveFilter === 'personnel'
-      ? 'No headlines mention any country with personnel ticks.'
-      : (newsData.fetching ? 'Loading headlines…' : 'No matching headlines yet — the next 5-min poll will populate this.');
+    let msg;
+    if (searchTokens.length) {
+      const safeQ = newsSearchQuery.trim().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      msg = `No headlines match "${safeQ}".`;
+    } else if (newsActiveFilter === 'personnel') {
+      msg = 'No headlines mention any country with personnel ticks.';
+    } else {
+      msg = newsData.fetching ? 'Loading headlines…' : 'No matching headlines yet — the next 10-min poll will populate this.';
+    }
     listEl.innerHTML = `<div class="news-empty">${msg}</div>`;
     return;
   }
+
+  // Pre-compile highlight regex for any search tokens
+  const highlightRe = searchTokens.length
+    ? new RegExp('(' + searchTokens.map(escapeRegex).join('|') + ')', 'gi')
+    : null;
+  const applyHighlight = (str) => {
+    if (!highlightRe || !str) return str;
+    return str.replace(highlightRe, '<mark class="ni-hit">$1</mark>');
+  };
 
   listEl.innerHTML = items.map(item => {
     const personnelMatch = newsMentionsPersonnelCountry(item);
     const time = item.pubDate ? new Date(item.pubDate) : null;
     const timeStr = time ? time.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Singapore', hour12:false }) : '—';
-    const srcClass = item.source.startsWith('BBC') ? 'bbc' : item.source.startsWith('CNA') ? 'cna' : item.source.startsWith('Al') ? 'al' : '';
-    const desc = item.description && item.description.length > 200 ? item.description.substring(0,198) + '…' : (item.description || '');
+    const srcClass = item.source.startsWith('BBC') ? 'bbc' : item.source.startsWith('CNA') ? 'cna' : item.source.startsWith('Al') ? 'al' : item.source.startsWith('Straits Times') ? 'st' : '';
+    // Short label for the fixed-width source badge. Long source names
+    // (e.g. "Straits Times Asia") otherwise overflow the 90px column.
+    const srcLabel = item.source.startsWith('Straits Times ')
+      ? 'ST · ' + item.source.replace('Straits Times ', '').toUpperCase()
+      : item.source;
+    // Defensive: descriptions sometimes arrive with encoded markup like
+    // "&lt;p&gt;...&lt;/p&gt;". Decode entities first, then strip the now-
+    // visible tags. Order matters — strip after decode, otherwise the regex
+    // sees only "&lt;p&gt;" and matches nothing.
+    const tmp = document.createElement('textarea');
+    tmp.innerHTML = item.description || '';
+    const decoded = tmp.value;
+    const rawDesc = decoded.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const desc = rawDesc.length > 200 ? rawDesc.substring(0, 198) + '…' : rawDesc;
+    // Stable event ID for the REC tick. Uses link when available, else
+    // title+source. Namespaced with "news:" so it never collides with
+    // card IDs like "usgs:..." or "gdacs:...".
+    const eventId = 'news:' + ((item.link && item.link.trim()) || ((item.title || '') + '|' + (item.source || '')));
+    const isRecorded = recordedEvents.has(eventId);
     return `
-      <div class="news-item ${personnelMatch ? 'personnel-relevant' : ''}">
-        <div class="ni-src ${srcClass}">${item.source}</div>
+      <div class="news-item ${personnelMatch ? 'personnel-relevant' : ''}${isRecorded ? ' recorded' : ''}" data-event-id="${eventId.replace(/"/g, '&quot;')}">
+        <div class="ni-rec" onclick="event.stopPropagation()">
+          <input type="checkbox" class="rec-check"
+                 ${isRecorded ? 'checked' : ''}
+                 onchange="toggleRecorded('${eventId.replace(/'/g, "\\'")}', this.checked)"
+                 title="Mark this article as recorded">
+        </div>
+        <div class="ni-src ${srcClass}" title="${item.source}">${srcLabel}</div>
         <div class="ni-body">
-          <div class="ni-title"><a href="${item.link || '#'}" target="_blank" rel="noopener">${item.title || '(no title)'}</a></div>
-          ${desc ? `<div class="ni-desc">${desc}</div>` : ''}
+          <div class="ni-title"><a href="${item.link || '#'}" target="_blank" rel="noopener">${applyHighlight(item.title || '(no title)')}</a></div>
+          ${desc ? `<div class="ni-desc">${applyHighlight(desc)}</div>` : ''}
           ${personnelMatch ? `<div class="ni-tags"><span class="ni-tag personnel">⚑ PERSONNEL: ${personnelMatch.toUpperCase()}</span></div>` : ''}
         </div>
         <div class="ni-time">${timeStr}</div>
@@ -8378,6 +9116,38 @@ document.querySelectorAll('.news-filter-btn').forEach(btn => {
     renderNewsFeed();
   });
 });
+
+// Wire up news search input
+(function wireUpNewsSearch() {
+  const input = document.getElementById('news-search-input');
+  const clearBtn = document.getElementById('news-search-clear');
+  if (!input) return;
+  // Debounced re-render — typing fast shouldn't re-render on every keystroke
+  let debounceTimer = null;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      newsSearchQuery = input.value;
+      renderNewsFeed();
+    }, 120);
+  });
+  // Escape key clears the search
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      input.value = '';
+      newsSearchQuery = '';
+      renderNewsFeed();
+    }
+  });
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      newsSearchQuery = '';
+      renderNewsFeed();
+      input.focus();
+    });
+  }
+})();
 
 // ============================================================
 //  MAP — D3 + Natural Earth real geography
@@ -8861,12 +9631,16 @@ function renderMap() {
   // markers (personnel-relevant only). News markers are appended so they
   // render on TOP of any overlapping disaster markers.
   const renderList = [...DATA];
-  if (typeof getPersonnelNewsMapEvents === 'function') {
-    renderList.push(...getPersonnelNewsMapEvents());
+  // Plan A: all news items with a detectable country get a marker (not
+  // limited to personnel-ticked countries). The marker style is distinct
+  // (hexagon, yellow), so news markers visually coexist with card markers
+  // without auto-merging. If a card and a news item refer to the same
+  // event, both appear — the user can see both data points.
+  if (typeof getAllNewsMapEvents === 'function') {
+    renderList.push(...getAllNewsMapEvents());
   }
   renderList.forEach(d => {
-    // News markers always show regardless of hazard filter or 24h gate
-    // (they have their own personnel-relevance filter in getPersonnelNewsMapEvents)
+    // News markers always show regardless of hazard filter or 24h gate.
     if (!d.news) {
       if (!d.nominal && !activeFilters.has(d.hazard)) return;
       // 24h filter: when active, only show nominal markers + incidents from the last 24h
@@ -8979,8 +9753,8 @@ function renderMap() {
 function showMapPopup(evt, code, hazard, pin) {
   // Search both DATA (disaster alerts) and the synthesized news markers
   let d = DATA.find(x => x.code === code && (x.hazard === hazard || (x.nominal && hazard === 'ok')));
-  if (!d && typeof getPersonnelNewsMapEvents === 'function') {
-    d = getPersonnelNewsMapEvents().find(x => x.code === code && x.hazard === hazard);
+  if (!d && typeof getAllNewsMapEvents === 'function') {
+    d = getAllNewsMapEvents().find(x => x.code === code && x.hazard === hazard);
   }
   if (!d) return;
   const popup = document.getElementById('map-popup');
@@ -9330,9 +10104,11 @@ async function toggleRecorded(eventId, checked) {
   if (checked) recordedEvents.add(eventId);
   else recordedEvents.delete(eventId);
   saveRecordedSetLocal(recordedEvents);
-  // 2. Visual update without re-rendering the table
-  const row = document.querySelector(`tr[data-event-id="${CSS.escape(eventId)}"]`);
-  if (row) row.classList.toggle('recorded', checked);
+  // 2. Visual update without re-rendering. Targets both table rows (cards)
+  //    and news items, since both now carry data-event-id.
+  document.querySelectorAll(`[data-event-id="${CSS.escape(eventId)}"]`).forEach(el => {
+    el.classList.toggle('recorded', checked);
+  });
   updateRecordedCounter();
   // 3. Async sync to Worker
   if (typeof TELEGRAM_BRIDGE_URL === 'undefined' || !TELEGRAM_BRIDGE_URL ||
@@ -9677,7 +10453,6 @@ function renderCards() {
       <div class="ai">
         <div class="ai-head">
           <span>⬡ AI STAFF-ASSIST SUMMARY</span>
-          <button class="regen" onclick="regenerateSummary('${d.code}', '${d.hazard}', {force: true})">↻ Regenerate</button>
         </div>
         <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}${hasSAF ? `<span class="label">Recommended Actions</span>${preset.actions}` : ''}</div>
       </div>
@@ -9823,7 +10598,7 @@ Be concise, factual, military-professional. No speculation beyond the data.`;
       `<span class="label">Situation</span>${parsed.situation}` +
       `<span class="label">Risk Assessment</span>${parsed.threshold}` +
       (hasSAF ? `<span class="label">Recommended Actions</span>${parsed.actions}` : '') +
-      `<div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-mute);letter-spacing:0.1em">⬡ LIVE · GENERATED ${new Date().toISOString().substring(11,19)}Z · REVIEW REQUIRED</div>`;
+      `<div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-mute);letter-spacing:0.1em">⬡ LIVE · GENERATED ${new Date().toISOString().substring(11,19)}Z · REVIEW REQUIRED</div>`;
 
     bodyEl.innerHTML = html;
     // Cache the rendered HTML so a re-render restores it instantly
@@ -9962,7 +10737,7 @@ function renderAQChart(canvasId, statsId, series, isLive) {
   tickVals.forEach(v => {
     const y = Y(v);
     yLabels += `<line x1="${M.left}" y1="${y}" x2="${W - M.right}" y2="${y}" stroke="#1f2a38" stroke-width="0.4"/>
-                <text x="${M.left - 5}" y="${y + 3}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#5a6b7e">${v}</text>`;
+                <text x="${M.left - 5}" y="${y + 3}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="#5a6b7e">${v}</text>`;
   });
 
   // X labels (5 ticks)
@@ -9981,7 +10756,7 @@ function renderAQChart(canvasId, statsId, series, isLive) {
     } else {
       lbl = dt.toLocaleString('en', { hour: 'numeric', day: 'numeric', month: 'short' });
     }
-    xLabels += `<text x="${x}" y="${H - 6}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#5a6b7e">${lbl}</text>`;
+    xLabels += `<text x="${x}" y="${H - 6}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5a6b7e">${lbl}</text>`;
   }
 
   // Line path
@@ -10005,7 +10780,7 @@ function renderAQChart(canvasId, statsId, series, isLive) {
       <path d="${area}" fill="rgba(79,209,197,0.10)"/>
       <path d="${path}" fill="none" stroke="#4fd1c5" stroke-width="1.5"/>
       ${xLabels}
-      <text x="6" y="14" font-family="JetBrains Mono" font-size="9" fill="#5a6b7e">µg/m³</text>
+      <text x="6" y="14" font-family="IBM Plex Mono" font-size="9" fill="#5a6b7e">µg/m³</text>
     </svg>
   `;
 
@@ -10532,30 +11307,73 @@ function getPersonnelIncidentAlerts() {
   // Also include personnel-relevant news items as "watch"-level alerts so
   // the watch officer can see journalist-reported events alongside the
   // structured disaster feeds. News items already pass the disaster-keyword
-  // filter at intake; here we just need to (a) check they mention a
-  // personnel country (b) be within the 24h window (c) bind to the
-  // matching personnel records.
+  // filter at intake AND the 3-day retention window upstream, so we don't
+  // apply an additional time cutoff here — if it's in the news tab and
+  // mentions a personnel country, it belongs in the panel.
   if (Array.isArray(newsData?.items) && typeof getPersonnelNewsMapEvents === 'function') {
     const newsEvents = getPersonnelNewsMapEvents();
     newsEvents.forEach(ev => {
-      if (!ev.updated) return;
-      const t = new Date(ev.updated).getTime();
-      if (!t || t < cutoff) return;
       const matches = checkedByISO[ev.code];
       if (!matches || !matches.length) return;
       alerts.push({ incident: ev, personnel: matches });
     });
   }
 
+  // Merge news items into matching card alerts when they describe the same
+  // event. Heuristic: same country (ISO code) AND a shared significant
+  // hazard word (earthquake/flood/wildfire/etc.) in either the card's
+  // event field or the news item's title. When merged, the news article
+  // becomes a "supporting source" on the card alert rather than a separate
+  // panel row — less clutter, more correlated context.
+  const HAZARD_TOKENS = [
+    'earthquake','quake','tsunami','volcano','eruption',
+    'flood','flooding','landslide','mudslide','avalanche',
+    'wildfire','bushfire','forest fire',
+    'cyclone','typhoon','hurricane','tornado','storm',
+    'haze','smog',
+    'outbreak','epidemic','pandemic','ebola','dengue','mpox','cholera','hantavirus','covid',
+    'heatwave','drought',
+  ];
+  function detectHazardTokens(text) {
+    if (!text) return [];
+    const lc = String(text).toLowerCase();
+    return HAZARD_TOKENS.filter(t => lc.includes(t));
+  }
+  const cardAlerts = alerts.filter(a => !a.incident.news);
+  const newsAlerts = alerts.filter(a => a.incident.news);
+  const consumedNewsIdx = new Set();
+  cardAlerts.forEach(card => {
+    const cardText = (card.incident.event || '') + ' ' + (card.incident.subtype || '');
+    const cardTokens = new Set(detectHazardTokens(cardText));
+    // Reset relatedNews every pass — the card incident object lives in the
+    // DATA array and persists across renders. If we |= the existing array,
+    // re-renders accumulate duplicate entries.
+    card.incident.relatedNews = [];
+    if (cardTokens.size === 0) return;
+    newsAlerts.forEach((news, idx) => {
+      if (consumedNewsIdx.has(idx)) return;
+      if (news.incident.code !== card.incident.code) return;
+      const newsTokens = detectHazardTokens(news.incident.event || '');
+      // Merge if there's any shared hazard token
+      if (newsTokens.some(t => cardTokens.has(t))) {
+        card.incident.relatedNews.push(news.incident);
+        consumedNewsIdx.add(idx);
+      }
+    });
+  });
+  const mergedAlerts = cardAlerts.concat(
+    newsAlerts.filter((_, idx) => !consumedNewsIdx.has(idx))
+  );
+
   // Critical first, then warning, then watch; newest first within each severity.
   // News items sort at the watch level and within their group by recency.
   const sevOrder = { crit: 0, warn: 1, watch: 2 };
-  alerts.sort((a, b) => {
+  mergedAlerts.sort((a, b) => {
     const s = sevOrder[a.incident.severity] - sevOrder[b.incident.severity];
     if (s !== 0) return s;
     return new Date(b.incident.updated) - new Date(a.incident.updated);
   });
-  return alerts;
+  return mergedAlerts;
 }
 
 // Panel is collapsed by default; user clicks the button to expand.
@@ -10637,12 +11455,30 @@ function renderPersonnelAlertBanner() {
             <div class="pep-item-action">READ ↗</div>
           </div>`;
       }
+      const hasNews = incident.relatedNews && incident.relatedNews.length > 0;
       return `
-        <div class="pep-item ${sevClass}" onclick="jumpToCard('${incident.code}-${incident.hazard}')">
+        <div class="pep-item ${sevClass}${hasNews ? ' pep-multi-source' : ''}" onclick="jumpToCard('${incident.code}-${incident.hazard}')">
           <div class="pep-item-sev sev-${sevClass}">${sevLabel}</div>
           <div class="pep-item-body">
-            <div class="pep-item-title"><b>${country}</b> · ${hazardLabel}</div>
+            <div class="pep-item-title">
+              <b>${country}</b> · ${hazardLabel}
+              ${hasNews ? `<span class="pep-multi-badge" title="Reported by both authoritative source and news media">⊕ CARD + NEWS</span>` : ''}
+            </div>
             <div class="pep-item-detail">Personnel: ${subUnitNames}${extra}</div>
+            ${hasNews ? `
+              <div class="pep-news-block">
+                <div class="pep-news-block-header">📰 Also reported by ${incident.relatedNews.length} news source${incident.relatedNews.length === 1 ? '' : 's'}</div>
+                ${incident.relatedNews.slice(0, 3).map(n => {
+                  const url = (n.url || '').replace(/'/g, '%27');
+                  const headline = (n.event || '').length > 90 ? n.event.substring(0, 88) + '…' : (n.event || '');
+                  const src = (n.source || '').replace(/^NEWS · /, '');
+                  return `<a class="pep-news-link" href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <span class="pep-news-src">${src}</span>
+                    <span class="pep-news-headline">${headline}</span>
+                  </a>`;
+                }).join('')}
+                ${incident.relatedNews.length > 3 ? `<div class="pep-news-more">+ ${incident.relatedNews.length - 3} more</div>` : ''}
+              </div>` : ''}
           </div>
           <div class="pep-item-action">VIEW →</div>
         </div>`;
@@ -11095,7 +11931,7 @@ function buildStateCard(country, state, showCountry, forceTerminal) {
   const displayAbbr = /[A-Za-z]/.test(rawCode) ? rawCode : '';
 
   const countryLabel = showCountry
-    ? `<div class="mono" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${iso2} ${country.name}</div>`
+    ? `<div class="mono" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${iso2} ${country.name}</div>`
     : '';
 
   // Show "View cities" link if this state has curated cities and we're
@@ -11184,7 +12020,7 @@ function buildCityCard(country, state, city) {
       </div>
       <div>
         <div class="name">${city.name}</div>
-        <div class="mono" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${state.name} · ${iso2}</div>
+        <div class="mono" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:2px">${state.name} · ${iso2}</div>
       </div>
       <div class="unit-meta">
         <div><span class="mk">Status:</span> ${statusHtml}</div>

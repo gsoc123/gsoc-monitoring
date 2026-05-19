@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HADR Environmental Monitoring — Staff Assist Prototype</title>
+<title>Global Environmental Force Monitoring Advisory Dashboard</title>
 
 <!-- Favicon: simple globe icon, inline SVG so no external request needed. -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8F%3C/text%3E%3C/svg%3E">
@@ -545,6 +545,7 @@
   .personnel-exposure-panel .pep-sev.crit { background: var(--crit); color: var(--bg); }
   .personnel-exposure-panel .pep-sev.warn { background: var(--warn); color: var(--bg); }
   .personnel-exposure-panel .pep-sev.watch { background: var(--watch); color: var(--bg); }
+  .personnel-exposure-panel .pep-sev.news { background: var(--accent); color: var(--bg); }
   .personnel-exposure-panel .pep-chevron {
     color: var(--text-mute);
     font-size: 12px;
@@ -579,6 +580,7 @@
   .personnel-exposure-panel .pep-item-sev.sev-crit { background: var(--crit); color: var(--bg); }
   .personnel-exposure-panel .pep-item-sev.sev-warn { background: var(--warn); color: var(--bg); }
   .personnel-exposure-panel .pep-item-sev.sev-watch { background: var(--watch); color: var(--bg); }
+  .personnel-exposure-panel .pep-item-sev.sev-news { background: var(--accent); color: var(--bg); }
   .personnel-exposure-panel .pep-item-body {
     flex: 1;
     min-width: 0;
@@ -1121,6 +1123,18 @@
     border-bottom: 1px dashed var(--line-2);
   }
   .card .meta b { color: var(--text); font-weight: 500; }
+  .card .meta a.src-link {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dashed transparent;
+    transition: border-color 0.15s;
+  }
+  .card .meta a.src-link:hover {
+    border-bottom-color: var(--accent);
+  }
+  .card .meta a.src-link b {
+    color: var(--accent);
+  }
   .card .desc {
     font-size: 13px;
     color: var(--text);
@@ -2257,6 +2271,146 @@
   .clocks-sync-badge.ok  { color: var(--ok);   border-color: var(--ok); }
   .clocks-sync-badge.err { color: var(--warn); border-color: var(--warn); }
 
+  /* ====== Global News Tab ====== */
+  .news-wrap { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+  .news-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 18px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .news-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .news-meta { color: var(--text-dim); font-size: 12px; }
+  .news-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .news-filter-btn {
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    color: var(--text-dim);
+    padding: 6px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .news-filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .news-filter-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .news-refresh {
+    background: transparent;
+    border: 1px solid var(--line-2);
+    color: var(--text-mute);
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .news-refresh:hover { color: var(--accent); border-color: var(--accent); }
+  #news-list {
+    display: grid;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line-2);
+  }
+  .news-item {
+    background: var(--bg-2);
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 90px 1fr 100px;
+    gap: 14px;
+    align-items: start;
+    transition: background 0.1s;
+  }
+  .news-item:hover { background: var(--bg-3); }
+  .news-item.personnel-relevant {
+    border-left: 3px solid var(--crit);
+  }
+  .news-item .ni-src {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-mute);
+    padding: 3px 6px;
+    border: 1px solid var(--line-2);
+    background: var(--bg);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .news-item .ni-src.bbc      { color: #ff4d4d; border-color: #ff4d4d; }
+  .news-item .ni-src.cna      { color: #4fd1c5; border-color: #4fd1c5; }
+  .news-item .ni-src.al       { color: #ffa336; border-color: #ffa336; }
+  .news-item .ni-body { min-width: 0; }
+  .news-item .ni-title {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .news-item .ni-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .news-item .ni-title a:hover { color: var(--accent); }
+  .news-item .ni-desc {
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .news-item .ni-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .news-item .ni-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border: 1px solid var(--line-2);
+    color: var(--text-mute);
+  }
+  .news-item .ni-tag.personnel {
+    border-color: var(--crit);
+    color: var(--crit);
+    font-weight: 700;
+  }
+  .news-item .ni-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-mute);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .news-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-mute);
+    font-style: italic;
+  }
+
+  @media (max-width: 800px) {
+    .news-item { grid-template-columns: 1fr; gap: 6px; }
+    .news-item .ni-time { text-align: left; }
+  }
+
   .sg-wrap { max-width: 1800px; margin: 0 auto; padding: 0 24px; }
   .sg-header {
     display: flex; justify-content: space-between; align-items: flex-start;
@@ -3295,7 +3449,7 @@
   <div class="brand">
     <div class="logo">🌏</div>
     <div>
-      <h1>Global Environmental Monitoring &amp; HADR Advisory Dashboard</h1>
+      <h1>Global Environmental Force Monitoring Advisory Dashboard</h1>
       <div class="sub">Country-level personnel data</div>
     </div>
   </div>
@@ -3318,6 +3472,7 @@
     <button data-view="map" class="active">◇ Map</button>
     <button data-view="table">▤ Table</button>
     <button data-view="cards">▦ Cards</button>
+    <button data-view="news">◰ News</button>
     <button data-view="sg">⬢ SG Focus</button>
     <button data-view="clocks">◷ World Clocks</button>
   </div>
@@ -3474,6 +3629,27 @@
 
   <section class="view" id="cards-view">
     <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="view" id="news-view">
+    <div class="news-wrap">
+      <div class="news-header">
+        <div>
+          <div class="news-title">◰ GLOBAL DISASTER NEWS</div>
+          <div class="news-meta">
+            <b>Weather · Air Quality · Seismic · Flood · Wildfire · Volcanic · Health</b> ·
+            Aggregated from BBC, CNA, Al Jazeera ·
+            <span id="news-status">◌ Loading…</span>
+          </div>
+        </div>
+        <div class="news-actions">
+          <button class="news-filter-btn active" data-filter="all">ALL DISASTERS</button>
+          <button class="news-filter-btn" data-filter="personnel">PERSONNEL LOCATIONS ONLY</button>
+          <button class="news-refresh" onclick="fetchNewsFeed()" title="Force refresh">↻</button>
+        </div>
+      </div>
+      <div id="news-list"></div>
+    </div>
   </section>
 
   <section class="view" id="sg-view">
@@ -4047,6 +4223,64 @@ let dataSourceStatus = {
 
 let liveAlerts = []; // accumulates from all sources
 
+// News feed state + persistence — full implementation declared further down
+// (after fetchClimateDrivers, inside the news section). The state, retention
+// window, and auto-poll are set up there.
+
+// Climate drivers — long-range climate state (ENSO/ONI). Used by Watch
+// Officer Assessment to flag months-ahead conditions like El Niño that
+// won't appear in event feeds.
+let climateData = { latest: null, last3: [], lastFetch: null, fetching: false };
+
+// Keywords used to filter the news feed to disaster-relevant headlines.
+// Conservative list — anything with these terms in title or description
+// surfaces. False positives are OK; false negatives are worse for a watch
+// officer.
+// Keywords that signal an article is reporting on an actual disaster/health
+// emergency/environmental event. Tightly scoped to the 7 operational
+// categories the watch officer cares about:
+//   1. Disastrous weather  (cyclone/typhoon/hurricane/tornado/storm/blizzard)
+//   2. Air quality          (haze/smog/wildfire smoke)
+//   3. Seismic events       (earthquake/tsunami/tremor)
+//   4. Flood                (flood/flash flood/landslide/mudslide/avalanche)
+//   5. Wildfire             (wildfire/bushfire/forest fire/blaze)
+//   6. Volcanic activity    (volcano/eruption/lava/ash)
+//   7. Health-related       (outbreak/epidemic/pandemic/specific diseases)
+//
+// Deliberately EXCLUDED: war, airstrikes, missile attacks, political
+// conflict, protests, elections, diplomacy. These were producing noise like
+// "Iran war live" / "Israeli strikes" / "Trump postpones attack" / "Death
+// toll in Lebanon". For HADR awareness, military/political conflict is a
+// separate intelligence problem, not a disaster monitoring problem.
+//
+// Also EXCLUDED: generic catch-alls like "casualties", "death toll",
+// "emergency", "rescue", "evacuation" — these match conflict and accident
+// stories too readily. We rely on the specific category keywords alone.
+const NEWS_DISASTER_KEYWORDS = [
+  // Seismic events
+  'earthquake','quake','tsunami','tremor','aftershock','seismic',
+  // Volcanic activity
+  'volcano','volcanic','eruption','volcanic ash','lava flow',
+  // Disastrous weather
+  'cyclone','typhoon','hurricane','tornado','tropical storm','tropical depression',
+  'storm surge','blizzard','ice storm','hailstorm','dust storm','sandstorm',
+  'severe storm','thunderstorm','snowstorm','rainstorm',
+  // Flood
+  'flood','flooding','floods','flash flood','flash floods',
+  'landslide','landslides','mudslide','mudslides','avalanche','avalanches',
+  // Wildfire
+  'wildfire','wildfires','bushfire','bushfires','forest fire','forest fires','blaze','blazes',
+  // Temperature extremes / drought
+  'drought','heatwave','heat wave','cold wave','heat dome','extreme heat',
+  // Health-related disasters
+  'epidemic','outbreak','outbreaks','cholera','dengue','ebola','mpox','pandemic','plague',
+  'viral outbreak','disease outbreak','measles outbreak','typhoid',
+  // Air quality
+  'haze','smog','transboundary haze','wildfire smoke','choking smog','air pollution crisis',
+  // Disaster catch-all (specific enough)
+  'natural disaster','natural disasters',
+];
+
 // =============================================================
 //  CORS-AWARE FETCH
 //  Some APIs don't send CORS headers, so browser-originated
@@ -4383,6 +4617,435 @@ async function fetchAirQuality() {
   }
 }
 
+// ============================================================
+//  News Feed (BBC + CNA + Al Jazeera, aggregated)
+// ============================================================
+// Surfaces mainstream-media disaster coverage. Used to alert watch officers
+// to events affecting personnel in any country (worldwide scope). Does NOT
+// generate alert cards — purely informational.
+// News feed (BBC/CNA/AJ) — fetched separately from disaster sources.
+// ACCUMULATES items into a rolling 3-day window across refreshes so the
+// watch officer can see news that has already aged out of the upstream
+// RSS feeds. Persisted to localStorage for continuity across page reloads.
+// Polls automatically every 5 minutes.
+const NEWS_STORAGE_KEY = 'hadr_news_v1';
+const NEWS_RETENTION_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+const NEWS_REFRESH_MS   = 5 * 60 * 1000;            // 5 minutes
+let newsData = { items: [], lastFetch: null, fetching: false };
+
+function loadNewsFromStorage() {
+  try {
+    const raw = localStorage.getItem(NEWS_STORAGE_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    // Drop anything older than retention window OR not disaster-related
+    // (the latter handles items stored before disaster-only intake).
+    const cutoff = Date.now() - NEWS_RETENTION_MS;
+    return arr.filter(it => {
+      const t = new Date(it.pubDate || 0).getTime();
+      if (!isFinite(t) || t < cutoff) return false;
+      if (!newsItemPasses(it)) return false;
+      return true;
+    });
+  } catch (e) {
+    console.warn('[news] load from storage failed:', e.message);
+    return [];
+  }
+}
+
+function saveNewsToStorage(items) {
+  try {
+    // Cap at 500 items so localStorage doesn't bloat. With 4 sources at
+    // ~30 items each and a 3-day window, expect 100-200 typical.
+    const capped = items.slice(0, 500);
+    localStorage.setItem(NEWS_STORAGE_KEY, JSON.stringify(capped));
+  } catch (e) {
+    console.warn('[news] save to storage failed:', e.message);
+  }
+}
+
+// Stable dedupe key for a news item — prefer link, fall back to title+source.
+function newsItemKey(it) {
+  return (it.link && it.link.trim()) || ((it.title || '') + '|' + (it.source || ''));
+}
+
+// Bootstrap from storage so the first paint shows accumulated items.
+newsData.items = loadNewsFromStorage();
+console.log(`[news] bootstrapped ${newsData.items.length} items from localStorage`);
+
+async function fetchNewsFeed() {
+  if (newsData.fetching) return newsData;
+  newsData.fetching = true;
+  try {
+    if (!TELEGRAM_BRIDGE_URL) throw new Error('No bridge');
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/news-feed');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+    const fresh = Array.isArray(data.items) ? data.items : [];
+
+    // Merge fresh into existing, filter to disaster-only at intake, dedup
+    // by link, keep only items within the 3-day retention window.
+    const seen = new Map();
+    // Existing first — preserves any fields we've already enriched. We also
+    // filter existing items in case they were stored before disaster-only
+    // intake was enforced.
+    for (const it of newsData.items) {
+      if (newsItemPasses(it)) seen.set(newsItemKey(it), it);
+    }
+    // Then new items — they replace existing copies with the same key.
+    // Skip anything that doesn't pass the disaster keyword filter.
+    let added = 0, skippedNonDisaster = 0;
+    for (const it of fresh) {
+      if (!newsItemPasses(it)) { skippedNonDisaster++; continue; }
+      const k = newsItemKey(it);
+      if (!seen.has(k)) added++;
+      seen.set(k, it);
+    }
+    // Apply 3-day window + sort newest first
+    const cutoff = Date.now() - NEWS_RETENTION_MS;
+    const merged = [...seen.values()]
+      .filter(it => {
+        const t = new Date(it.pubDate || 0).getTime();
+        return isFinite(t) && t >= cutoff;
+      })
+      .sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
+
+    newsData = { items: merged, lastFetch: Date.now(), fetching: false };
+    saveNewsToStorage(merged);
+    console.log(`[news] fetched ${fresh.length} fresh, ${skippedNonDisaster} non-disaster filtered out, ${added} new disasters; ${merged.length} total in 3-day window`);
+    if (typeof renderNewsFeed === 'function') {
+      try { renderNewsFeed(); } catch (e) {}
+    }
+    // Re-render map so personnel-relevant news markers appear/update
+    if (typeof renderMap === 'function') {
+      try { renderMap(); } catch (e) {}
+    }
+  } catch (e) {
+    console.warn('[news] fetch failed:', e.message);
+    newsData.fetching = false;
+  }
+  return newsData;
+}
+
+// Auto-poll every 5 minutes. Kicks off after dashboard boot.
+let newsPollTimer = null;
+function startNewsPolling() {
+  if (newsPollTimer) return;
+  newsPollTimer = setInterval(() => {
+    fetchNewsFeed().catch(e => console.warn('[news] poll error:', e.message));
+  }, NEWS_REFRESH_MS);
+  console.log(`[news] auto-poll started (every ${NEWS_REFRESH_MS / 60000} min)`);
+}
+
+// Check if a news item is disaster-relevant by keyword match.
+//
+// Uses word-boundary matching for single-word keywords so short words like
+// "war" don't match unrelated text like "Anwar", "warning", "toward". Multi-
+// word phrases (e.g. "armed conflict", "missile strike") stay as substring
+// matching since word-boundary rules around spaces are already met.
+const NEWS_KEYWORD_REGEXES = NEWS_DISASTER_KEYWORDS.map(kw => {
+  if (kw.includes(' ')) {
+    return { kw, test: (s) => s.includes(kw) };
+  }
+  const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('\\b' + escaped + '\\b', 'i');
+  return { kw, test: (s) => re.test(s) };
+});
+
+// Phrases that signal an article is ANALYSIS / EXPLAINER / RETROSPECTIVE
+// rather than a breaking disaster report. If any of these match the title
+// or description, the article is disqualified even when disaster keywords
+// are present. Helps surface only actionable items where personnel/units
+// might need to take immediate action.
+//
+// Examples that this list filters out:
+//   ✗ "How worrying is the Ebola outbreak in DR Congo?"
+//   ✗ "Inside the 'kill-zone' on Ukraine's front line, where new weapons have transformed war"
+//   ✗ "Hezbollah drone strike videos show evolving tactics"
+//   ✗ "Years after the earthquake, survivors rebuild"
+//
+// Examples that still pass through:
+//   ✓ "Earthquake hits southwest China; thousands evacuate"
+//   ✓ "Israel launches strikes on southern Lebanon"
+//   ✓ "Toddlers among more than 50 schoolchildren kidnapped in Nigeria"
+const NEWS_ANALYTICAL_PHRASES = [
+  // Genre markers
+  'analysis','analyses','explainer','explained','op-ed','opinion piece',
+  'fact check','fact-check','commentary','editorial',
+  // "Behind the scenes" / "Inside the" framing
+  'inside the','behind the','behind closed',
+  // Question-headline retrospectives
+  'how worrying','how dangerous','how serious','how bad','how concerning',
+  'what we know','what to know','what next','what now','what happens next',
+  'why is','why are','why does','why did',
+  // Image/video collections
+  'video shows','videos show','video reveals','videos reveal',
+  'pictures show','photos show','in pictures','in photos','in maps',
+  // Temporal retrospectives — articles ABOUT past events
+  'years after','months after','days after','weeks after',
+  'one year on','one month on','one week on',
+  'a year after','a month after','a week after',
+  'in the wake of','in the aftermath of','aftermath of the',
+  'anniversary of','marking the anniversary',
+  // Lessons / reflections
+  'lessons from','lessons learned','lessons of',
+  'looking back','reflecting on','remembering the',
+  // First-person quotes / human-interest framing
+  'my voice','my story','my experience','my account',
+  'this may be the last','this might be the last',
+  // Tactical/strategic analysis framing
+  'evolving tactics','changing tactics','new tactics',
+  'transformed war','transforming war',
+  'the rise of','the fall of','the return of',
+  // Speculative future framing
+  'could be','might be','may be the','may have been',
+];
+
+// Pre-compile substring checks (these are mostly multi-word; bare-word ones
+// like "analysis" use word boundary to avoid matching "analyses" → "psychoanalysis").
+const NEWS_ANALYTICAL_REGEXES = NEWS_ANALYTICAL_PHRASES.map(p => {
+  if (p.includes(' ') || p.includes('-')) {
+    return { p, test: (s) => s.includes(p) };
+  }
+  const escaped = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('\\b' + escaped + '\\b', 'i');
+  return { p, test: (s) => re.test(s) };
+});
+
+function newsItemIsAnalytical(item) {
+  const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  return NEWS_ANALYTICAL_REGEXES.some(k => k.test(haystack));
+}
+
+// Political/conflict phrases. Even if a disaster keyword matches (e.g.
+// "flood of refugees" — 'flood' alone), these phrases disqualify the
+// article as political/conflict rather than natural disaster. Acts as a
+// safety net for borderline cases.
+const NEWS_POLITICAL_PHRASES = [
+  // War & armed conflict
+  'world war','civil war','cold war','trade war','price war','culture war','turf war',
+  'war live','war zone','war crimes','war effort','war games','war torn','war-torn',
+  'armed conflict','military conflict','sectarian conflict',
+  'conflict between','israeli strike','israeli strikes',
+  // Strikes/attacks (when about military/political action)
+  'airstrike','air strike','drone strike','missile strike','rocket attack',
+  'shelling','artillery','bombing','bombed','ceasefire','truce',
+  // Hostages/kidnapping (political context)
+  'hostages','hostage','kidnapped','abducted',
+  // Refugees as political topic
+  'refugee crisis','asylum seekers','migrants',
+  // Protests / civil unrest
+  'protest','protesters','protests','protest march','demonstrators','demonstration',
+  'rally','rallies','riots','riot',
+  // Politics / elections / governance
+  'election','elections','campaign','candidate','voters','voted','voting',
+  'parliament','senate','congress','administration says','administration has',
+  'summit','negotiations','diplomatic','peace talks',
+  'court','indicted','arrested','charged with','sentenced to',
+  'sanctions','tariff','trade dispute',
+  // Specific politicians as title leads (signals political story)
+  'trump says','trump warns','trump delays','trump administration',
+  'biden says','biden administration',
+];
+
+const NEWS_POLITICAL_REGEXES = NEWS_POLITICAL_PHRASES.map(p => {
+  if (p.includes(' ') || p.includes('-')) {
+    return { p, test: (s) => s.includes(p) };
+  }
+  const escaped = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('\\b' + escaped + '\\b', 'i');
+  return { p, test: (s) => re.test(s) };
+});
+
+function newsItemIsPolitical(item) {
+  const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  return NEWS_POLITICAL_REGEXES.some(k => k.test(haystack));
+}
+
+function newsItemPasses(item) {
+  const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  // Must match at least one natural disaster / health / environment keyword
+  if (!NEWS_KEYWORD_REGEXES.some(k => k.test(haystack))) return false;
+  // Must NOT match analytical/retrospective framing
+  if (newsItemIsAnalytical(item)) return false;
+  // Must NOT match political/conflict framing
+  if (newsItemIsPolitical(item)) return false;
+  return true;
+}
+
+// Check if a headline mentions a country where SAF has ticked personnel.
+// Returns the matched country name or null.
+function newsMentionsPersonnelCountry(item) {
+  const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
+  // Collect country names from personnel ticks
+  const personnelCountries = new Set();
+  try {
+    Object.keys(personnelPresence || {}).forEach(key => {
+      if (!personnelPresence[key]) return;
+      const iso2 = key.split('|')[0];
+      if (iso2 && typeof ISO2_TO_NAME !== 'undefined' && ISO2_TO_NAME[iso2]) {
+        personnelCountries.add(ISO2_TO_NAME[iso2]);
+      }
+    });
+  } catch (e) {}
+  for (const name of personnelCountries) {
+    if (haystack.includes(name.toLowerCase())) return name;
+  }
+  return null;
+}
+
+// =============================================================
+//  COUNTRY CENTROIDS — for plotting news markers on the map
+// =============================================================
+// Approximate centroid for each personnel-deployable country. ISO-2 keyed.
+// Used by getPersonnelNewsMapEvents() to place news markers. Add countries
+// here when personnel is deployed to a new location. Values are rough
+// geographic centroids — fine for situational awareness, not precise mapping.
+const COUNTRY_CENTROIDS = {
+  // SEA / personnel-active
+  'SG': [1.3521, 103.8198],   'BN': [4.5353, 114.7277],
+  'TW': [23.5, 121.0],         'ID': [-2.5, 118.0],
+  'MY': [4.2, 102.0],          'TH': [15.0, 100.5],
+  'PH': [13.0, 122.0],         'VN': [16.0, 106.0],
+  'KH': [12.5, 104.9],         'LA': [19.8, 102.5],
+  'MM': [21.9, 95.9],          'JP': [36.2, 138.2],
+  'KR': [35.9, 127.7],         'CN': [35.8, 104.1],
+  'IN': [20.5, 78.9],          'BD': [23.6, 90.3],
+  'LK': [7.8, 80.7],           'PK': [30.3, 69.3],
+  'NP': [28.3, 84.1],          'AF': [33.9, 67.7],
+  // Oceania
+  'AU': [-25.0, 134.0],        'NZ': [-40.9, 174.8],
+  'PG': [-6.3, 143.9],         'FJ': [-17.7, 178.0],
+  'TL': [-8.8, 125.7],
+  // Europe — major personnel destinations
+  'GB': [54.7, -2.6],          'IE': [53.4, -8.2],
+  'FR': [46.2, 2.2],           'DE': [51.1, 10.4],
+  'NL': [52.1, 5.3],           'BE': [50.5, 4.5],
+  'ES': [40.5, -3.7],          'IT': [42.0, 12.6],
+  'PT': [39.4, -8.2],          'CH': [46.8, 8.2],
+  'AT': [47.5, 14.5],          'SE': [60.1, 18.6],
+  'NO': [60.5, 8.5],           'FI': [61.9, 25.7],
+  'DK': [56.3, 9.5],           'PL': [51.9, 19.1],
+  // Americas
+  'US': [37.1, -95.7],         'CA': [56.1, -106.3],
+  'MX': [23.6, -102.6],        'BR': [-14.2, -51.9],
+  // Middle East / Africa
+  'AE': [23.4, 53.8],          'SA': [23.9, 45.0],
+  'QA': [25.4, 51.2],          'KW': [29.3, 47.5],
+  'IL': [31.5, 34.8],          'TR': [38.9, 35.2],
+  'EG': [26.8, 30.8],          'ZA': [-30.6, 22.9],
+  'KE': [-0.0, 37.9],
+};
+
+// Convert personnel-relevant news items into map-renderable event objects.
+// These have the same structure as disaster alerts but with `news: true`
+// so the renderer/popup can distinguish them. Source badge will show e.g.
+// "NEWS · BBC World" in the popup.
+//
+// Filter rules (matches the user's choice — personnel-relevant only):
+//   1. Item must pass the disaster keyword filter (already done at intake)
+//   2. Item must mention a country with a personnel tick (PERSONNEL tag)
+//   3. We must have a centroid for that country
+function getPersonnelNewsMapEvents() {
+  if (!Array.isArray(newsData.items) || newsData.items.length === 0) return [];
+  // Resolve country NAME → ISO2 from the existing forward map. Built once
+  // per call; cheap.
+  const NAME_TO_ISO2 = {};
+  for (const [iso, name] of Object.entries(ISO2_TO_NAME)) {
+    NAME_TO_ISO2[name.toLowerCase()] = iso;
+  }
+  const events = [];
+  const seenKey = new Set(); // dedup by country — one marker per country max
+  for (const item of newsData.items) {
+    const matchedCountry = newsMentionsPersonnelCountry(item);
+    if (!matchedCountry) continue;
+    const iso = NAME_TO_ISO2[matchedCountry.toLowerCase()];
+    if (!iso) continue;
+    const centroid = COUNTRY_CENTROIDS[iso];
+    if (!centroid) continue;
+    // Dedup: only one news marker per country (use the most recent item,
+    // since newsData.items is sorted newest-first).
+    if (seenKey.has(iso)) continue;
+    seenKey.add(iso);
+    // Synthesize an event object compatible with the map renderer.
+    // Severity: news items are operational watch-level by default (they're
+    // not authoritative scientific data, but they ARE personnel-relevant).
+    events.push({
+      news: true,
+      id: 'news-' + iso + '-' + Date.parse(item.pubDate || 0),
+      code: iso,
+      name: ISO2_TO_NAME[iso],
+      lat: centroid[0],
+      lng: centroid[1],
+      hazard: 'news', // distinct hazard key so DATA-based lookups don't clash
+      subtype: 'News Coverage',
+      severity: 'watch', // visual tier — yellow, matches the "watch" stat
+      event: item.title || 'News headline',
+      desc: item.description || '',
+      updated: item.pubDate || new Date().toISOString(),
+      source: 'NEWS · ' + (item.source || 'unknown'),
+      url: item.link,
+      newsItem: item, // reference for popup
+    });
+  }
+  return events;
+}
+
+// ============================================================
+//  Climate Drivers (NOAA ENSO / Niño 3.4 ONI)
+// ============================================================
+// Slow-changing climate state. Cached for 6 hours on the Worker; we fetch
+// once per dashboard load (subsequent reloads use Worker cache).
+async function fetchClimateDrivers() {
+  if (climateData.fetching) return climateData;
+  // 6-hour client cache too — values change at most monthly
+  if (climateData.lastFetch && (Date.now() - climateData.lastFetch) < 6 * 60 * 60 * 1000) {
+    return climateData;
+  }
+  climateData.fetching = true;
+  try {
+    if (!TELEGRAM_BRIDGE_URL) throw new Error('No bridge');
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/climate-drivers');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+    climateData = {
+      latest: data.latest || null,
+      last3:  data.last3  || [],
+      lastFetch: Date.now(),
+      fetching: false,
+    };
+    console.log('[climate] ENSO ONI latest:', climateData.latest);
+  } catch (e) {
+    console.warn('[climate] fetch failed:', e.message);
+    climateData.fetching = false;
+  }
+  return climateData;
+}
+
+// Classify ONI value into a named ENSO state. Standard NOAA bands.
+function classifyENSO(oni) {
+  if (oni == null) return { state:'unknown', label:'Unknown', color:'info', impact:null };
+  if (oni >=  2.0) return { state:'super_elnino',  label:'Super El Niño',     color:'crit',
+    impact: 'Historically associated with HOT, DRY conditions in Singapore; severe trans-boundary haze risk from Indonesian fires.' };
+  if (oni >=  1.5) return { state:'strong_elnino', label:'Strong El Niño',    color:'warn',
+    impact: 'Elevated risk of hotter, drier conditions in Singapore and increased trans-boundary haze potential.' };
+  if (oni >=  1.0) return { state:'mod_elnino',    label:'Moderate El Niño',  color:'warn',
+    impact: 'Drier-than-average conditions possible in Singapore; monitor haze potential.' };
+  if (oni >=  0.5) return { state:'weak_elnino',   label:'Weak El Niño',      color:'watch',
+    impact: 'Slight drying tendency; minor impact expected on Singapore weather.' };
+  if (oni <= -1.5) return { state:'strong_lanina', label:'Strong La Niña',    color:'warn',
+    impact: 'Wetter conditions likely in Singapore; elevated flash-flood and landslide risk in region.' };
+  if (oni <= -1.0) return { state:'mod_lanina',    label:'Moderate La Niña',  color:'watch',
+    impact: 'Wetter-than-average conditions; monitor regional flood risks.' };
+  if (oni <= -0.5) return { state:'weak_lanina',   label:'Weak La Niña',      color:'watch',
+    impact: 'Slight wetting tendency; minor impact on Singapore weather.' };
+  return { state:'neutral', label:'ENSO Neutral', color:'ok',
+    impact: 'No strong ENSO signal; routine seasonal patterns expected.' };
+}
+
 
 // ============================================================
 //  DEDUPLICATION
@@ -4398,6 +5061,7 @@ async function fetchAirQuality() {
 //  Priority order (kept when a dup is found):
 //    USGS > GDACS > OpenMeteo
 // ============================================================
+// Priority order — authoritative observers ranked higher when dedup hits.
 const SOURCE_PRIORITY = { 'USGS':1, 'GDACS':2, 'OpenMeteo':3 };
 
 function deduplicateAlerts(alerts) {
@@ -4514,6 +5178,10 @@ async function refreshAllLiveData(opts = {}) {
   update24hButton();
   // Re-evaluate personnel × incident alerts after new data arrives
   if (typeof renderPersonnelAlertBanner === 'function') renderPersonnelAlertBanner();
+  // Fire-and-forget: news + climate. These don't feed alert cards so we
+  // don't await them — the UI updates when they arrive.
+  if (typeof fetchNewsFeed === 'function')          fetchNewsFeed();
+  if (typeof fetchClimateDrivers === 'function')   fetchClimateDrivers();
   // Telegram alerts (silent if bridge URL is empty)
   if (typeof maybeSendTelegramAlerts === 'function') maybeSendTelegramAlerts();
 
@@ -5577,8 +6245,35 @@ function buildSGAssessmentFacts() {
     psi:  { past: null, future: null }, // PSI has no public forecast
     pm25: { past: null, future: null }, // PM2.5 has no reliable SG forecast
     rain: { past: null, future: null },
+    climate: null,  // ENSO state from NOAA — populated below if available
     overallRisk: 'low',
   };
+
+  // ----- Climate drivers (ENSO ONI from NOAA) -----
+  try {
+    if (climateData?.latest) {
+      const oni = climateData.latest.anom;
+      const cls = classifyENSO(oni);
+      facts.climate = {
+        oni,
+        season: climateData.latest.season,
+        year: climateData.latest.year,
+        state: cls.state,
+        label: cls.label,
+        color: cls.color,
+        impact: cls.impact,
+        trend: (() => {
+          if (!climateData.last3 || climateData.last3.length < 2) return 'stable';
+          const earliest = climateData.last3[0].anom;
+          const latest = climateData.last3[climateData.last3.length - 1].anom;
+          const delta = latest - earliest;
+          if (delta >  0.2) return 'warming (strengthening El Niño / weakening La Niña)';
+          if (delta < -0.2) return 'cooling (strengthening La Niña / weakening El Niño)';
+          return 'stable';
+        })(),
+      };
+    }
+  } catch (e) { console.warn('[bot-context] climate facts failed:', e.message); }
 
   // ----- Temperature past 7 days (NEA temp7d) -----
   const temp7d = (sgWeekData.temp || [])
@@ -5723,6 +6418,50 @@ function buildSGAssessmentFacts() {
   else if (riskScore >= 2)  facts.overallRisk = 'moderate';
   else                       facts.overallRisk = 'low';
 
+  // Sanity gate — strip values that fall outside physically plausible
+  // ranges for Singapore. Bad parsing or transient NEA outages can produce
+  // zero/near-zero readings that, if shown verbatim, make the briefing look
+  // nonsensical to a watch officer (e.g. "Air temperature peaked at 0.5°C").
+  // When data is invalid, null out the section so the renderer can show
+  // "Loading…" instead.
+  const dataIssues = [];
+  if (facts.temp.past) {
+    const m = facts.temp.past.peakMax;
+    const w = facts.temp.past.weekAvgMean;
+    if (!Number.isFinite(m) || m < 15 || m > 50 || !Number.isFinite(w) || w < 15 || w > 50) {
+      console.warn('[sg-assess] temperature out of plausible range — skipping bullet:', { peakMax:m, weekMean:w });
+      dataIssues.push('temperature');
+      facts.temp.past = null;
+    }
+  }
+  if (facts.psi.past) {
+    const v = facts.psi.past.peakValue;
+    const a = facts.psi.past.weekAvg;
+    if (!Number.isFinite(v) || v < 5 || v > 500 || !Number.isFinite(a) || a < 5) {
+      console.warn('[sg-assess] PSI out of plausible range — skipping bullet:', { peak:v, avg:a });
+      dataIssues.push('PSI');
+      facts.psi.past = null;
+    }
+  }
+  if (facts.pm25.past) {
+    const v = facts.pm25.past.peakValue;
+    const a = facts.pm25.past.weekAvg;
+    if (!Number.isFinite(v) || v < 0 || v > 500 || !Number.isFinite(a) || a < 0) {
+      console.warn('[sg-assess] PM2.5 out of plausible range — skipping bullet:', { peak:v, avg:a });
+      dataIssues.push('PM2.5');
+      facts.pm25.past = null;
+    }
+  }
+  if (facts.rain.past) {
+    const t = facts.rain.past.totalMm;
+    if (!Number.isFinite(t) || t < 0 || t > 1000) {
+      console.warn('[sg-assess] rainfall out of plausible range — skipping bullet:', { total:t });
+      dataIssues.push('rainfall');
+      facts.rain.past = null;
+    }
+  }
+  facts.dataIssues = dataIssues;
+
   return facts;
 }
 
@@ -5761,6 +6500,15 @@ function renderSGAssessmentBody(facts) {
     const r = facts.rain.past;
     pastBits.push(`Rainfall total <b>${r.totalMm.toFixed(0)}mm</b> over the week (${r.dryDays} dry day${r.dryDays===1?'':'s'}); wettest on ${fmtDate(r.wettestDay)} (${r.wettestMm.toFixed(0)}mm).`);
   }
+  // If nothing valid came through, show a helpful loading/error state
+  // instead of an empty bullet list.
+  if (pastBits.length === 0) {
+    if (facts.dataIssues && facts.dataIssues.length) {
+      pastBits.push(`<span style="color:var(--warn);font-style:italic">7-day history data from NEA is incomplete or invalid (${facts.dataIssues.join(', ')}). Try the ↻ Refresh button above; this can also happen briefly while NEA's API is updating.</span>`);
+    } else {
+      pastBits.push(`<span style="color:var(--text-mute);font-style:italic">7-day history still loading from NEA…</span>`);
+    }
+  }
 
   // ===== Next 7 Days =====
   const futureBits = [];
@@ -5775,6 +6523,16 @@ function renderSGAssessmentBody(facts) {
     futureBits.push(`Rainfall expected <b>${r.totalMm.toFixed(0)}mm</b> total over next 7 days${r.wettestMm > 20 ? `, with significant rain on ${fmtDate(r.wettestDay)} (${r.wettestMm.toFixed(0)}mm)` : ''}.`);
   }
   futureBits.push(`<span style="color:var(--text-mute);font-style:italic">PSI/PM2.5 7-day forecast not publicly available — refer to NEA daily bulletin for outlook.</span>`);
+
+  // ===== Climate Drivers (months-ahead context) =====
+  const climateBits = [];
+  if (facts.climate) {
+    const c = facts.climate;
+    climateBits.push(`Current ENSO state: <b class="risk-${c.color}">${c.label}</b> (ONI ${c.oni >= 0 ? '+' : ''}${c.oni.toFixed(2)} for ${c.season} ${c.year}). Trend: ${c.trend}.`);
+    if (c.impact) climateBits.push(c.impact);
+  } else {
+    climateBits.push(`<span style="color:var(--text-mute);font-style:italic">Climate driver data unavailable — check /climate-drivers Worker endpoint.</span>`);
+  }
 
   // ===== Watch For (actionable) =====
   const watchBits = [];
@@ -5794,11 +6552,19 @@ function renderSGAssessmentBody(facts) {
   if (facts.rain.future?.wettestMm > 50) {
     watchBits.push(`<b>Heavy rain expected on ${fmtDate(facts.rain.future.wettestDay)}</b> (${facts.rain.future.wettestMm.toFixed(0)}mm) — possible localised flooding; review training-area drainage and standfast triggers.`);
   }
+  // Climate-driven watch items (months-ahead)
+  if (facts.climate?.state === 'super_elnino' || facts.climate?.state === 'strong_elnino') {
+    watchBits.push(`<b>${facts.climate.label} active</b> — historically associated with hotter, drier conditions and elevated trans-boundary haze risk over the coming months. Brief commanders on extended heat / haze contingencies.`);
+  } else if (facts.climate?.state === 'mod_elnino') {
+    watchBits.push(`${facts.climate.label} active — monitor for elevated heat and haze potential in coming months.`);
+  } else if (facts.climate?.state === 'strong_lanina') {
+    watchBits.push(`<b>${facts.climate.label} active</b> — historically associated with wetter conditions and flood risk. Monitor regional flood forecasts.`);
+  }
   if (!watchBits.length) {
     watchBits.push(`No elevated risks indicated for the coming 7 days. Maintain routine monitoring.`);
   }
 
-  return { pastBits, futureBits, watchBits };
+  return { pastBits, futureBits, climateBits, watchBits };
 }
 
 // Cache for AI-generated headlines. Key by data hash + lookups for the most
@@ -5865,7 +6631,7 @@ Output: ONE sentence only.`;
 function renderSGAssessmentBox(containerEl) {
   if (!containerEl) return;
   const facts = buildSGAssessmentFacts();
-  const { pastBits, futureBits, watchBits } = renderSGAssessmentBody(facts);
+  const { pastBits, futureBits, climateBits, watchBits } = renderSGAssessmentBody(facts);
   const riskColor = facts.overallRisk === 'critical' ? 'crit'
                   : facts.overallRisk === 'high'     ? 'warn'
                   : facts.overallRisk === 'moderate' ? 'watch' : 'ok';
@@ -5876,10 +6642,10 @@ function renderSGAssessmentBox(containerEl) {
         <span class="sg-assess-risk ${riskColor}">${facts.overallRisk.toUpperCase()}</span>
         <button class="sg-assess-refresh" onclick="refreshSGAssessment()" title="Force AI headline refresh">↻</button>
       </div>
-      <div class="sg-assess-headline" id="sg-assess-headline">
+      <div class="sg-assess-headline" id="sg-assess-headline" style="${sgHeadlineCache.headline && sgHeadlineCache.factsKey === factsKeyFor(facts) ? '' : 'display:none'}">
         ${sgHeadlineCache.headline && sgHeadlineCache.factsKey === factsKeyFor(facts)
           ? sgHeadlineCache.headline
-          : '<span style="color:var(--text-mute);font-style:italic">◌ Generating AI headline…</span>'}
+          : ''}
       </div>
       <div class="sg-assess-body">
         <div class="sg-assess-section">
@@ -5891,24 +6657,31 @@ function renderSGAssessmentBox(containerEl) {
           <ul class="sg-assess-list">${futureBits.map(b => `<li>${b}</li>`).join('')}</ul>
         </div>
         <div class="sg-assess-section">
+          <div class="sg-assess-label">Climate Drivers (3-month outlook)</div>
+          <ul class="sg-assess-list">${climateBits.map(b => `<li>${b}</li>`).join('')}</ul>
+        </div>
+        <div class="sg-assess-section">
           <div class="sg-assess-label">Watch For</div>
           <ul class="sg-assess-list watch-list">${watchBits.map(b => `<li>${b}</li>`).join('')}</ul>
         </div>
       </div>
       <div class="sg-assess-foot">
-        Auto-generated · Refresh dashboard to update facts · AI headline cached 15 min
+        Auto-generated · Refresh dashboard to update facts
       </div>
     </div>`;
   // Fire AI headline async if not already cached for this fact-set
   if (!(sgHeadlineCache.headline && sgHeadlineCache.factsKey === factsKeyFor(facts))) {
     generateSGHeadline(facts).then(h => {
+      const el = document.getElementById('sg-assess-headline');
+      if (!el) return;
       if (!h) {
-        const el = document.getElementById('sg-assess-headline');
-        if (el) el.innerHTML = `<span style="color:var(--text-mute);font-style:italic">AI headline unavailable; rule-based briefing below remains valid.</span>`;
+        // AI unavailable — hide the headline area entirely so the rule-based
+        // briefing below reads as the primary product. No scary error banner.
+        el.style.display = 'none';
         return;
       }
-      const el = document.getElementById('sg-assess-headline');
-      if (el) el.textContent = h;
+      el.style.display = '';
+      el.textContent = h;
     });
   }
 }
@@ -7519,6 +8292,14 @@ document.querySelectorAll('.views button').forEach(b => {
     if (b.dataset.view === 'personnel' && typeof fetchPersonnelStateFromBridge === 'function') {
       fetchPersonnelStateFromBridge();
     }
+    // News tab — fetch on first open, render on each open
+    if (b.dataset.view === 'news') {
+      if (!newsData.lastFetch) {
+        fetchNewsFeed();
+      } else {
+        renderNewsFeed();
+      }
+    }
     // Personnel tab: focus password input or re-render
     if (b.dataset.view === 'personnel') {
       if (personnelUnlocked) {
@@ -7528,6 +8309,74 @@ document.querySelectorAll('.views button').forEach(b => {
       }
     }
   };
+});
+
+// ============================================================
+//  News Feed Renderer
+// ============================================================
+let newsActiveFilter = 'all'; // 'all' (all disaster items) | 'personnel' (subset mentioning personnel countries)
+
+function renderNewsFeed() {
+  const listEl = document.getElementById('news-list');
+  const statusEl = document.getElementById('news-status');
+  if (!listEl) return;
+
+  if (statusEl) {
+    if (newsData.fetching) {
+      statusEl.textContent = '◌ Fetching…';
+    } else if (newsData.lastFetch) {
+      const lastTime = new Date(newsData.lastFetch).toLocaleTimeString('en-GB', { timeZone:'Asia/Singapore', hour12:false });
+      statusEl.innerHTML = `◉ <b>LIVE</b> · Auto-refresh every 5 min · Last fetch: <b>${lastTime} SGT</b> · <b>${newsData.items.length}</b> items in past 3 days`;
+    } else {
+      statusEl.textContent = '◌ Loading…';
+    }
+  }
+
+  // Apply filter. Everything in storage is already disaster-only, so the
+  // only optional filter is the personnel-location overlay.
+  let items = newsData.items || [];
+  if (newsActiveFilter === 'personnel') {
+    items = items.filter(item => newsMentionsPersonnelCountry(item) !== null);
+  }
+  // Cap displayed items
+  items = items.slice(0, 60);
+
+  if (!items.length) {
+    const msg = newsActiveFilter === 'personnel'
+      ? 'No headlines mention any country with personnel ticks.'
+      : (newsData.fetching ? 'Loading headlines…' : 'No matching headlines yet — the next 5-min poll will populate this.');
+    listEl.innerHTML = `<div class="news-empty">${msg}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = items.map(item => {
+    const personnelMatch = newsMentionsPersonnelCountry(item);
+    const time = item.pubDate ? new Date(item.pubDate) : null;
+    const timeStr = time ? time.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Singapore', hour12:false }) : '—';
+    const srcClass = item.source.startsWith('BBC') ? 'bbc' : item.source.startsWith('CNA') ? 'cna' : item.source.startsWith('Al') ? 'al' : '';
+    const desc = item.description && item.description.length > 200 ? item.description.substring(0,198) + '…' : (item.description || '');
+    return `
+      <div class="news-item ${personnelMatch ? 'personnel-relevant' : ''}">
+        <div class="ni-src ${srcClass}">${item.source}</div>
+        <div class="ni-body">
+          <div class="ni-title"><a href="${item.link || '#'}" target="_blank" rel="noopener">${item.title || '(no title)'}</a></div>
+          ${desc ? `<div class="ni-desc">${desc}</div>` : ''}
+          ${personnelMatch ? `<div class="ni-tags"><span class="ni-tag personnel">⚑ PERSONNEL: ${personnelMatch.toUpperCase()}</span></div>` : ''}
+        </div>
+        <div class="ni-time">${timeStr}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Wire up news filter buttons
+document.querySelectorAll('.news-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    newsActiveFilter = btn.dataset.filter;
+    renderNewsFeed();
+  });
 });
 
 // ============================================================
@@ -8008,12 +8857,23 @@ function renderMap() {
   const markers = document.getElementById('markers');
   markers.innerHTML = '';
   const now24h = Date.now() - 24 * 60 * 60 * 1000;
-  DATA.forEach(d => {
-    if (!d.nominal && !activeFilters.has(d.hazard)) return;
-    // 24h filter: when active, only show nominal markers + incidents from the last 24h
-    if (mapFilter24h && !d.nominal) {
-      const t = d.updated ? new Date(d.updated).getTime() : 0;
-      if (!t || t < now24h) return;
+  // Build the combined render list: real disaster alerts + synthesized news
+  // markers (personnel-relevant only). News markers are appended so they
+  // render on TOP of any overlapping disaster markers.
+  const renderList = [...DATA];
+  if (typeof getPersonnelNewsMapEvents === 'function') {
+    renderList.push(...getPersonnelNewsMapEvents());
+  }
+  renderList.forEach(d => {
+    // News markers always show regardless of hazard filter or 24h gate
+    // (they have their own personnel-relevance filter in getPersonnelNewsMapEvents)
+    if (!d.news) {
+      if (!d.nominal && !activeFilters.has(d.hazard)) return;
+      // 24h filter: when active, only show nominal markers + incidents from the last 24h
+      if (mapFilter24h && !d.nominal) {
+        const t = d.updated ? new Date(d.updated).getTime() : 0;
+        if (!t || t < now24h) return;
+      }
     }
     const p = project(d.lat, d.lng);
     if (!p || isNaN(p.x) || isNaN(p.y)) return;
@@ -8117,7 +8977,11 @@ function renderMap() {
 }
 
 function showMapPopup(evt, code, hazard, pin) {
-  const d = DATA.find(x => x.code === code && (x.hazard === hazard || (x.nominal && hazard === 'ok')));
+  // Search both DATA (disaster alerts) and the synthesized news markers
+  let d = DATA.find(x => x.code === code && (x.hazard === hazard || (x.nominal && hazard === 'ok')));
+  if (!d && typeof getPersonnelNewsMapEvents === 'function') {
+    d = getPersonnelNewsMapEvents().find(x => x.code === code && x.hazard === hazard);
+  }
   if (!d) return;
   const popup = document.getElementById('map-popup');
   const mapView = document.getElementById('map-view');
@@ -8134,11 +8998,44 @@ function showMapPopup(evt, code, hazard, pin) {
     const fullTime = d.updated ? fmtFullTime(d.updated) : '—';
     // Summarise description to 2 sentences max for the tooltip
     const descText = (d.desc || '').split(/(?<=[.!?])\s+/).slice(0, 2).join(' ');
+    const countryName = ISO2_TO_NAME[d.code] || d.name || d.code || '';
+
+    // News markers: simpler popup with prominent NEWS badge + link to article.
+    // No actions, no "View Full Advisory" — those don't apply to news.
+    if (d.news) {
+      popup.innerHTML = `
+        <div class="popup-top">
+          <span class="popup-sev" style="color:${sevColor};border-color:${sevColor}">
+            <span class="popup-dot" style="background:${sevColor}"></span>NEWS
+          </span>
+          <span class="popup-country">${countryName}${d.code && d.code !== '??' ? ' · ' + d.code : ''}</span>
+        </div>
+        <div class="pt">${d.event}</div>
+        <div class="pm">${d.source}</div>
+        <div class="popup-timestamp">
+          <span class="popup-ts-label">PUBLISHED</span>
+          <span class="popup-ts-value">${fullTime}</span>
+          <span class="popup-ts-ago">${timeAgo}</span>
+        </div>
+        ${descText ? `<div class="popup-desc">${descText}</div>` : ''}
+        <div class="popup-grid">
+          <div><span class="popup-k">Personnel</span><span class="popup-v">Yes (in country)</span></div>
+          <div><span class="popup-k">Type</span><span class="popup-v">News headline</span></div>
+        </div>
+        ${d.url ? `<button onclick="window.open('${d.url}', '_blank', 'noopener')">Read Article ↗</button>` : ''}
+      `;
+      popup.style.left = Math.min(x, viewRect.width - 340) + 'px';
+      popup.style.top = Math.min(y, viewRect.height - 280) + 'px';
+      popup.style.display = 'block';
+      if (pin) popup.classList.add('pinned');
+      else popup.classList.remove('pinned');
+      return;
+    }
+
     const actionList = (d.actions || []).slice(0, 3).map(a =>
       `<span class="popup-action ${a.includes('WELFARE') || a.includes('HADR') ? 'on' : ''}">${a}</span>`
     ).join('');
 
-    const countryName = ISO2_TO_NAME[d.code] || d.name || d.code || '';
     const regionLabel = regionLabelFor(d);
 
     popup.innerHTML = `
@@ -8747,6 +9644,18 @@ function renderCards() {
       : exposureLevel === 'nearby'
         ? 'Nearby (within 100km / country-level)'
         : 'None known';
+    // Build source link if available. Sources without a URL fall back to a
+    // sensible homepage so the user can at least navigate to the publisher.
+    const sourceUrl = d.url || (
+      d.source === 'USGS'       ? `https://earthquake.usgs.gov/earthquakes/map/?extent=${(d.lat||0)-5},${(d.lng||0)-5},${(d.lat||0)+5},${(d.lng||0)+5}` :
+      d.source === 'GDACS'      ? 'https://www.gdacs.org/' :
+      d.source === 'OpenMeteo'  ? `https://open-meteo.com/en/docs/air-quality-api` :
+      null
+    );
+    const sourceCell = sourceUrl
+      ? `<span>Source: <a href="${sourceUrl}" target="_blank" rel="noopener" class="src-link"><b>${d.source}</b> ↗</a></span>`
+      : `<span>Source: <b>${d.source}</b></span>`;
+
     card.innerHTML = `
       <div class="top">
         <div>
@@ -8761,7 +9670,7 @@ function renderCards() {
       <div class="meta">
         <span>Hazard: <b>${HAZ_LABEL[d.hazard]} / ${d.subtype}</b></span>
         <span>Incident Time: <b>${fmtFullTime(d.updated)}</b> <span style="color:var(--accent)">(${fmtTime(d.updated)})</span></span>
-        <span>Source: <b>${d.source}</b></span>
+        ${sourceCell}
         <span>Personnel: <b>${personnelText}</b></span>
       </div>
       <div class="desc">${d.desc}</div>
@@ -9619,7 +10528,27 @@ function getPersonnelIncidentAlerts() {
     if (!matches || !matches.length) return;
     alerts.push({ incident: d, personnel: matches });
   });
-  // Critical first, then warning, then watch; newest first within each severity
+
+  // Also include personnel-relevant news items as "watch"-level alerts so
+  // the watch officer can see journalist-reported events alongside the
+  // structured disaster feeds. News items already pass the disaster-keyword
+  // filter at intake; here we just need to (a) check they mention a
+  // personnel country (b) be within the 24h window (c) bind to the
+  // matching personnel records.
+  if (Array.isArray(newsData?.items) && typeof getPersonnelNewsMapEvents === 'function') {
+    const newsEvents = getPersonnelNewsMapEvents();
+    newsEvents.forEach(ev => {
+      if (!ev.updated) return;
+      const t = new Date(ev.updated).getTime();
+      if (!t || t < cutoff) return;
+      const matches = checkedByISO[ev.code];
+      if (!matches || !matches.length) return;
+      alerts.push({ incident: ev, personnel: matches });
+    });
+  }
+
+  // Critical first, then warning, then watch; newest first within each severity.
+  // News items sort at the watch level and within their group by recency.
   const sevOrder = { crit: 0, warn: 1, watch: 2 };
   alerts.sort((a, b) => {
     const s = sevOrder[a.incident.severity] - sevOrder[b.incident.severity];
@@ -9656,9 +10585,10 @@ function renderPersonnelAlertBanner() {
   }
 
   // Compute summary numbers
-  const critCount  = alerts.filter(a => a.incident.severity === 'crit').length;
-  const warnCount  = alerts.filter(a => a.incident.severity === 'warn').length;
-  const watchCount = alerts.filter(a => a.incident.severity === 'watch').length;
+  const critCount  = alerts.filter(a => a.incident.severity === 'crit' && !a.incident.news).length;
+  const warnCount  = alerts.filter(a => a.incident.severity === 'warn' && !a.incident.news).length;
+  const watchCount = alerts.filter(a => a.incident.severity === 'watch' && !a.incident.news).length;
+  const newsCount  = alerts.filter(a => a.incident.news).length;
   const countriesAffected = new Set(alerts.map(a => a.incident.code)).size;
 
   // Summary header (always visible)
@@ -9673,6 +10603,7 @@ function renderPersonnelAlertBanner() {
           ${critCount  ? `<span class="pep-sev crit">${critCount} CRITICAL</span>` : ''}
           ${warnCount  ? `<span class="pep-sev warn">${warnCount} WARNING</span>` : ''}
           ${watchCount ? `<span class="pep-sev watch">${watchCount} WATCH</span>` : ''}
+          ${newsCount  ? `<span class="pep-sev news">${newsCount} NEWS</span>` : ''}
         </div>
       </div>
       <span class="pep-chevron">${exposurePanelExpanded ? '▾' : '▸'}</span>
@@ -9690,6 +10621,22 @@ function renderPersonnelAlertBanner() {
                      : incident.severity === 'warn'  ? 'Warning'
                      : incident.severity === 'watch' ? 'Watch'
                      : incident.severity;
+      // News items render differently: clickable link to article, no card-jump.
+      if (incident.news) {
+        const url = (incident.url || '').replace(/'/g, '%27');
+        const headline = (incident.event || '').length > 80
+          ? incident.event.substring(0, 78) + '…'
+          : incident.event;
+        return `
+          <div class="pep-item ${sevClass} pep-news" onclick="window.open('${url}','_blank','noopener')">
+            <div class="pep-item-sev sev-news">NEWS</div>
+            <div class="pep-item-body">
+              <div class="pep-item-title"><b>${country}</b> · <span style="opacity:0.9">${headline}</span></div>
+              <div class="pep-item-detail">${incident.source || 'News'} · Personnel: ${subUnitNames}${extra}</div>
+            </div>
+            <div class="pep-item-action">READ ↗</div>
+          </div>`;
+      }
       return `
         <div class="pep-item ${sevClass}" onclick="jumpToCard('${incident.code}-${incident.hazard}')">
           <div class="pep-item-sev sev-${sevClass}">${sevLabel}</div>
@@ -10797,6 +11744,12 @@ async function bootApp() {
   // Recorded events sync (team-wide REC ticks) — fetch on boot + every 60s
   syncRecordedFromWorker({ force: true });
   setInterval(() => syncRecordedFromWorker(), 60 * 1000);
+  // News feed — fetch on boot, then auto-poll every 5 min to accumulate
+  // a rolling 3-day window. Persisted to localStorage.
+  if (typeof fetchNewsFeed === 'function') {
+    fetchNewsFeed();
+    if (typeof startNewsPolling === 'function') startNewsPolling();
+  }
   // Eager-load the country list so it's ready when user unlocks the Personnel tab
   if (typeof loadGeoCountries === 'function') loadGeoCountries();
   // Check for personnel × incident cross-refs after boot

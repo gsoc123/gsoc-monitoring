@@ -4557,6 +4557,14 @@ function labelFromPlace(d) {
 function regionLabelFor(d) {
   if (!d) return '';
 
+  // News items: label with the country name, not the headline. Headlines
+  // are long and clutter the map (e.g. "US authorities screen for Ebola
+  // at airports..."). The marker icon + hover popup already show the
+  // headline; the static label just needs to identify WHERE.
+  if (d.news) {
+    return d.name || (d.code && ISO2_TO_NAME[d.code]) || d.code || '';
+  }
+
   // USGS earthquakes: event is "M5.4 — 38km SE of Ferndale, California"
   // We want "Ferndale" or "California" etc.
   if (d.source === 'USGS' || (d.hazard === 'quake' && d.event)) {
@@ -11304,15 +11312,16 @@ function getPersonnelIncidentAlerts() {
     alerts.push({ incident: d, personnel: matches });
   });
 
-  // Also include personnel-relevant news items as "watch"-level alerts so
-  // the watch officer can see journalist-reported events alongside the
-  // structured disaster feeds. News items already pass the disaster-keyword
-  // filter at intake AND the 3-day retention window upstream, so we don't
-  // apply an additional time cutoff here — if it's in the news tab and
-  // mentions a personnel country, it belongs in the panel.
+  // Include personnel-relevant news items alongside the structured disaster
+  // feeds. Apply the same 24h cutoff as cards so the panel surfaces only
+  // very recent events — news articles older than 24h are filtered out
+  // here even though the news tab itself shows up to 3 days of history.
   if (Array.isArray(newsData?.items) && typeof getPersonnelNewsMapEvents === 'function') {
     const newsEvents = getPersonnelNewsMapEvents();
     newsEvents.forEach(ev => {
+      if (!ev.updated) return;
+      const t = new Date(ev.updated).getTime();
+      if (!t || t < cutoff) return;
       const matches = checkedByISO[ev.code];
       if (!matches || !matches.length) return;
       alerts.push({ incident: ev, personnel: matches });

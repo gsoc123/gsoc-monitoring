@@ -4198,8 +4198,9 @@ const SEV_ORDER = { crit: 0, warn: 1, watch: 2, info: 3 };
 const SEV_COLOR = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1c5' };
 const SEV_LABEL = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory' };
 const HAZ_LABEL = {
-  weather: 'Weather', haze: 'Air Quality', quake: 'Seismic',
-  flood: 'Flood / Wildfire', volcano: 'Volcanic', disease: 'Health'
+  cyclone: 'Cyclone', haze: 'Air Quality', quake: 'Seismic',
+  flood: 'Flood', wildfire: 'Wildfire', drought: 'Drought',
+  volcano: 'Volcanic', disease: 'Disease'
 };
 
 let activeAlerts = DATA.slice(); // populated by rebuildDATA()
@@ -4376,6 +4377,7 @@ let dataSourceStatus = {
   usgs:       { status:'pending', count:0, error:null, lastUpdate:null, label:'USGS Earthquakes' },
   gdacs:      { status:'pending', count:0, error:null, lastUpdate:null, label:'GDACS Disasters' },
   airquality: { status:'pending', count:0, error:null, lastUpdate:null, label:'Open-Meteo Air Quality' },
+  who:        { status:'pending', count:0, error:null, lastUpdate:null, label:'WHO Disease Outbreak News' },
 };
 
 let liveAlerts = []; // accumulates from all sources
@@ -4582,8 +4584,8 @@ function regionLabelFor(d) {
     return s || '';
   }
 
-  // GDACS disasters: event often like "Tropical Cyclone KABAYAN" or "Flood in Central Java"
-  if (d.source === 'GDACS' || ['weather','flood','volcano'].includes(d.hazard)) {
+  // GDACS disasters + WHO disease outbreaks
+  if (d.source === 'GDACS' || d.source === 'WHO' || ['cyclone','flood','wildfire','drought','volcano','disease'].includes(d.hazard)) {
     let s = String(d.event || d.subtype || '');
     // Try to extract after "in "
     const inMatch = s.match(/\bin\s+(.+?)(?:[,.]|$)/i);
@@ -4617,15 +4619,20 @@ function regionLabelFor(d) {
 }
 
 // ---- USGS Earthquakes ----
+// Magnitude threshold: M4.0+ for the past 7 days. USGS offers summary
+// feeds at M1.0+/M2.5+/M4.5+ only — there is no M4.0+ feed — so we fetch
+// the M2.5+ weekly feed and filter to M4.0+ client-side. The 7-day window
+// aligns with the dashboard's rebuildDATA cutoff and GDACS's natural
+// "currently active" window.
 async function fetchUSGS() {
   try {
-    const url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson';
+    const url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson';
     const resp = await fetchWithCORS(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     const events = (data.features || [])
-      .filter(f => f.properties.mag >= 5.0)
-      .slice(0, 25)
+      .filter(f => f.properties.mag >= 4.0)
+      .slice(0, 500)
       .map(f => {
         const place = f.properties.place || 'Unknown';
         const code = parseCountryFromPlace(place);
@@ -4649,8 +4656,16 @@ async function fetchUSGS() {
           hazard: 'quake',
           subtype: 'Earthquake',
           event: `M${mag.toFixed(1)} — ${place}`,
-          severity: mag >= 7 ? 'crit' : mag >= 6 ? 'warn' : mag >= 5.5 ? 'watch' : 'info',
-          threshold: mag >= 6.0 ? 'EXCEEDED' : mag >= 5.5 ? 'APPROACHING' : 'BELOW',
+          // Severity bands re-tuned for the wider M2.5-9 range. We keep the
+          // four-tier vocabulary the rest of the dashboard uses (crit / warn
+          // / watch / info) — smaller quakes fall into 'info' (advisory),
+          // which the table sorts to the bottom rather than burying or
+          // dropping them.
+          severity: mag >= 7 ? 'crit'
+                  : mag >= 6 ? 'warn'
+                  : mag >= 5 ? 'watch'
+                  : 'info',
+          threshold: mag >= 6.0 ? 'EXCEEDED' : mag >= 5.0 ? 'APPROACHING' : 'BELOW',
           updated: new Date(f.properties.time).toISOString(),
           desc: `Magnitude ${mag.toFixed(1)} earthquake at depth ${depth ? depth.toFixed(0) : '?'} km. ${f.properties.tsunami ? 'Tsunami warning system triggered.' : 'No tsunami warning issued.'}${f.properties.felt ? ' Reported felt by ' + f.properties.felt + ' people.' : ''}`,
           actions: inSAF ? (mag >= 6 ? ['WELFARE CHECK','MONITOR'] : ['MONITOR']) : ['MONITOR'],
@@ -4668,7 +4683,12 @@ async function fetchUSGS() {
 // ---- GDACS (multi-hazard) ----
 async function fetchGDACS() {
   try {
-    const url = 'https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH';
+    // EVENTS4APP returns currently-active GDACS events (what the gdacs.org
+    // website itself shows). The /SEARCH endpoint returns a stale snapshot
+    // — only ~4 events recent enough to clear the 30-day cutoff. EVENTS4APP
+    // is the same endpoint the official GDACS mobile app uses; field shape
+    // is identical so the parser below works unchanged.
+    const url = 'https://www.gdacs.org/gdacsapi/api/events/geteventlist/EVENTS4APP';
     const resp = await fetchWithCORS(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
@@ -4700,8 +4720,8 @@ async function fetchGDACS() {
     // ===== END DIAGNOSTIC =====
 
     const HAZARD_MAP = {
-      'TC':'weather', 'EQ':'quake', 'FL':'flood', 'VO':'volcano',
-      'DR':'flood', 'WF':'flood', 'TS':'quake'
+      'TC':'cyclone', 'EQ':'quake', 'FL':'flood', 'VO':'volcano',
+      'DR':'drought', 'WF':'wildfire', 'TS':'quake'
     };
     const SUBTYPE_MAP = {
       'TC':'Tropical Cyclone','EQ':'Earthquake','FL':'Flood','VO':'Volcanic Activity',
@@ -4711,7 +4731,7 @@ async function fetchGDACS() {
 
     const events = features
       .filter(f => f.properties && f.properties.eventtype && f.properties.eventtype !== 'EQ') // skip EQ (use USGS)
-      .slice(0, 40)
+      .slice(0, 200)
       .map(f => {
         const p = f.properties;
         const coords = f.geometry?.type === 'Point' ? f.geometry.coordinates : null;
@@ -4795,6 +4815,139 @@ async function fetchAirQuality() {
     return events;
   } catch(e) {
     dataSourceStatus.airquality = { status:'fail', count:0, error:e.message, lastUpdate:null, label:'Open-Meteo Air Quality' };
+    return [];
+  }
+}
+
+// ============================================================
+//  WHO Disease Outbreak News (DON)
+// ============================================================
+// WHO's official disease outbreak alerts — authoritative source for global
+// health emergencies. Updates irregularly (a few entries per month) but
+// each entry represents a confirmed outbreak WHO considers significant
+// enough to flag internationally. PHEIC-grade events (e.g. Ebola DRC/Uganda
+// PHEIC, May 2026) are marked CRITICAL.
+//
+// Notes:
+//   - WHO API returns JSON via OData. No CORS issues from browser.
+//   - Country is not a structured field — extracted from the Title text.
+//   - No coordinates — country flag is the only geographic signal (no map
+//     marker unless we lookup via COUNTRY_CENTROIDS).
+//   - Entries are kept for 30 days (NOT the 7-day cutoff used by GDACS/USGS)
+//     because health emergencies remain operationally relevant for weeks
+//     after WHO publishes. Exemption is handled in rebuildDATA.
+async function fetchWHO_DON() {
+  try {
+    // $top=50 covers comfortably more than the 30-day window; orderby desc
+    // surfaces newest entries first.
+    const url = 'https://www.who.int/api/news/diseaseoutbreaknews?$top=50&$orderby=PublicationDateAndTime%20desc';
+    const resp = await fetchWithCORS(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const entries = data.value || [];
+
+    // Build a lookup of country names → ISO2 for title-based detection.
+    // Sort by length desc so "Democratic Republic of the Congo" matches
+    // before "Congo" — avoids misclassifying DRC events to Congo (CG).
+    const countryEntries = Object.entries(ISO2_TO_NAME)
+      .sort((a, b) => b[1].length - a[1].length);
+
+    // Window: 30 days. Don't even create cards for older entries.
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+
+    const events = entries
+      .filter(e => {
+        const t = new Date(e.PublicationDateAndTime || e.PublicationDate || 0).getTime();
+        return !isNaN(t) && t >= cutoff;
+      })
+      .map(e => {
+        const title = e.Title || e.OverrideTitle || 'WHO Disease Outbreak Notice';
+        const titleLower = title.toLowerCase();
+
+        // Find the first country named in the title. WHO titles like:
+        //   "Ebola disease caused by Bundibugyo virus, Democratic Republic
+        //    of the Congo & Uganda"
+        // will match DRC first (longest match by sort order).
+        let code = '??';
+        let displayName = 'Multi-country';
+        for (const [iso, name] of countryEntries) {
+          if (titleLower.includes(name.toLowerCase())) {
+            code = iso;
+            displayName = name;
+            break;
+          }
+        }
+        const inSAF = code !== '??' && SAF_PRESENCE_CODES.has(code);
+
+        // Severity inference from the Assessment field:
+        //   PHEIC (Public Health Emergency of International Concern) → crit
+        //   "very high" / "high" risk → warn
+        //   default → watch (DON entries are inherently noteworthy)
+        const assessment = ((e.Assessment || '') + ' ' + (e.Overview || '')).toLowerCase();
+        let sev, threshold;
+        if (/public health emergency of international concern|\bpheic\b/.test(assessment)) {
+          sev = 'crit';
+          threshold = 'EXCEEDED';
+        } else if (/(very high|high) risk/.test(assessment)) {
+          sev = 'warn';
+          threshold = 'EXCEEDED';
+        } else if (/(moderate|elevated) risk/.test(assessment)) {
+          sev = 'watch';
+          threshold = 'APPROACHING';
+        } else {
+          sev = 'watch';
+          threshold = 'BELOW';
+        }
+
+        // Strip HTML from Summary for the card description.
+        // Capped at ~140 chars — WHO summaries are dense and the full text
+        // is one click away via the source link. Trimmed to word boundary
+        // with an ellipsis so the cut looks intentional, not chopped.
+        const rawSummary = (e.Summary || e.Overview || '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        let summary = rawSummary;
+        if (rawSummary.length > 140) {
+          const cut = rawSummary.substring(0, 140);
+          const lastSpace = cut.lastIndexOf(' ');
+          summary = (lastSpace > 100 ? cut.substring(0, lastSpace) : cut) + '…';
+        }
+
+        // Coordinates: WHO doesn't provide them; fall back to country centroid.
+        const centroid = code !== '??' ? COUNTRY_CENTROIDS[code] : null;
+
+        return {
+          id: 'who-' + (e.UrlName || e.Id),
+          live: true, source: 'WHO',
+          code,
+          name: displayName,
+          lat: centroid ? centroid[0] : 0,
+          lng: centroid ? centroid[1] : 0,
+          personnel: !!inSAF,
+          hazard: 'disease',
+          subtype: 'Disease Outbreak',
+          event: title,
+          severity: sev,
+          threshold,
+          // Use LastModified if available (event escalations update it),
+          // else fall back to publication time.
+          updated: e.LastModified || e.PublicationDateAndTime || e.PublicationDate || new Date().toISOString(),
+          desc: summary || 'WHO Disease Outbreak News. See source for full report.',
+          actions: inSAF
+            ? (sev === 'crit' ? ['WELFARE CHECK','HEALTH ADVISORY','MONITOR']
+              : sev === 'warn' ? ['HEALTH ADVISORY','MONITOR']
+              : ['MONITOR'])
+            : ['MONITOR'],
+          url: e.ItemDefaultUrl
+            ? 'https://www.who.int/emergencies/disease-outbreak-news/item' + e.ItemDefaultUrl
+            : 'https://www.who.int/emergencies/disease-outbreak-news'
+        };
+      });
+    dataSourceStatus.who = { status:'ok', count:events.length, error:null, lastUpdate:new Date().toISOString(), label:'WHO Disease Outbreak News' };
+    return events;
+  } catch(e) {
+    dataSourceStatus.who = { status:'fail', count:0, error:e.message, lastUpdate:null, label:'WHO Disease Outbreak News' };
     return [];
   }
 }
@@ -5125,6 +5278,42 @@ const NEWS_ANALYTICAL_PHRASES = [
   // (Removed 'could be','might be','may be','may have been' — these block
   //  legitimate forecast headlines like "cyclone could intensify" or
   //  "outbreak may spread", which the user explicitly wants surfaced.)
+
+  // === FALSE-POSITIVE PATTERNS ===
+  // Feature / promotional framing — "stunning images of X" is feature
+  // content, not an active event report.
+  'stunning images','stunning photos','stunning video','stunning footage',
+  'incredible footage','incredible images','incredible video',
+  'amazing images','amazing footage','amazing video',
+  'spectacular footage','spectacular images',
+  'jaw-dropping','jaw dropping','breathtaking',
+  'mesmerising','mesmerizing','dazzling',
+  'provides stunning','provides incredible','captures stunning',
+  // "Look inside" / "Take a look" feature framing (already partially
+  // covered by 'inside the' above, but these are more specific).
+  'take a look at','take a look inside','look inside the',
+  'see inside the','an inside look',
+  // Human-interest / feel-good sidebars (not operational signal)
+  'hero dog','hero cat','hero pet','miracle rescue','miracle survival',
+  'feel-good','feel good story','heartwarming','heart-warming',
+  'touching story','touching moment','wholesome',
+  'against all odds','beats the odds','beat the odds',
+  // Commentary / op-ed framing (softer than 'warning'; just opinion)
+  'voices concern','voices concerns','expresses concern','expresses concerns',
+  'voiced concern','voiced concerns','expressed concern','expressed concerns',
+  'calls for international action','calls for global action',
+  'speaks out about','speaking out about','speaks out on',
+  'shares thoughts on','reacts to the','responds to the',
+  // Trivially small / under-threshold events
+  'at least one ','small fire reported','minor flooding reported',
+  // Drills / exercises / preparedness ceremonies (not real events)
+  'disaster drill','emergency drill','tsunami drill','earthquake drill',
+  'fire drill','evacuation drill','tabletop exercise',
+  'preparedness exercise','preparedness ceremony','preparedness campaign',
+  'simulation exercise','mock disaster','mock evacuation',
+  // Anniversaries / retrospectives that don't use 'years/months after'
+  'remembering the victims','honouring the victims','honoring the victims',
+  'memorial service for','memorial held for',
 ];
 
 // Pre-compile substring checks (these are mostly multi-word; bare-word ones
@@ -5141,6 +5330,24 @@ const NEWS_ANALYTICAL_REGEXES = NEWS_ANALYTICAL_PHRASES.map(p => {
 function newsItemIsAnalytical(item) {
   const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
   return NEWS_ANALYTICAL_REGEXES.some(k => k.test(haystack));
+}
+
+// =============================================================
+//  AVIATION ADVISORY BOILERPLATE
+// =============================================================
+// VAAC (Volcanic Ash Advisory Center) bulletins, SIGMETs, and aviation
+// weather reports use a distinctive all-caps code style with terms like
+// "VA DTG", "OBS IN SATELLITE IMAGERY", "FL250" (flight level). These are
+// useful for aviation operators but noise for HADR monitoring — the same
+// volcanic eruption will also be reported in prose by news outlets.
+//
+// Detected by characteristic code tokens that virtually never appear in
+// normal prose headlines.
+const NEWS_AVIATION_REGEX = /\b(VA DTG|VAAC|OBS VA|OBS IN SATELLITE|EST VA DTG|FCST VA|TO FL\d{2,5}|FL\d{3,5}\/\d{3,5})\b/i;
+
+function newsItemIsAviationBulletin(item) {
+  const haystack = (item.title || '') + ' ' + (item.description || '');
+  return NEWS_AVIATION_REGEX.test(haystack);
 }
 
 // Political/conflict phrases. Even if a disaster keyword matches, these
@@ -5299,14 +5506,112 @@ function newsItemHasUrgentKeyword(item) {
   return NEWS_INHERENTLY_URGENT.some(k => title.includes(k));
 }
 
+// =============================================================
+//  PUBLISHER DENYLIST — low-quality / off-topic outlets
+// =============================================================
+// Defends against any feed that might surface items from social media or
+// low-quality outlets. Direct outlet feeds (BBC, CNA, Al Jazeera) don't
+// normally need this — but the denylist is kept as a defensive layer in
+// case feed configuration changes or an outlet syndicates third-party
+// content. Items whose publisher matches are dropped at intake.
+//
+// Matched case-insensitively against the publisher name (when extracted
+// from a trailing " - Publisher" suffix) and against the item link's
+// hostname.
+const NEWS_PUBLISHER_DENYLIST = [
+  // Social media — never acceptable as a primary source
+  'facebook', 'facebook.com', 'instagram', 'instagram.com',
+  'twitter', 'twitter.com', 'x.com', 'x (formerly twitter)',
+  'tiktok', 'tiktok.com', 'reddit', 'reddit.com',
+  'youtube', 'youtube.com', 'threads', 'threads.net',
+  'linkedin', 'linkedin.com', 'pinterest', 'pinterest.com',
+  'snapchat', 'snapchat.com', 'telegram', 't.me',
+  'truth social', 'truthsocial.com', 'bluesky', 'bsky.app',
+  'mastodon', 'discord',
+
+  // Hyperlocal US TV affiliates — usually carry local-interest fluff that
+  // doesn't add operational signal at the global HADR level (real big
+  // events are also covered by national outlets we already trust).
+  // Pattern: 3-4 letter call sign + .com (KRON4, WSBTV, WFAA, WKBN, etc.).
+  // Curated list of the most common ones that surfaced in past noise:
+  'mynews4.com', 'wkbn.com', 'kron4.com', 'wsbtv.com', 'wfaa.com',
+  'kxan.com', 'wdsu.com', 'wral.com', 'kfor.com', 'ksat.com',
+  'fox5dc.com', 'fox5ny.com', 'fox5atlanta.com', 'fox5vegas.com',
+  'abc7news.com', 'abc7chicago.com', 'abc13.com', 'abc15.com',
+  'nbc4i.com', 'nbcwashington.com', 'nbcdfw.com', 'nbclosangeles.com',
+  'cbs8.com', 'cbsnews.com/local', 'wpri.com', 'wkrn.com', 'wkrg.com',
+  'wsfa.com', 'wsbradio.com', 'fox8.com', 'fox10phoenix.com',
+  'fox13memphis.com', 'fox13now.com', 'fox23.com', 'fox4now.com',
+  'fox6now.com', 'fox9.com',
+
+  // Content farms / aggregators / SEO mills (low editorial quality)
+  'opera news', 'msn.com/en-xx', 'devdiscourse.com', 'devdiscourse',
+  'theweek.com', 'yahoo entertainment', 'newsbreak.com', 'newsbreak',
+];
+
+// Build a fast lookup set (lowercase) once.
+const NEWS_PUBLISHER_DENYSET = new Set(NEWS_PUBLISHER_DENYLIST.map(s => s.toLowerCase()));
+
+// Extract a publisher name from headlines that use the "Title - Publisher"
+// convention (the format Google News and some aggregators append). Used by
+// the publisher denylist check; returns null if no plausible publisher
+// suffix is found. Conservative: requires " - " (space-dash-space) near
+// the end, and the trailing segment must be short (<= ~40 chars) so we
+// don't mis-extract when a real headline contains " - " mid-sentence.
+function extractPublisherFromTitle(title) {
+  if (!title) return null;
+  const idx = title.lastIndexOf(' - ');
+  if (idx < 0) return null;
+  const tail = title.slice(idx + 3).trim();
+  if (!tail || tail.length > 40) return null;
+  // Reject if the tail contains sentence punctuation (likely mid-headline)
+  if (/[.!?]$/.test(tail)) return null;
+  return tail;
+}
+
+// Get the hostname from an item's link, or null. Strips "www." prefix.
+function extractHostFromLink(link) {
+  if (!link) return null;
+  try {
+    const u = new URL(link);
+    return u.hostname.replace(/^www\./, '').toLowerCase();
+  } catch (e) {
+    return null;
+  }
+}
+
+// Returns true if the item's publisher (extracted from title or hostname)
+// matches the denylist. Used by newsItemPasses to drop unwanted outlets.
+function newsItemPublisherBlocked(item) {
+  const pub = extractPublisherFromTitle(item.title);
+  if (pub && NEWS_PUBLISHER_DENYSET.has(pub.toLowerCase())) return true;
+  const host = extractHostFromLink(item.link);
+  if (host && NEWS_PUBLISHER_DENYSET.has(host)) return true;
+  // Also check if the hostname contains any denylisted token as a substring
+  // (catches subdomains like m.facebook.com, web.archive.org/.../tiktok.com)
+  if (host) {
+    for (const banned of NEWS_PUBLISHER_DENYSET) {
+      if (banned.includes('.') && host.endsWith(banned)) return true;
+    }
+  }
+  return false;
+}
+
 function newsItemPasses(item) {
   const haystack = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
   // 1) Must mention a disaster keyword (weather/air/seismic/flood/wildfire/volcanic/health)
   if (!NEWS_KEYWORD_REGEXES.some(k => k.test(haystack))) return false;
-  // 2) Must NOT be an explainer / analysis / retrospective. Catches headlines
-  //    like "What is Ebola and why...", "How worrying is...", "Inside the...",
-  //    "Years after the earthquake...", "Here's why tourists are leaving..."
+  // 2) Must NOT be an explainer / analysis / retrospective / feature piece.
+  //    Catches "What is Ebola and why...", "How worrying is...",
+  //    "Inside the...", "Years after the earthquake...", "Stunning images
+  //    of...", "Hero dog rescues...", "Voices concern over...", etc.
   if (newsItemIsAnalytical(item)) return false;
+  // 3) Must NOT come from a denylisted publisher (social media, content
+  //    farms, hyperlocal TV affiliates).
+  if (newsItemPublisherBlocked(item)) return false;
+  // 4) Must NOT be an aviation advisory bulletin (VAAC/SIGMET-style code
+  //    text — relevant to aviation operators but noise for HADR ops).
+  if (newsItemIsAviationBulletin(item)) return false;
   return true;
 }
 
@@ -5665,10 +5970,26 @@ function classifyENSO(oni) {
 //    USGS > GDACS > OpenMeteo
 // ============================================================
 // Priority order — authoritative observers ranked higher when dedup hits.
-const SOURCE_PRIORITY = { 'USGS':1, 'GDACS':2, 'OpenMeteo':3 };
+const SOURCE_PRIORITY = { 'USGS':1, 'GDACS':2, 'WHO':2, 'OpenMeteo':3 };
 
 function deduplicateAlerts(alerts) {
   const kept = [];
+
+  // Helper: title-token Jaccard similarity. Used by the WHO branch below.
+  // Returns 0-1; ≥0.7 typically means the titles describe the same event.
+  function titleSimilarity(a, b) {
+    const tokenize = s => new Set(
+      (s || '').toLowerCase()
+        .replace(/[^a-z0-9 ]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length >= 3) // drop very short tokens
+    );
+    const A = tokenize(a), B = tokenize(b);
+    if (A.size === 0 || B.size === 0) return 0;
+    let inter = 0;
+    for (const x of A) if (B.has(x)) inter++;
+    return inter / (A.size + B.size - inter);
+  }
 
   for (const candidate of alerts) {
     let isDup = false;
@@ -5679,9 +6000,43 @@ function deduplicateAlerts(alerts) {
       // Must be same hazard type to be a dup
       if (candidate.hazard !== existing.hazard) continue;
 
+      // ----- WHO Disease Outbreak News special case -----
+      // WHO publishes successive DON entries for the same ongoing outbreak
+      // (e.g. three "Hantavirus cluster on MV Hondius" reports a week apart).
+      // These are operationally the same event, not separate incidents.
+      // Match by title similarity (Jaccard ≥ 0.7) regardless of country —
+      // many WHO entries are multi-country and don't parse to a single ISO.
+      // Keep the NEWEST entry (latest LastModified) since that has the most
+      // current case counts and assessment.
+      if (candidate.source === 'WHO' && existing.source === 'WHO') {
+        if (titleSimilarity(candidate.event, existing.event) >= 0.7) {
+          isDup = true;
+          const tCand = new Date(candidate.updated).getTime();
+          const tExist = new Date(existing.updated).getTime();
+          if (!isNaN(tCand) && tCand > tExist) {
+            kept[i] = candidate; // replace older with newer
+          }
+          break;
+        }
+        // Different WHO events — fall through to next existing entry.
+        // Don't apply country/proximity logic to WHO since most are
+        // multi-country with no coordinates.
+        continue;
+      }
+
       // Must be same country (skip if both are unknown)
       if (candidate.code !== existing.code) continue;
       if (candidate.code === '??') continue;
+
+      // SAME-SOURCE earthquakes are never duplicates of each other. USGS
+      // (and GDACS) assign distinct event IDs to mainshock and aftershock
+      // sequences, and a M5.0 mainshock and a M5.1 aftershock 21 hours later
+      // are operationally distinct events even though they're in the same
+      // location. We only treat earthquakes as duplicates when reported by
+      // DIFFERENT sources (e.g. USGS and GDACS both describing the same
+      // event) — that's the cross-source duplication this function exists
+      // to handle.
+      if (candidate.hazard === 'quake' && candidate.source === existing.source) continue;
 
       // Must be within 7 days of each other
       const tA = new Date(candidate.updated).getTime();
@@ -5726,10 +6081,14 @@ function deduplicateAlerts(alerts) {
 // "country OK" markers on the world map) are preserved from MOCK_DATA since
 // those aren't incidents — they represent baseline country status, not events.
 function rebuildDATA() {
-  // 30-day window: drop incidents older than 30 days.
-  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  // 7-day window for most hazards. Exception: WHO disease outbreak entries
+  // have their own 30-day window (filtered inside fetchWHO_DON) because
+  // health emergencies remain operationally relevant for weeks. We let WHO
+  // events through unconditionally here — they self-filter at fetch time.
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const recentAlerts = liveAlerts.filter(a => {
-    if (!a.updated) return false; // no timestamp = drop
+    if (a.source === 'WHO') return true; // WHO has its own retention
+    if (!a.updated) return false;
     const t = new Date(a.updated).getTime();
     return !isNaN(t) && t >= cutoff;
   });
@@ -5748,11 +6107,12 @@ function rebuildDATA() {
   // dedup), so the LIVE … <count> matches the number of cards on screen.
   // Only update counts for sources currently in 'ok' state — don't overwrite
   // pending/fail status. Live air-quality events use source 'OpenMeteo'.
-  const displayedCounts = { usgs: 0, gdacs: 0, airquality: 0 };
+  const displayedCounts = { usgs: 0, gdacs: 0, airquality: 0, who: 0 };
   DATA.forEach(d => {
     if (d.source === 'USGS') displayedCounts.usgs++;
     else if (d.source === 'GDACS') displayedCounts.gdacs++;
     else if (d.source === 'OpenMeteo') displayedCounts.airquality++;
+    else if (d.source === 'WHO') displayedCounts.who++;
   });
   Object.keys(displayedCounts).forEach(k => {
     if (dataSourceStatus[k] && dataSourceStatus[k].status === 'ok') {
@@ -5791,13 +6151,14 @@ async function refreshAllLiveData(opts = {}) {
     : Promise.resolve();
 
   // Kick off global fetches — each updates UI as it completes
-  const [usgs, gdacs, aq] = await Promise.all([
+  const [usgs, gdacs, aq, who] = await Promise.all([
     fetchUSGS().then(r => { updateRefreshBanner(); setSourceStatusUI(true); return r; }),
     fetchGDACS().then(r => { updateRefreshBanner(); setSourceStatusUI(true); return r; }),
     fetchAirQuality().then(r => { updateRefreshBanner(); setSourceStatusUI(true); return r; }),
+    fetchWHO_DON().then(r => { updateRefreshBanner(); setSourceStatusUI(true); return r; }),
   ]);
 
-  liveAlerts = [...usgs, ...gdacs, ...aq];
+  liveAlerts = [...usgs, ...gdacs, ...aq, ...who];
   rebuildDATA();
   updateStats();
   renderAll();
@@ -5844,18 +6205,19 @@ async function refreshAllLiveData(opts = {}) {
 
   // Summary toast
   if (showToast) {
+    const totalSources = Object.keys(dataSourceStatus).length;
     const okCount = Object.values(dataSourceStatus).filter(s => s.status === 'ok').length;
     const elapsed = ((Date.now() - refreshStartTime) / 1000).toFixed(1);
     const sgOk    = sgData && sgData.live;
     let msg, cls;
-    if (okCount === 3 && sgOk) {
+    if (okCount === totalSources && sgOk) {
       msg = `✓ All sources LIVE · ${elapsed}s`;
       cls = 'ok';
     } else if (okCount === 0 && !sgOk) {
       msg = `✗ All sources blocked — showing MOCK data · ${elapsed}s`;
       cls = 'err';
     } else {
-      const parts = [`${okCount}/3 global LIVE`, sgOk ? 'SG LIVE' : 'SG MOCK'];
+      const parts = [`${okCount}/${totalSources} global LIVE`, sgOk ? 'SG LIVE' : 'SG MOCK'];
       msg = `⚠ Partial refresh · ${parts.join(' · ')} · ${elapsed}s`;
       cls = 'warn';
     }
@@ -8871,11 +9233,24 @@ updateStats();
 
 // --- Filters ---
 const filterEl = document.getElementById('filters');
+// Color per hazard category for the filter chip dot. Centralised here
+// rather than in a long ternary so adding a new hazard means one line.
+const HAZ_CHIP_COLOR = {
+  cyclone:  '#4fd1c5',  // teal — kept from previous 'weather' since GDACS TCs were the only thing mapped to it
+  haze:     '#ffa336',  // orange
+  quake:    '#ff4d4d',  // red
+  flood:    '#5ed67b',  // green
+  wildfire: '#ff8c42',  // burnt orange
+  drought:  '#d4b072',  // sandy yellow-brown
+  volcano:  '#ffd83d',  // yellow
+  disease:  '#c58bff',  // purple
+};
 Object.entries(HAZ_LABEL).forEach(([k, v]) => {
   const chip = document.createElement('div');
   chip.className = 'chip on';
   chip.dataset.haz = k;
-  chip.innerHTML = `<span class="dot" style="background:${k==='weather'?'#4fd1c5':k==='haze'?'#ffa336':k==='quake'?'#ff4d4d':k==='flood'?'#5ed67b':k==='volcano'?'#ffd83d':'#c58bff'}"></span>${v}`;
+  const color = HAZ_CHIP_COLOR[k] || '#c58bff';
+  chip.innerHTML = `<span class="dot" style="background:${color}"></span>${v}`;
   chip.onclick = () => {
     if (activeFilters.has(k)) activeFilters.delete(k); else activeFilters.add(k);
     chip.classList.toggle('on');
@@ -9075,12 +9450,21 @@ function renderNewsFeed() {
     const personnelMatch = newsMentionsPersonnelCountry(item);
     const time = item.pubDate ? new Date(item.pubDate) : null;
     const timeStr = time ? time.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Singapore', hour12:false }) : '—';
-    const srcClass = item.source.startsWith('BBC') ? 'bbc' : item.source.startsWith('CNA') ? 'cna' : item.source.startsWith('Al') ? 'al' : item.source.startsWith('Straits Times') ? 'st' : '';
+    // Defensive: items occasionally arrive without a source name. Fall back
+    // to a neutral "News" label so the row still renders.
+    const itemSource = item.source || 'News';
+    const srcClass = itemSource.startsWith('BBC') ? 'bbc'
+                   : itemSource.startsWith('CNA') ? 'cna'
+                   : itemSource.startsWith('Al') ? 'al'
+                   : itemSource.startsWith('Straits Times') ? 'st'
+                   : '';
     // Short label for the fixed-width source badge. Long source names
     // (e.g. "Straits Times Asia") otherwise overflow the 90px column.
-    const srcLabel = item.source.startsWith('Straits Times ')
-      ? 'ST · ' + item.source.replace('Straits Times ', '').toUpperCase()
-      : item.source;
+    const srcLabel = itemSource.startsWith('Straits Times ')
+      ? 'ST · ' + itemSource.replace('Straits Times ', '').toUpperCase()
+      : itemSource.length > 14
+      ? itemSource.slice(0, 12) + '…'
+      : itemSource;
     // Defensive: descriptions sometimes arrive with encoded markup like
     // "&lt;p&gt;...&lt;/p&gt;". Decode entities first, then strip the now-
     // visible tags. Order matters — strip after decode, otherwise the regex
@@ -9088,7 +9472,13 @@ function renderNewsFeed() {
     const tmp = document.createElement('textarea');
     tmp.innerHTML = item.description || '';
     const decoded = tmp.value;
-    const rawDesc = decoded.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    let rawDesc = decoded.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    // If the description just echoes the title (or starts with it), it
+    // adds nothing — suppress so the row stays clean.
+    if (rawDesc && item.title) {
+      const titleNorm = item.title.replace(/\s+/g, ' ').trim();
+      if (rawDesc === titleNorm || rawDesc.startsWith(titleNorm)) rawDesc = '';
+    }
     const desc = rawDesc.length > 200 ? rawDesc.substring(0, 198) + '…' : rawDesc;
     // Stable event ID for the REC tick. Uses link when available, else
     // title+source. Namespaced with "news:" so it never collides with
@@ -9103,7 +9493,7 @@ function renderNewsFeed() {
                  onchange="toggleRecorded('${eventId.replace(/'/g, "\\'")}', this.checked)"
                  title="Mark this article as recorded">
         </div>
-        <div class="ni-src ${srcClass}" title="${item.source}">${srcLabel}</div>
+        <div class="ni-src ${srcClass}" title="${itemSource}">${srcLabel}</div>
         <div class="ni-body">
           <div class="ni-title"><a href="${item.link || '#'}" target="_blank" rel="noopener">${applyHighlight(item.title || '(no title)')}</a></div>
           ${desc ? `<div class="ni-desc">${applyHighlight(desc)}</div>` : ''}
@@ -10237,18 +10627,30 @@ function buildLiveSituation(d) {
     case 'quake':
       // USGS events: d.desc is "Magnitude X.X earthquake at depth Y km. ..."
       return descRaw || `Seismic event reported in ${where || 'the area'}.`;
-    case 'weather':
+    case 'cyclone':
       return where
-        ? `Weather event affecting ${where}: ${descRaw || 'see source for details.'}`
-        : descRaw || 'Weather event reported.';
+        ? `Tropical cyclone affecting ${where}: ${descRaw || 'see source for details.'}`
+        : descRaw || 'Tropical cyclone reported.';
     case 'flood':
       return where
         ? `Flood event in ${where}: ${descRaw || 'see source for details.'}`
         : descRaw || 'Flood event reported.';
+    case 'wildfire':
+      return where
+        ? `Wildfire in ${where}: ${descRaw || 'see source for details.'}`
+        : descRaw || 'Wildfire reported.';
+    case 'drought':
+      return where
+        ? `Drought conditions in ${where}: ${descRaw || 'see source for details.'}`
+        : descRaw || 'Drought conditions reported.';
     case 'volcano':
       return where
         ? `Volcanic activity in ${where}: ${descRaw || 'see source for details.'}`
         : descRaw || 'Volcanic activity reported.';
+    case 'disease':
+      return where
+        ? `Disease outbreak in ${where}: ${descRaw || 'see source for details.'}`
+        : descRaw || 'Disease outbreak reported.';
     default:
       return descRaw || `${HAZ_LABEL[d.hazard] || 'Incident'} reported${where ? ' in ' + where : ''}.`;
   }
@@ -10434,6 +10836,7 @@ function renderCards() {
       d.source === 'USGS'       ? `https://earthquake.usgs.gov/earthquakes/map/?extent=${(d.lat||0)-5},${(d.lng||0)-5},${(d.lat||0)+5},${(d.lng||0)+5}` :
       d.source === 'GDACS'      ? 'https://www.gdacs.org/' :
       d.source === 'OpenMeteo'  ? `https://open-meteo.com/en/docs/air-quality-api` :
+      d.source === 'WHO'        ? 'https://www.who.int/emergencies/disease-outbreak-news' :
       null
     );
     const sourceCell = sourceUrl
@@ -12290,13 +12693,14 @@ async function refreshHazardDataOnly() {
     });
     setSourceStatusUI(true);
 
-    const [usgs, gdacs, aq] = await Promise.all([
+    const [usgs, gdacs, aq, who] = await Promise.all([
       fetchUSGS().catch(e => { console.warn('[auto-refresh] USGS failed', e); return []; }),
       fetchGDACS().catch(e => { console.warn('[auto-refresh] GDACS failed', e); return []; }),
       fetchAirQuality().catch(e => { console.warn('[auto-refresh] OpenAQ failed', e); return []; }),
+      fetchWHO_DON().catch(e => { console.warn('[auto-refresh] WHO DON failed', e); return []; }),
     ]);
 
-    liveAlerts = [...usgs, ...gdacs, ...aq];
+    liveAlerts = [...usgs, ...gdacs, ...aq, ...who];
     rebuildDATA();
     updateStats();
     renderAll();

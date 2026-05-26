@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Global Environmental Force Monitoring Dashboard</title>
+<title>GSOC Force Monitoring Dashboard (Environmental + Disease)</title>
 
 <!-- Favicon: simple globe icon, inline SVG so no external request needed. -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8F%3C/text%3E%3C/svg%3E">
@@ -1548,287 +1548,6 @@
   .aq-stats .src-tag.live { color: var(--ok); }
   .aq-stats .src-tag.mock { color: var(--text-mute); }
 
-  /* Singapore Focus view */
-  /* World Clocks View */
-  .clocks-wrap {
-    max-width: 1800px;
-    margin: 0 auto;
-    padding: 10px 24px;
-  }
-  .clocks-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 18px;
-    flex-wrap: wrap;
-    padding-bottom: 18px;
-    margin-bottom: 22px;
-    border-bottom: 1px solid var(--line);
-  }
-  .clocks-title {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--text);
-  }
-  .clocks-sub {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: 4px;
-  }
-  .clocks-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1px;
-    background: var(--line);
-    border: 1px solid var(--line);
-  }
-  /* New: search bar for adding clocks */
-  .clocks-search-bar {
-    position: relative;
-    margin-bottom: 14px;
-    max-width: 600px;
-  }
-  .clocks-search-bar input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--line-2);
-    color: var(--text);
-    padding: 10px 36px 10px 14px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-  }
-  .clocks-search-bar input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .clocks-search-clear {
-    position: absolute;
-    right: 6px; top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    color: var(--text-mute);
-    cursor: pointer;
-    padding: 4px 8px;
-    font-size: 14px;
-  }
-  .clocks-search-clear:hover { color: var(--accent); }
-
-  .clocks-search-results {
-    background: var(--bg);
-    border: 1px solid var(--line-2);
-    margin-bottom: 14px;
-    max-height: 320px;
-    overflow-y: auto;
-    max-width: 600px;
-  }
-  .clocks-search-results .csr-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--line);
-    gap: 12px;
-    font-size: 12px;
-  }
-  .clocks-search-results .csr-row:last-child { border-bottom: none; }
-  .clocks-search-results .csr-row:hover { background: var(--bg-2); }
-  .clocks-search-results .csr-name {
-    flex: 1;
-    color: var(--text);
-  }
-  .clocks-search-results .csr-name b { color: var(--accent); }
-  .clocks-search-results .csr-meta {
-    color: var(--text-mute);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-  }
-  .clocks-search-results .csr-add {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-  .clocks-search-results .csr-add:hover { opacity: 0.85; }
-  .clocks-search-results .csr-add.added {
-    background: var(--bg-3);
-    color: var(--text-mute);
-    cursor: default;
-  }
-  .clocks-search-results .csr-empty {
-    padding: 16px 14px;
-    color: var(--text-mute);
-    font-size: 12px;
-    text-align: center;
-  }
-  .clocks-empty-state {
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--text-mute);
-    font-size: 13px;
-    grid-column: 1 / -1;
-  }
-  .clocks-empty-state .lead {
-    color: var(--text-dim);
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-
-  /* Edit mode: hide/unhide overlay button on each card */
-  .clock-card .card-action-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 22px; height: 22px;
-    background: var(--bg);
-    border: 1px solid var(--line-2);
-    color: var(--text-dim);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    transition: all 0.15s;
-    opacity: 0.4;
-  }
-  .clock-card:hover .card-action-btn { opacity: 1; }
-  .clocks-grid.edit-mode .clock-card .card-action-btn {
-    display: flex;
-    opacity: 1;
-  }
-  .clock-card .card-action-btn.hide-btn:hover {
-    background: var(--crit);
-    color: var(--bg);
-    border-color: var(--crit);
-  }
-  .clock-card .card-action-btn.unhide-btn {
-    color: var(--ok);
-    border-color: var(--ok);
-  }
-  .clock-card .card-action-btn.unhide-btn:hover {
-    background: var(--ok);
-    color: var(--bg);
-  }
-
-  /* Hidden state — faded appearance when viewing hidden clocks */
-  .clock-card.hidden-state {
-    opacity: 0.45;
-    border-left: 3px solid var(--warn);
-  }
-  .clock-card.hidden-state:hover { opacity: 0.75; }
-  .clock-card.hidden-state .hidden-badge {
-    position: absolute;
-    bottom: 8px;
-    left: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.12em;
-    color: var(--warn);
-    text-transform: uppercase;
-  }
-  .clock-card {
-    background: var(--bg-2);
-    padding: 18px 18px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    position: relative;
-    transition: background 0.15s;
-  }
-  .clock-card:hover { background: var(--panel); }
-  .clock-card.home {
-    background: var(--info-bg);
-    border-left: 3px solid var(--accent);
-  }
-  .clock-card.home:hover { background: rgba(79,209,197,0.14); }
-
-  .clock-card .clock-name-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    /* Reserve right space for the X button */
-    padding-right: 36px;
-  }
-  .clock-card .city {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.2;
-    word-break: break-word;
-  }
-  .clock-card .country-code {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--text-mute);
-    letter-spacing: 0.1em;
-    margin-top: 2px;
-  }
-  .clock-card .time {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--accent);
-    margin-top: 6px;
-    line-height: 1;
-  }
-  .clock-card .date {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 3px;
-  }
-  .clock-card .offset {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
-    color: var(--text-mute);
-    padding: 2px 6px;
-    border: 1px solid var(--line-2);
-    letter-spacing: 0.05em;
-  }
-  .clock-card.home .offset {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-  .clock-card .night-indicator {
-    position: absolute;
-    bottom: 12px;
-    left: 18px;
-    font-size: 11px;
-    opacity: 0.6;
-  }
-
-  .clocks-footnote {
-    margin-top: 16px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--text-mute);
-    letter-spacing: 0.05em;
-    text-align: center;
-  }
-
-  @media (max-width: 700px) {
-    .clocks-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
-    .clock-card { padding: 14px; }
-    .clock-card .time { font-size: 18px; }
-    .clock-card .city { font-size: 14px; }
-    .clock-card .flag { font-size: 18px; }
-  }
-
   /* Personnel Tab — password-gated view */
   .views button.locked-tab {
     color: var(--warn);
@@ -2350,18 +2069,6 @@
   .personnel-sync-badge.connecting { color: var(--text-mute); border-color: var(--line-2); }
   .personnel-sync-badge.ok         { color: var(--ok);       border-color: var(--ok); }
   .personnel-sync-badge.err        { color: var(--warn);     border-color: var(--warn); }
-
-  .clocks-sync-badge {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    padding: 5px 10px;
-    border: 1px solid var(--line);
-    display: inline-block;
-    color: var(--text-mute);
-  }
-  .clocks-sync-badge.ok  { color: var(--ok);   border-color: var(--ok); }
-  .clocks-sync-badge.err { color: var(--warn); border-color: var(--warn); }
 
   /* ====== Global News Tab ====== */
   .news-wrap { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
@@ -3604,7 +3311,7 @@
   <div class="brand">
     <div class="logo">🌏</div>
     <div>
-      <h1>Global Environmental Force Monitoring Dashboard</h1>
+      <h1>GSOC Force Monitoring Dashboard (Environmental + Disease)</h1>
       <div class="sub">Country-level personnel data</div>
     </div>
   </div>
@@ -3629,7 +3336,6 @@
     <button data-view="cards">▦ Cards</button>
     <button data-view="news">◰ News</button>
     <button data-view="sg">⬢ SG Focus</button>
-    <button data-view="clocks">◷ World Clocks</button>
   </div>
   <div class="filters" id="filters">
     <!-- injected -->
@@ -3897,38 +3603,6 @@
       <div class="sg-section">
         <div class="sg-section-title">Risk Assessment</div>
         <div id="sg-thresholds"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="view" id="clocks-view">
-    <div class="clocks-wrap">
-      <div class="clocks-header">
-        <div>
-          <div class="clocks-title">◷ World Clocks</div>
-          <div class="clocks-sub">Search for any country or region to add it as a clock. Each clock shows the local time for that location. <b>Shared list</b> — changes sync to all users.</div>
-        </div>
-        <div>
-          <span class="clocks-sync-badge" id="clocks-sync-badge">◌ CONNECTING</span>
-        </div>
-      </div>
-
-      <div class="clocks-search-bar">
-        <input type="text" id="clocks-search-input"
-               placeholder="🔍 Type a country or region (e.g. Texas, Bavaria, Japan) to add a clock…"
-               autocomplete="off"
-               oninput="handleClocksSearch(this.value)" />
-        <button class="clocks-search-clear" onclick="clearClocksSearch()" title="Clear search">✕</button>
-      </div>
-
-      <div id="clocks-search-results" class="clocks-search-results" style="display:none"></div>
-
-      <div class="clocks-grid" id="clocks-grid">
-        <!-- populated by JS -->
-      </div>
-
-      <div class="clocks-footnote">
-        <span>Times update every second · DST handled via IANA timezone database · Your selected clocks are remembered across sessions</span>
       </div>
     </div>
   </section>
@@ -8876,350 +8550,6 @@ function tickClock() {
 }
 setInterval(tickClock, 1000); tickClock();
 
-// =============================================================
-//  WORLD CLOCKS — search-driven, persisted in localStorage
-// =============================================================
-//
-// Each clock has a stable key:
-//   "country:US"   → uses country.timezone (e.g. America/New_York for US)
-//   "state:US-TX"  → uses state.timezone (America/Chicago)
-//
-// userClocks: ordered list of { type, id, label, sublabel, tz } resolved from D1.
-
-// ===== Persistence: D1-synced via the Worker bridge =====
-// Shared global list — every user sees the same clocks.
-// localStorage is used as an offline cache, not the source of truth.
-const CLOCKS_LOCAL_CACHE_KEY = 'hadr_user_clocks_cache_v1';
-let userClocks = []; // [{ type:'country'|'state', id, label, sublabel, tz }]
-let clocksSearchTimer = null;
-let clocksSearchQuery = '';
-let clocksSyncOk = false;
-let clocksPollHandle = null;
-
-// Boot from cache so the UI has something to render before the first sync lands.
-(function loadClocksCache() {
-  try {
-    const raw = localStorage.getItem(CLOCKS_LOCAL_CACHE_KEY);
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) userClocks = arr;
-    }
-  } catch (e) { userClocks = []; }
-})();
-
-function saveClocksCache() {
-  try { localStorage.setItem(CLOCKS_LOCAL_CACHE_KEY, JSON.stringify(userClocks)); } catch (e) {}
-}
-
-function clockUid(type, id) { return `${type}:${id}`; }
-function isClockAdded(type, id) {
-  return userClocks.some(c => c.type === type && c.id === id);
-}
-
-function updateClocksSyncBadge() {
-  const el = document.getElementById('clocks-sync-badge');
-  if (!el) return;
-  if (clocksSyncOk) {
-    el.textContent = '● SYNCED';
-    el.className = 'clocks-sync-badge ok';
-  } else {
-    el.textContent = '⚠ OFFLINE';
-    el.className = 'clocks-sync-badge err';
-  }
-}
-
-async function fetchClocksFromBridge() {
-  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
-  try {
-    const r = await fetch(`${TELEGRAM_BRIDGE_URL}/clocks`, {
-      headers: { 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const data = await r.json();
-    const remote = (data.clocks || []).map(row => ({
-      type:     row.type,
-      id:       row.ref_id,
-      label:    row.label,
-      sublabel: row.sublabel,
-      tz:       row.timezone,
-    }));
-    // Replace local list with remote (source of truth)
-    userClocks = remote;
-    saveClocksCache();
-    clocksSyncOk = true;
-    updateClocksSyncBadge();
-    renderClocks();
-    if (clocksSearchQuery) renderClocksSearchResults(); // refresh added/removed states
-    return true;
-  } catch (e) {
-    console.warn('[clocks-sync] GET error:', e.message);
-    clocksSyncOk = false;
-    updateClocksSyncBadge();
-    return false;
-  }
-}
-
-async function pushClockToBridge(clock) {
-  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
-  try {
-    const r = await fetch(`${TELEGRAM_BRIDGE_URL}/clocks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
-      body: JSON.stringify({
-        type:     clock.type,
-        ref_id:   clock.id,
-        label:    clock.label,
-        sublabel: clock.sublabel,
-        timezone: clock.tz,
-      }),
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    clocksSyncOk = true;
-    updateClocksSyncBadge();
-    return true;
-  } catch (e) {
-    console.warn('[clocks-sync] POST error:', e.message);
-    clocksSyncOk = false;
-    updateClocksSyncBadge();
-    return false;
-  }
-}
-
-async function deleteClockFromBridge(type, id) {
-  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
-  try {
-    const uid = encodeURIComponent(`${type}:${id}`);
-    const r = await fetch(`${TELEGRAM_BRIDGE_URL}/clocks?uid=${uid}`, {
-      method: 'DELETE',
-      headers: { 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    clocksSyncOk = true;
-    updateClocksSyncBadge();
-    return true;
-  } catch (e) {
-    console.warn('[clocks-sync] DELETE error:', e.message);
-    clocksSyncOk = false;
-    updateClocksSyncBadge();
-    return false;
-  }
-}
-
-function startClocksPolling() {
-  if (clocksPollHandle) return;
-  clocksPollHandle = setInterval(() => {
-    // Only poll while the World Clocks tab is active
-    if (document.getElementById('clocks-view')?.classList.contains('active')) {
-      fetchClocksFromBridge();
-    }
-  }, 5000);
-}
-
-function addClock(type, id, label, sublabel, tz) {
-  if (isClockAdded(type, id)) return;
-  if (!tz) {
-    console.warn(`[clocks] No timezone for ${type}/${id} — clock not added`);
-    return;
-  }
-  // Optimistic UI: append locally and render immediately
-  const clock = { type, id, label, sublabel, tz };
-  userClocks.push(clock);
-  saveClocksCache();
-  renderClocks();
-  if (clocksSearchQuery) renderClocksSearchResults();
-  // Fire-and-forget commit to D1
-  pushClockToBridge(clock);
-}
-
-function removeClock(type, id) {
-  userClocks = userClocks.filter(c => !(c.type === type && c.id === id));
-  saveClocksCache();
-  renderClocks();
-  if (clocksSearchQuery) renderClocksSearchResults();
-  // Fire-and-forget delete from D1
-  deleteClockFromBridge(type, id);
-}
-
-function handleClocksSearch(q) {
-  const query = (q || '').trim();
-  clocksSearchQuery = query;
-  if (clocksSearchTimer) clearTimeout(clocksSearchTimer);
-  if (!query) {
-    document.getElementById('clocks-search-results').style.display = 'none';
-    return;
-  }
-  clocksSearchTimer = setTimeout(() => renderClocksSearchResults(), 250);
-}
-
-function clearClocksSearch() {
-  clocksSearchQuery = '';
-  const input = document.getElementById('clocks-search-input');
-  if (input) input.value = '';
-  document.getElementById('clocks-search-results').style.display = 'none';
-}
-
-async function renderClocksSearchResults() {
-  const resultsEl = document.getElementById('clocks-search-results');
-  if (!resultsEl) return;
-  if (!clocksSearchQuery) {
-    resultsEl.style.display = 'none';
-    return;
-  }
-  resultsEl.style.display = '';
-  resultsEl.innerHTML = `<div class="csr-empty">◌ Searching "${clocksSearchQuery.replace(/</g,'&lt;')}"…</div>`;
-
-  // Use the same /geo/search endpoint the Personnel tab uses — already returns timezones
-  const data = await searchGeo(clocksSearchQuery);
-  // Filter out any results without a timezone (shouldn't happen post-load, but defensive)
-  const countries = (data.countries || []).filter(c => c.timezone);
-  const states    = (data.states    || []).filter(s => s.timezone);
-
-  if (!countries.length && !states.length) {
-    resultsEl.innerHTML = `<div class="csr-empty">No matches for "${clocksSearchQuery.replace(/</g,'&lt;')}". Try the country or region name.</div>`;
-    return;
-  }
-
-  const rows = [];
-  countries.forEach(c => {
-    const added = isClockAdded('country', c.iso2);
-    rows.push(`
-      <div class="csr-row">
-        <div class="csr-name"><b>${c.name}</b> ${c.capital ? `· ${c.capital}` : ''}</div>
-        <div class="csr-meta">${c.timezone}</div>
-        ${added
-          ? `<button class="csr-add added" disabled>Added</button>`
-          : `<button class="csr-add" onclick="addClock('country', '${c.iso2}', '${escSql(c.name)}', '${escSql(c.capital || c.iso2)}', '${escSql(c.timezone)}')">+ Add</button>`}
-      </div>`);
-  });
-  states.forEach(s => {
-    const country = getCountryByISO2(s.country_iso2);
-    const added = isClockAdded('state', s.id);
-    rows.push(`
-      <div class="csr-row">
-        <div class="csr-name"><b>${s.name}</b> · ${country?.name || s.country_iso2}</div>
-        <div class="csr-meta">${s.timezone}</div>
-        ${added
-          ? `<button class="csr-add added" disabled>Added</button>`
-          : `<button class="csr-add" onclick="addClock('state', '${s.id}', '${escSql(s.name)}', '${escSql(country?.name || s.country_iso2)}', '${escSql(s.timezone)}')">+ Add</button>`}
-      </div>`);
-  });
-  resultsEl.innerHTML = rows.join('');
-}
-
-// Helper: escape strings for safe inline JS in inserted HTML
-function escSql(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
-
-function getTimezoneOffset(tz) {
-  try {
-    const now = new Date();
-    const utc = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
-    const local = new Date(now.toLocaleString('en-US', { timeZone: tz }));
-    const offsetMin = Math.round((local - utc) / 60000);
-    const sign = offsetMin >= 0 ? '+' : '-';
-    const h = Math.abs(Math.floor(offsetMin / 60)).toString().padStart(2, '0');
-    const m = Math.abs(offsetMin % 60).toString().padStart(2, '0');
-    return `UTC${sign}${h}:${m}`;
-  } catch (e) { return ''; }
-}
-
-function isNightTime(tz) {
-  try {
-    const hour = parseInt(new Intl.DateTimeFormat('en-GB', {
-      timeZone: tz, hour: '2-digit', hour12: false
-    }).format(new Date()), 10);
-    return hour >= 19 || hour < 7;
-  } catch (e) { return false; }
-}
-
-// Convert ISO2 country code to a regional-indicator flag emoji.
-// Modern OSes/browsers render this as the country flag.
-function iso2ToFlagEmoji(iso2) {
-  if (!iso2 || iso2.length !== 2) return '';
-  const A = 0x41;          // ASCII 'A'
-  const BASE = 0x1F1E6;    // Regional Indicator Symbol Letter A
-  const code = iso2.toUpperCase();
-  const c0 = code.charCodeAt(0) - A;
-  const c1 = code.charCodeAt(1) - A;
-  if (c0 < 0 || c0 > 25 || c1 < 0 || c1 > 25) return '';
-  return String.fromCodePoint(BASE + c0) + String.fromCodePoint(BASE + c1);
-}
-
-// For a clock entry, return the ISO2 to use for the flag.
-//   - country clock: id is the iso2 directly (e.g. "US")
-//   - state clock:   id is "US-TX" → we use the leading "US"
-function clockFlagISO2(clock) {
-  if (!clock) return '';
-  if (clock.type === 'country') return clock.id;
-  if (clock.type === 'state')   return (clock.id || '').split('-')[0];
-  return '';
-}
-
-function renderClocks() {
-  const grid = document.getElementById('clocks-grid');
-  if (!grid) return;
-
-  if (!userClocks.length) {
-    grid.innerHTML = `
-      <div class="clocks-empty-state">
-        <div class="lead">No clocks added yet</div>
-        <div>Use the search bar above to find a country or region and add it as a clock.</div>
-      </div>`;
-    return;
-  }
-
-  grid.innerHTML = userClocks.map(c => {
-    const night  = isNightTime(c.tz);
-    const offset = getTimezoneOffset(c.tz);
-    const idEsc  = escSql(c.id);
-    return `
-      <div class="clock-card" data-tz="${c.tz}">
-        <button class="card-action-btn hide-btn" onclick="removeClock('${c.type}', '${idEsc}')" title="Remove this clock">✕</button>
-        <div class="clock-name-row">
-          <div>
-            <div class="city">${c.label}</div>
-            <div class="country-code">${c.sublabel}</div>
-          </div>
-        </div>
-        <div class="time" data-role="time">—</div>
-        <div class="date" data-role="date">—</div>
-        <span class="offset">${offset}</span>
-        ${night ? '<span class="night-indicator" title="Local night time">🌙</span>' : ''}
-      </div>`;
-  }).join('');
-  tickWorldClocks();
-}
-
-function tickWorldClocks() {
-  const now = new Date();
-  document.querySelectorAll('#clocks-grid .clock-card').forEach(card => {
-    const tz = card.dataset.tz;
-    if (!tz) return;
-    const timeEl = card.querySelector('[data-role="time"]');
-    const dateEl = card.querySelector('[data-role="date"]');
-    try {
-      const timeStr = new Intl.DateTimeFormat('en-GB', {
-        timeZone: tz,
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false
-      }).format(now);
-      const dateStr = new Intl.DateTimeFormat('en-GB', {
-        timeZone: tz,
-        weekday: 'short', day: '2-digit', month: 'short'
-      }).format(now);
-      if (timeEl) timeEl.textContent = timeStr;
-      if (dateEl) dateEl.textContent = dateStr;
-    } catch (e) { /* invalid tz */ }
-  });
-}
-
-setInterval(() => {
-  if (document.getElementById('clocks-view')?.classList.contains('active')) {
-    tickWorldClocks();
-  }
-}, 1000);
-
-// Render initial state on boot
-renderClocks();
 
 function updateStats() {
   const counts = { crit:0, warn:0, watch:0, info:0 };
@@ -9282,11 +8612,6 @@ document.querySelectorAll('.views button').forEach(b => {
         if (sgMap) sgMap.invalidateSize();
         renderSGMap();
       }, 100);
-    }
-    // Render clocks when clocks tab is opened, plus fetch fresh state from D1
-    if (b.dataset.view === 'clocks') {
-      renderClocks();
-      if (typeof fetchClocksFromBridge === 'function') fetchClocksFromBridge();
     }
     // Refresh personnel state from D1 immediately when entering Personnel tab —
     // user shouldn't have to wait up to 5s for the next poll
@@ -12869,40 +12194,17 @@ function startAutoRefreshTimers() {
 }
 
 // ============================================================
-//  TELEGRAM NOTIFIER
-//  After each hazard refresh, find new Critical/Warning incidents
-//  and POST them to the Cloudflare Worker, which forwards to Telegram.
+//  TELEGRAM NOTIFIER (v2 — server-side dedup)
+//  After each hazard refresh, find Critical/Warning incidents from
+//  the last 24h and POST them to the Cloudflare Worker. The worker
+//  checks D1 to decide which are actually new before broadcasting.
 //
 //  - Disabled if TELEGRAM_BRIDGE_URL is empty
-//  - localStorage dedup so we don't re-spam on page reload
-//  - 24h cutoff on first run so we don't dump every old alert at once
+//  - Worker handles dedup (multi-browser safe)
+//  - Worker filters by subscriber subscription time (no backlog for new subs)
+//  - Excludes air-quality / haze events
 //  - Silent failure (logs to console only) — never breaks the dashboard
 // ============================================================
-const TELEGRAM_NOTIFIED_KEY = 'hadr_telegram_notified_ids_v1';
-const TELEGRAM_NOTIFIED_MAX = 500;
-
-let telegramNotifiedIds = new Set();
-(function loadNotifiedIds() {
-  try {
-    const raw = localStorage.getItem(TELEGRAM_NOTIFIED_KEY);
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) telegramNotifiedIds = new Set(arr);
-    }
-  } catch (e) { /* ignore */ }
-})();
-
-function saveTelegramNotifiedIds() {
-  try {
-    let ids = Array.from(telegramNotifiedIds);
-    if (ids.length > TELEGRAM_NOTIFIED_MAX) {
-      ids = ids.slice(-Math.floor(TELEGRAM_NOTIFIED_MAX / 2));
-      telegramNotifiedIds = new Set(ids);
-    }
-    localStorage.setItem(TELEGRAM_NOTIFIED_KEY, JSON.stringify(ids));
-  } catch (e) { /* ignore */ }
-}
-
 function incidentTelegramId(d) {
   if (!d) return '';
   if (d.id) return String(d.id);
@@ -12925,23 +12227,25 @@ async function maybeSendTelegramAlerts() {
     new Date(d.updated).getTime() >= cutoff
   );
 
-  // Filter out already-notified
-  const toSend = candidates.filter(d => !telegramNotifiedIds.has(incidentTelegramId(d)));
-  if (!toSend.length) return;
+  if (!candidates.length) return;
 
-  console.log(`[telegram] sending ${toSend.length} new alert(s)…`);
+  console.log(`[telegram] posting ${candidates.length} candidate(s) to worker for dedup + broadcast…`);
 
   const payload = {
-    incidents: toSend.map(d => ({
-      id:        incidentTelegramId(d),
-      severity:  d.severity,
-      country:   (typeof ISO2_TO_NAME !== 'undefined' && ISO2_TO_NAME[d.code]) || d.name || d.code || 'Unknown',
-      code:      d.code,
-      event:     d.event || d.subtype || 'Incident',
-      desc:      d.desc || '',
-      source:    d.source || '—',
-      updated:   d.updated,
-      threshold: d.threshold || '—',
+    incidents: candidates.map(d => ({
+      id:             incidentTelegramId(d),
+      severity:       d.severity,
+      country:        (typeof ISO2_TO_NAME !== 'undefined' && ISO2_TO_NAME[d.code]) || d.name || d.code || 'Unknown',
+      code:           d.code,
+      event:          d.event || d.subtype || 'Incident',
+      desc:           d.desc || '',
+      source:         d.source || '—',
+      updated:        d.updated,
+      threshold:      d.threshold || '—',
+      regionName:     d.regionName || '',
+      lat:            Number.isFinite(d.lat) ? d.lat : null,
+      lng:            Number.isFinite(d.lng) ? d.lng : null,
+      exposureLevel:  d.exposureLevel || 'none',
     })),
   };
 
@@ -12955,14 +12259,15 @@ async function maybeSendTelegramAlerts() {
       body: JSON.stringify(payload),
     });
     const result = await r.json();
-    if (result?.sent > 0) {
-      // Mark sent ones as notified
-      toSend.slice(0, result.sent).forEach(d => telegramNotifiedIds.add(incidentTelegramId(d)));
-      saveTelegramNotifiedIds();
-      console.log(`[telegram] ✓ sent ${result.sent} alert(s) (${result.errors || 0} errors)`);
-    } else if (result?.errors > 0) {
-      console.warn('[telegram] all sends failed:', result.errorDetails);
-    } else if (!r.ok) {
+    if (r.ok) {
+      const sent    = result?.sent    ?? 0;
+      const skipped = result?.skipped ?? 0;
+      const errors  = result?.errors  ?? 0;
+      console.log(`[telegram] worker response: ${sent} sent, ${skipped} skipped (dedup), ${errors} errors`);
+      if (errors > 0 && result?.errorDetails) {
+        console.warn('[telegram] error details:', result.errorDetails);
+      }
+    } else {
       console.warn(`[telegram] bridge returned ${r.status}:`, result);
     }
   } catch (e) {
@@ -12987,9 +12292,6 @@ async function bootApp() {
   // the Personnel tab is active to pick up changes from other users
   fetchPersonnelStateFromBridge();
   startPersonnelPolling();
-  // World Clocks sync (shared global) — fetch on boot, poll while tab is active
-  if (typeof fetchClocksFromBridge === 'function') fetchClocksFromBridge();
-  if (typeof startClocksPolling === 'function')    startClocksPolling();
   // Recorded events sync (team-wide REC ticks) — fetch on boot + every 60s
   syncRecordedFromWorker({ force: true });
   setInterval(() => syncRecordedFromWorker(), 60 * 1000);

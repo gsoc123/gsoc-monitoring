@@ -4329,6 +4329,7 @@ async function fetchUSGS() {
           personnel: !!inSAF,
           hazard: 'quake',
           subtype: 'Earthquake',
+          place: place,
           event: `M${mag.toFixed(1)} — ${place}`,
           // Severity bands re-tuned for the wider M2.5-9 range. We keep the
           // four-tier vocabulary the rest of the dashboard uses (crit / warn
@@ -9084,7 +9085,7 @@ function renderRecentPanel() {
     const timeAgo = fmtTime(d.updated);
     const fullTime = fmtFullTime(d.updated);
     return `
-      <div class="recent-item" onclick="jumpToCard('${d.code}-${d.hazard}')">
+      <div class="recent-item" onclick="jumpToCard('${cardKey(d)}')">
         <div class="ri-head">
           <span class="ri-sev" style="color:${color};border-color:${color}">
             <span class="dot" style="background:${color}"></span>${sevLabel}
@@ -9556,7 +9557,7 @@ function showMapPopup(evt, code, hazard, pin) {
         <div><span class="popup-k">Age</span><span class="popup-v">${timeAgo}</span></div>
       </div>
       ${actionList ? `<div class="popup-actions">${actionList}</div>` : ''}
-      <button onclick="jumpToCard('${d.code}-${d.hazard}')">View Full Advisory →</button>
+      <button onclick="jumpToCard('${cardKey(d)}')">View Full Advisory →</button>
     `;
   }
 
@@ -9902,7 +9903,7 @@ function renderTable() {
 
   rows.forEach(d => {
     const row = document.createElement('tr');
-    row.onclick = () => jumpToCard(`${d.code}-${d.hazard || 'ok'}`);
+    row.onclick = () => jumpToCard(cardKey(d));
     if (d.id) row.setAttribute('data-event-id', d.id);
     const isRecorded = !!d.id && recordedEvents.has(d.id);
     if (isRecorded) row.classList.add('recorded');
@@ -10096,7 +10097,7 @@ function renderCards() {
     if (!activeFilters.has(d.hazard)) return;
     const card = document.createElement('div');
     card.className = `card ${d.severity}`;
-    card.id = `card-${d.code}-${d.hazard}`;
+    card.id = `card-${cardKey(d)}`;
     // Always auto-generate the Situation from the actual event data.
     // PRESET_SUMMARIES is no longer consulted — it contained stale content
     // (e.g. "Riau/Kalimantan peatland fires" was firing for any Indonesia
@@ -10113,19 +10114,28 @@ function renderCards() {
           : `BELOW — sub-threshold event.`,
       actions: (d.actions || ['MONITOR']).map(a => '• ' + a).join('\n')
     };
-    // Tiered SAF exposure classification (new):
-    //   'in_area' → green ⬢ SAF PRESENCE badge (same admin region)
-    //   'nearby'  → yellow ◌ SAF NEARBY badge (country-level tick OR city within 100km)
-    //   'none'    → no badge
-    const exposureLevel = getPersonnelExposureLevel(d);
-    const hasSAF = exposureLevel !== 'none';
+    // Tiered exposure classification (distance-band model, May 2026):
+    //   'in_area'  → personnel ≤50km (or in affected country) — green badge
+    //   'nearby'   → personnel 51–200km — yellow badge
+    //   'distant'  → personnel 200km+ — no badge
+    //   'forecast' → predicted event (Watch) — no presence badge
+    //   'none'     → no personnel signal — no badge
+    // Prefer the value already computed during classification; fall back to a
+    // fresh computation for any incident that bypassed the classifier.
+    const exposureLevel = d.exposureLevel ||
+      ({ crit:'in_area', warn:'nearby', advisory:'distant', none:'none' }[getPersonnelExposureLevel(d)] || 'none');
+    const hasSAF = exposureLevel === 'in_area' || exposureLevel === 'nearby';
     // Override the exposure line to reflect the *current* personnel state.
     if (exposureLevel === 'in_area') {
-      preset.exposure = `SAF personnel confirmed in ${d.regionName || 'the incident area'}.`;
+      preset.exposure = `Personnel confirmed within 50km of the incident (${d.regionName || 'incident area'}).`;
     } else if (exposureLevel === 'nearby') {
-      preset.exposure = 'SAF personnel within 100km of the incident (not in exact area).';
+      preset.exposure = 'Personnel within 51–200km of the incident.';
+    } else if (exposureLevel === 'distant') {
+      preset.exposure = 'Nearest personnel are 200km+ from the incident.';
+    } else if (exposureLevel === 'forecast') {
+      preset.exposure = 'Forecast/predicted event — monitoring for development.';
     } else {
-      preset.exposure = 'No known SAF personnel presence in this country.';
+      preset.exposure = 'No known personnel presence in this country.';
     }
 
     // For HAZE cards specifically, override Risk Assessment + Recommended
@@ -10151,10 +10161,12 @@ function renderCards() {
       : `${d.code} · ${d.name}`;
     // Personnel-line text matches the tier
     const personnelText = exposureLevel === 'in_area'
-      ? (d.regionName ? `Yes (in ${d.regionName})` : 'Yes (in area)')
+      ? (d.regionName ? `Yes (≤50km, ${d.regionName})` : 'Yes (within 50km)')
       : exposureLevel === 'nearby'
-        ? 'Nearby (within 100km / country-level)'
-        : 'None known';
+        ? 'Nearby (51–200km)'
+        : exposureLevel === 'distant'
+          ? 'Distant (200km+)'
+          : 'None known';
     // Build source link if available. Sources without a URL fall back to a
     // sensible homepage so the user can at least navigate to the publisher.
     const sourceUrl = d.url || (
@@ -10190,7 +10202,7 @@ function renderCards() {
         <div class="ai-head">
           <span>⬡ AI STAFF-ASSIST SUMMARY</span>
         </div>
-        <div class="ai-body" id="ai-${d.code}-${d.hazard}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}${hasSAF ? `<span class="label">Recommended Actions</span>${preset.actions}` : ''}</div>
+        <div class="ai-body" id="ai-${cardKey(d)}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}${hasSAF ? `<span class="label">Recommended Actions</span>${preset.actions}` : ''}</div>
       </div>
       ${d.hazard === 'haze' ? `
       <div class="aq-history">
@@ -10216,6 +10228,15 @@ function renderCards() {
       setTimeout(() => loadAQHistory(d.code, d.lat, d.lng, '1W', null), 50);
     }
   });
+}
+
+// Canonical unique key for linking a list/table/map item to its detail card.
+// Prefer the feed-provided unique id (usgs-…, gdacs-EQ-…, who-…, aq-…) so that
+// multiple events of the same hazard in the same country resolve to DISTINCT
+// cards. Falls back to code-hazard for rows with no id (e.g. nominal/ok rows).
+function cardKey(d) {
+  if (d && d.id) return String(d.id);
+  return `${d?.code || '?'}-${d?.hazard || 'ok'}`;
 }
 
 function jumpToCard(id) {
@@ -10805,61 +10826,108 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-// Classify an incident's SAF personnel exposure into one of three tiers:
-//
-//   'in_area' (green badge): personnel ticked at city OR state level in the
-//             SAME admin region (state) as the incident. Strongest match.
-//
-//   'nearby'  (yellow badge): personnel ticked anywhere in the SAME country
-//             as the incident, OR a city tick in a DIFFERENT country whose
-//             coordinates are within 100km of the incident (cross-border
-//             proximity, e.g. JB personnel + Singapore incident).
-//
-//   'none'    (no badge): no personnel signal for this incident.
-//
-// The tier drives the badge shown on cards and the panel item severity tag.
-function getPersonnelExposureLevel(incident) {
-  if (!incident || !incident.code) return 'none';
+// Parse the "nearest town" distance out of an incident title/place, e.g.
+// "M5.2 — 49 km ESE of Adak, Alaska" → 49. This is the epicentre-to-nearest-
+// populated-place distance reported by USGS. Returns a number (km) or null if
+// the title has no parseable "NN km" distance (e.g. most GDACS titles).
+function parseTitleDistanceKm(incident) {
+  if (!incident) return null;
+  const text = `${incident.event || ''} ${incident.place || ''}`;
+  const m = text.match(/(\d+(?:\.\d+)?)\s*km\b/i);
+  if (!m) return null;
+  const km = parseFloat(m[1]);
+  return Number.isFinite(km) ? km : null;
+}
+
+// Does this incident's country/state contain any ticked personnel?
+// Presence-only check — no coordinates required. Matches at country level,
+// and (when the incident has a regionCode like "US-AK") at state level too.
+function hasPersonnelPresence(incident) {
+  if (!incident || !incident.code) return false;
   const iso2 = String(incident.code).toUpperCase();
-  const incidentState = incident.regionCode || null; // e.g. "US-AK" or null
-  const incidentLat = incident.lat;
-  const incidentLng = incident.lng;
-
-  let hasSameCountryTick = false;
-  let hasCrossBorderProximity = false;
-
-  // Pass 1: scan ticks for any signal at all.
+  const incidentState = incident.regionCode || null; // e.g. "US-AK"
   for (const key of Object.keys(personnelPresence)) {
     if (!isAnyPresence(key)) continue;
     const parts = key.split('|');
     const tickCountry = parts[0];
     const tickStateId = parts[1] || null;
-    const tickCityId  = parts[2] || null;
+    if (tickCountry !== iso2) continue;
+    // Country-level tick (no state) → counts as presence in the country.
+    if (!tickStateId) return true;
+    // If the incident has no known state, any in-country tick counts.
+    if (!incidentState) return true;
+    // Incident HAS a known state (e.g. US-AK): only a tick in THAT state
+    // counts. A tick in a different state does NOT make this incident
+    // "present" — that was the Adak bug (personnel in Virginia flagging an
+    // Alaska quake). Keep scanning other ticks.
+    if (tickStateId === incidentState) return true;
+  }
+  return false;
+}
 
-    if (tickCountry === iso2) {
-      // Same-country tick. 'in_area' check: tick's state == incident's state.
-      if (incidentState && tickStateId === incidentState) {
-        return 'in_area';
-      }
-      hasSameCountryTick = true;
-      continue;
-    }
+// Centroid-distance exposure model for NON-QUAKE events (cyclone, flood,
+// volcano, drought, wildfire, haze, disease, news). These have no
+// epicentre-to-town distance in their titles, so we band by COUNTRY:
+//   - personnel in the affected country            → 'crit'
+//   - personnel in a country whose centroid is
+//     ≤ 1500 km from the affected country centroid → 'warn'
+//   - else                                          → 'advisory' / 'none'
+// Returns 'crit' | 'warn' | 'advisory' | 'none'.
+const CENTROID_NEAR_KM = 1500;
+function getCentroidExposureLevel(incident) {
+  if (!incident || !incident.code) return 'none';
+  const iso2 = String(incident.code).toUpperCase();
 
-    // Different country. Check cross-border 100km proximity for city ticks.
-    if (tickCityId && Number.isFinite(incidentLat) && Number.isFinite(incidentLng)) {
-      const cities = GEO_CITIES_BY_STATE[tickStateId] || [];
-      const city = cities.find(c => c.id === tickCityId);
-      if (city && Number.isFinite(city.lat) && Number.isFinite(city.lng)) {
-        const dist = haversineKm(incidentLat, incidentLng, city.lat, city.lng);
-        if (dist <= 100) hasCrossBorderProximity = true;
-      }
+  // Gather the set of countries where personnel are present.
+  const personnelCountries = new Set();
+  for (const key of Object.keys(personnelPresence)) {
+    if (!isAnyPresence(key)) continue;
+    personnelCountries.add(key.split('|')[0]);
+  }
+  if (personnelCountries.size === 0) return 'none';
+
+  // Critical: personnel in the affected country itself.
+  if (personnelCountries.has(iso2)) return 'crit';
+
+  // Warning: any personnel country within CENTROID_NEAR_KM of the affected
+  // country (centroid-to-centroid).
+  const affected = COUNTRY_CENTROIDS[iso2];
+  if (affected) {
+    for (const pc of personnelCountries) {
+      const c = COUNTRY_CENTROIDS[pc];
+      if (!c) continue;
+      const dist = haversineKm(affected[0], affected[1], c[0], c[1]);
+      if (dist <= CENTROID_NEAR_KM) return 'warn';
     }
   }
 
-  // No 'in_area' match found.
-  if (hasSameCountryTick)      return 'nearby'; // any tick in incident's country
-  if (hasCrossBorderProximity) return 'nearby'; // city tick from a neighbour within 100km
-  return 'none';
+  // Personnel exist, but none in-country or within range.
+  return 'advisory';
+}
+
+// Classify exposure. Routes by hazard type:
+//   - QUAKE: presence gate + TITLE distance (epicentre→nearest town):
+//       in-country/state + ≤50km → crit, 51–150km → warn, else advisory
+//   - ALL OTHERS (cyclone/flood/haze/disease/news/…): country-centroid model
+//       in affected country → crit, ≤1500km centroid → warn, else advisory
+// Returns 'crit' | 'warn' | 'advisory' | 'none'.
+function getPersonnelExposureLevel(incident) {
+  if (!incident || !incident.code) return 'none';
+
+  // Non-quake events (cyclone, flood, haze, disease, news, etc.) use the
+  // country-centroid model — they have no epicentre-to-town title distance.
+  if (incident.hazard !== 'quake') {
+    return getCentroidExposureLevel(incident);
+  }
+
+  // Quakes: presence gate + title distance (epicentre → nearest town).
+  if (!hasPersonnelPresence(incident)) return 'none';
+
+  const distKm = parseTitleDistanceKm(incident);
+  if (distKm == null) return 'advisory'; // present, but no distance to band on
+  if (distKm <= 50)  return 'crit';
+  if (distKm <= 150) return 'warn';
+  return 'advisory';
 }
 
 // Convenience: legacy callers that just want a yes/no.
@@ -10867,46 +10935,65 @@ function hasPersonnelExposure(incident) {
   return getPersonnelExposureLevel(incident) !== 'none';
 }
 
-// =============================================================
-//  PERSONNEL-DRIVEN SEVERITY CLASSIFICATION
-// =============================================================
-// New criteria (May 2026 onwards):
-//   CRITICAL — disaster (any source severity) with DIRECT safety concern
-//              to personnel IN the area. e.g. volcanic event at personnel
-//              location.
-//   WARNING  — disaster predicted/occurring NEAR personnel area that may
-//              cause impact. e.g. cyclone forecast tracking toward
-//              personnel location.
-//   WATCH    — significant disaster happening globally with NO immediate
-//              impact on overseas personnel (event is elsewhere).
-//   ADVISORY — good-to-know events; minor incidents with no personnel
-//              impact and limited operational significance.
+// Detect whether an incident is a FORECAST / PREDICTION → classified as WATCH.
 //
-// We preserve the original source severity on `sourceSeverity` so dedup,
-// sorting fall-backs, and tooltips can still reference the raw source
-// classification. The displayed `severity` is the operational tier.
+// Watch applies ONLY to news-tab items (d.news === true) whose title or
+// description contains a predictive keyword. Authoritative hazard incidents
+// (USGS, GDACS, etc.) are NEVER classified Watch by keyword — they go through
+// the distance bands. This prevents already-occurred events whose description
+// happens to say "aftershocks expected" from being swept into Watch.
+const FORECAST_KEYWORDS = [
+  'expect', 'forecast', 'predict', 'approaching', 'projected',
+  'anticipated', 'set to', 'tracking toward', 'tracking towards',
+  'could make landfall', 'likely to', 'warning issued',
+];
+function isForecastIncident(incident) {
+  if (!incident) return false;
+  // Only news-sourced items are eligible for the Watch (forecast) tier.
+  if (!incident.news && incident.hazard !== 'news') return false;
+  const hay = `${incident.event || ''} ${incident.desc || ''}`.toLowerCase();
+  return FORECAST_KEYWORDS.some(kw => hay.includes(kw));
+}
+
+// =============================================================
+//  PERSONNEL-DRIVEN SEVERITY CLASSIFICATION  (distance-band model)
+// =============================================================
+// Revised May 2026. Severity is determined purely by proximity of the
+// CLOSEST personnel to the incident epicenter — any source severity counts.
+//
+//   WATCH    — incident is a forecast/prediction (keyword-detected).
+//              OVERRIDES all distance tiers: a predicted event is Watch even
+//              if it is aimed directly at personnel. (Ops decision.)
+//   CRITICAL — closest personnel within 0–50 km (or coarse same-country tick)
+//   WARNING  — closest personnel within 51–200 km
+//   ADVISORY — closest personnel 200 km+ away, OR personnel exist but no
+//              measurable coordinates, OR no personnel signal at all
+//
+// `sourceSeverity` preserves the raw source classification for tooltips,
+// dedup fall-backs, and sorting.
 function classifySeverityByPersonnelExposure(incident) {
   if (!incident) return incident;
-  // Preserve the source-derived severity once (idempotent)
   if (!incident.sourceSeverity) incident.sourceSeverity = incident.severity;
 
-  const exposure = getPersonnelExposureLevel(incident);
-  if (exposure === 'in_area') {
-    incident.severity = 'crit';      // CRITICAL: personnel in affected area
+  // WATCH override: forecasts are always Watch, regardless of distance.
+  if (isForecastIncident(incident)) {
+    incident.severity = 'watch';
+    incident.exposureLevel = 'forecast';
+    return incident;
+  }
+
+  const exposure = getPersonnelExposureLevel(incident); // crit|warn|advisory|none
+
+  if (exposure === 'crit') {
+    incident.severity = 'crit';
     incident.exposureLevel = 'in_area';
-  } else if (exposure === 'nearby') {
-    incident.severity = 'warn';      // WARNING: personnel nearby
+  } else if (exposure === 'warn') {
+    incident.severity = 'warn';
     incident.exposureLevel = 'nearby';
   } else {
-    // No personnel impact. Differentiate Watch vs Advisory by intrinsic
-    // event significance from the source.
-    const orig = incident.sourceSeverity;
-    if (orig === 'crit' || orig === 'warn') {
-      incident.severity = 'watch';   // WATCH: significant event elsewhere
-    } else {
-      incident.severity = 'info';    // ADVISORY: minor event elsewhere
-    }
-    incident.exposureLevel = 'none';
+    // 'advisory' or 'none' → Advisory tier.
+    incident.severity = 'info';
+    incident.exposureLevel = (exposure === 'advisory') ? 'distant' : 'none';
   }
   return incident;
 }
@@ -11194,7 +11281,7 @@ function renderPersonnelAlertBanner() {
       }
       const hasNews = incident.relatedNews && incident.relatedNews.length > 0;
       return `
-        <div class="pep-item ${sevClass}${hasNews ? ' pep-multi-source' : ''}" onclick="jumpToCard('${incident.code}-${incident.hazard}')">
+        <div class="pep-item ${sevClass}${hasNews ? ' pep-multi-source' : ''}" onclick="jumpToCard('${cardKey(incident)}')">
           <div class="pep-item-sev sev-${sevClass}">${sevLabel}</div>
           <div class="pep-item-body">
             <div class="pep-item-title">
@@ -12153,7 +12240,11 @@ function startAutoRefreshTimers() {
   if (autoRefreshSGTimer)     clearInterval(autoRefreshSGTimer);
 
   autoRefreshHazardTimer = setInterval(() => {
-    if (document.hidden) return; // skip while tab is backgrounded
+    // NOTE: intentionally NOT gated on document.hidden. Telegram alerts must
+    // fire even when the tab is backgrounded. Browsers still throttle/freeze
+    // background timers (and pause them on sleep), so this is best-effort —
+    // the visibilitychange catch-up below covers the gap on return, and a
+    // server-side cron is the only fully reliable fix.
     refreshHazardDataOnly();
   }, AUTO_REFRESH_HAZARD_MS);
 

@@ -1477,6 +1477,75 @@
     border-color: var(--watch);
   }
 
+  /* Manual severity override panel (watch-officer control on each card) */
+  .ov-panel {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px dashed var(--border, #2a3344);
+    background: rgba(255,255,255,0.02);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .ov-head {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--muted, #8a94a6);
+    margin-bottom: 6px;
+  }
+  .ov-hint {
+    display: block;
+    font-size: 8.5px;
+    color: var(--muted, #6a7484);
+    letter-spacing: 0;
+    margin-top: 2px;
+    font-style: italic;
+  }
+  .ov-current {
+    font-size: 10px;
+    color: var(--text, #d6dde8);
+    margin-bottom: 6px;
+  }
+  .ov-current .ov-meta { color: var(--muted, #6a7484); }
+  .ov-clear {
+    margin-left: 6px;
+    font-size: 9px;
+    background: transparent;
+    border: 1px solid var(--border, #2a3344);
+    color: var(--muted, #8a94a6);
+    padding: 1px 6px;
+    cursor: pointer;
+  }
+  .ov-clear:hover { color: var(--text, #fff); }
+  .ov-row { margin-top: 5px; }
+  .ov-reason {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 4px 6px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--border, #2a3344);
+    color: var(--text, #d6dde8);
+  }
+  .ov-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
+  .ov-btn {
+    flex: 1 1 auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border, #2a3344);
+    color: var(--muted, #aab3c2);
+    cursor: pointer;
+  }
+  .ov-btn:hover { background: rgba(255,255,255,0.09); color: var(--text, #fff); }
+  .ov-btn.active {
+    background: var(--accent, #4ea1ff);
+    border-color: var(--accent, #4ea1ff);
+    color: #0b0e14;
+    font-weight: 600;
+  }
+
   /* Air quality history chart */
   .aq-history {
     background: var(--bg);
@@ -4330,6 +4399,9 @@ async function fetchUSGS() {
           hazard: 'quake',
           subtype: 'Earthquake',
           place: place,
+          mag: typeof mag === 'number' ? mag : null,
+          depthKm: typeof depth === 'number' ? depth : null,
+          tsunami: !!f.properties.tsunami,
           event: `M${mag.toFixed(1)} — ${place}`,
           // Severity bands re-tuned for the wider M2.5-9 range. We keep the
           // four-tier vocabulary the rest of the dashboard uses (crit / warn
@@ -5777,6 +5849,11 @@ function rebuildDATA() {
 
   DATA = deduped;
   activeAlerts = DATA;
+
+  // Re-apply any team-wide manual severity overrides ON TOP of the automatic
+  // classification just computed, so a watch officer's human decision (ocean
+  // separation, transport, terrain, etc.) is never clobbered by auto-refresh.
+  if (typeof applyOverridesToData === 'function') applyOverridesToData();
 
   // Sync badge counts with what's actually displayed (post 30-day cutoff +
   // dedup), so the LIVE … <count> matches the number of cards on screen.
@@ -9854,6 +9931,177 @@ async function toggleRecorded(eventId, checked) {
   }
 }
 
+// =============================================================
+//  MANUAL SEVERITY OVERRIDES  (team-wide, D1-persisted)
+// =============================================================
+// A watch officer can force an incident to a chosen tier to apply human
+// contextual modifiers (ocean separation, transport ecosystem, terrain,
+// infrastructure dependency) that the automated model cannot compute. The
+// override is stored in D1 (shared across the team), survives the auto-
+// reclassification that runs on every refresh, and persists until cleared.
+//
+// severityOverrides maps event_id -> { severity, reason, set_by, set_at }.
+const SEVERITY_OVERRIDE_STORAGE_KEY = 'gsoc_severity_overrides_v1';
+
+function loadOverridesLocal() {
+  try {
+    const raw = localStorage.getItem(SEVERITY_OVERRIDE_STORAGE_KEY);
+    if (!raw) return new Map();
+    const obj = JSON.parse(raw);
+    return new Map(Object.entries(obj || {}));
+  } catch (e) {
+    console.warn('[override] local load failed:', e.message);
+    return new Map();
+  }
+}
+
+function saveOverridesLocal(map) {
+  try {
+    localStorage.setItem(SEVERITY_OVERRIDE_STORAGE_KEY, JSON.stringify(Object.fromEntries(map)));
+  } catch (e) {
+    console.warn('[override] local save failed:', e.message);
+  }
+}
+
+let severityOverrides = loadOverridesLocal();
+let overridesSyncing = false;
+let overridesLastSync = 0;
+
+// Pull the authoritative override set from the Worker. Replaces local cache.
+async function syncOverridesFromWorker(opts = {}) {
+  if (typeof TELEGRAM_BRIDGE_URL === 'undefined' || !TELEGRAM_BRIDGE_URL) return;
+  if (overridesSyncing) return;
+  if (!opts.force && (Date.now() - overridesLastSync) < 30 * 1000) return;
+  overridesSyncing = true;
+  try {
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/severity-overrides');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (Array.isArray(data.overrides)) {
+      const m = new Map();
+      data.overrides.forEach(o => {
+        if (o && o.event_id && o.severity) {
+          m.set(o.event_id, { severity: o.severity, reason: o.reason || '', set_by: o.set_by || '', set_at: o.set_at || '' });
+        }
+      });
+      severityOverrides = m;
+      saveOverridesLocal(severityOverrides);
+      overridesLastSync = Date.now();
+      console.log(`[override] synced from D1: ${severityOverrides.size} overrides`);
+      // Re-apply over the current DATA and re-render so other officers'
+      // overrides take effect immediately.
+      if (typeof applyOverridesToData === 'function') applyOverridesToData();
+      if (typeof renderAll === 'function') { try { renderAll(); } catch (e) {} }
+    }
+  } catch (e) {
+    console.warn('[override] sync from D1 failed:', e.message);
+  } finally {
+    overridesSyncing = false;
+  }
+}
+
+// Apply stored overrides over the live DATA array. Called AFTER the automatic
+// classifySeverityByPersonnelExposure pass, so a human decision always wins
+// and is not clobbered by the next auto-refresh. Stamps overrideSeverity /
+// overrideReason on the incident and forces its severity to the chosen tier.
+function applyOverridesToData() {
+  if (typeof DATA === 'undefined' || !Array.isArray(DATA)) return;
+  DATA.forEach(d => {
+    const key = (typeof cardKey === 'function') ? cardKey(d) : d.id;
+    const ov = key && severityOverrides.get(key);
+    if (ov && ov.severity) {
+      d.overrideSeverity = ov.severity;
+      d.overrideReason = ov.reason || '';
+      d.overrideSetBy = ov.set_by || '';
+      d.severity = ov.severity;
+      d.exposureLevel = 'override';
+    } else {
+      // Clear any stale override stamps if the override was removed.
+      if (d.overrideSeverity) {
+        delete d.overrideSeverity;
+        delete d.overrideReason;
+        delete d.overrideSetBy;
+      }
+    }
+  });
+}
+
+// Set (or clear, when severity is null/'') a manual override for an incident.
+// Optimistic local update + UI re-render, then async persist to D1.
+async function setSeverityOverride(eventId, severity, reason) {
+  if (!eventId) return;
+  const clearing = !severity;
+  if (clearing) {
+    severityOverrides.delete(eventId);
+  } else {
+    severityOverrides.set(eventId, { severity, reason: reason || '', set_by: '', set_at: new Date().toISOString() });
+  }
+  saveOverridesLocal(severityOverrides);
+  // Re-apply and re-render so the change is visible immediately.
+  if (typeof applyOverridesToData === 'function') applyOverridesToData();
+  if (typeof updateStats === 'function') { try { updateStats(); } catch (e) {} }
+  if (typeof renderAll === 'function') { try { renderAll(); } catch (e) {} }
+  // Persist to Worker.
+  if (typeof TELEGRAM_BRIDGE_URL === 'undefined' || !TELEGRAM_BRIDGE_URL ||
+      typeof TELEGRAM_SHARED_SECRET === 'undefined' || !TELEGRAM_SHARED_SECRET) {
+    console.warn('[override] no Worker configured — saved locally only');
+    return;
+  }
+  try {
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/severity-overrides/set', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+      body: JSON.stringify({ event_id: eventId, severity: clearing ? null : severity, reason: reason || '' }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (!data?.ok) throw new Error(data?.error || 'unknown error');
+  } catch (e) {
+    console.warn('[override] sync to D1 failed:', e.message, '— local state preserved, will reconcile on next sync');
+  }
+}
+
+// Build the override-control panel HTML for a card. Shows the current override
+// state (if any) and lets a watch officer force the incident to any tier with
+// an optional reason, or clear back to the automatic classification.
+function buildOverrideControlHtml(d) {
+  const key = (typeof cardKey === 'function') ? cardKey(d) : d.id;
+  if (!key) return '';
+  const ov = severityOverrides.get(key);
+  const tiers = [
+    { v: 'crit',  label: 'Critical' },
+    { v: 'warn',  label: 'Warning'  },
+    { v: 'watch', label: 'Watch'    },
+    { v: 'info',  label: 'Advisory' },
+  ];
+  const safeKey = key.replace(/'/g, "\\'");
+  const reasonId = 'ov-reason-' + key.replace(/[^a-zA-Z0-9_-]/g, '');
+  const buttons = tiers.map(t => {
+    const active = ov && ov.severity === t.v;
+    return `<button class="ov-btn${active ? ' active' : ''}" onclick="event.stopPropagation(); onOverrideClick('${safeKey}','${t.v}','${reasonId}')">${t.label}</button>`;
+  }).join('');
+  const current = ov
+    ? `<div class="ov-current">⚑ Manually set to <b>${SEV_LABEL[ov.severity] || ov.severity}</b>${ov.reason ? ` — ${ov.reason.replace(/</g,'&lt;')}` : ''}${ov.set_at ? ` <span class="ov-meta">(${fmtTime(ov.set_at)})</span>` : ''} <button class="ov-clear" onclick="event.stopPropagation(); setSeverityOverride('${safeKey}', null, '')">clear</button></div>`
+    : '';
+  return `
+    <div class="ov-panel" onclick="event.stopPropagation()">
+      <div class="ov-head">⚑ MANUAL SEVERITY OVERRIDE <span class="ov-hint">apply human modifiers (ocean separation, transport, terrain…) the auto-model can't compute</span></div>
+      ${current}
+      <div class="ov-row">
+        <input type="text" class="ov-reason" id="${reasonId}" placeholder="reason (optional, e.g. ocean-separated)" value="${ov && ov.reason ? ov.reason.replace(/"/g,'&quot;') : ''}" maxlength="200">
+      </div>
+      <div class="ov-row ov-buttons">${buttons}</div>
+    </div>`;
+}
+
+// Click handler that reads the reason field next to the buttons, then applies.
+function onOverrideClick(eventId, severity, reasonId) {
+  let reason = '';
+  const el = document.getElementById(reasonId);
+  if (el) reason = el.value || '';
+  setSeverityOverride(eventId, severity, reason);
+}
+
 function updateRecordedCounter() {
   const el = document.getElementById('recorded-counter');
   if (!el) return;
@@ -10204,6 +10452,7 @@ function renderCards() {
         </div>
         <div class="ai-body" id="ai-${cardKey(d)}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}${hasSAF ? `<span class="label">Recommended Actions</span>${preset.actions}` : ''}</div>
       </div>
+      ${buildOverrideControlHtml(d)}
       ${d.hazard === 'haze' ? `
       <div class="aq-history">
         <div class="aq-head">
@@ -10922,6 +11171,22 @@ function getPersonnelExposureLevel(incident) {
 
   // Quakes: presence gate + title distance (epicentre → nearest town).
   if (!hasPersonnelPresence(incident)) return 'none';
+
+  // PHYSICAL DAMPING GATE (May 2026). A quake that is too small OR too deep
+  // cannot realistically threaten personnel on the ground, no matter how
+  // close the epicentre is to a town — surface shaking attenuates sharply
+  // with depth, and sub-M5 quakes rarely cause damage. Such quakes are capped
+  // to Advisory. EXCEPTION: if USGS has set the tsunami flag, an offshore
+  // quake is a genuine threat regardless of depth/magnitude, so we let the
+  // normal distance bands apply.
+  //   - magnitude floor: M < 5.0
+  //   - depth cap:       depth > 70 km (shallow/intermediate boundary)
+  const QUAKE_MAG_FLOOR = 5.0;
+  const QUAKE_DEPTH_CAP_KM = 70;
+  const tsunamiFlag = incident.tsunami === true;
+  const tooSmall = typeof incident.mag === 'number' && incident.mag < QUAKE_MAG_FLOOR;
+  const tooDeep  = typeof incident.depthKm === 'number' && incident.depthKm > QUAKE_DEPTH_CAP_KM;
+  if (!tsunamiFlag && (tooSmall || tooDeep)) return 'advisory';
 
   const distKm = parseTitleDistanceKm(incident);
   if (distKm == null) return 'advisory'; // present, but no distance to band on
@@ -12303,7 +12568,16 @@ function incidentTelegramId(d) {
 }
 
 async function maybeSendTelegramAlerts() {
-  // Disabled if config is empty
+  // DISABLED May 2026. Telegram broadcasts are now driven by the Worker's
+  // scheduled (cron) handler, which runs every 15 min independent of any
+  // browser. See worker.js → runScheduledTick(). The dashboard no longer
+  // POSTs candidates to the Worker for broadcast; it only displays alerts.
+  //
+  // Why disabled rather than removed: keeping the function (and its single
+  // callsites) lets us re-enable browser sends quickly if cron has issues —
+  // just remove the early return below.
+  return;
+  // eslint-disable-next-line no-unreachable
   if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return;
   if (typeof DATA === 'undefined' || !Array.isArray(DATA)) return;
 
@@ -12386,6 +12660,8 @@ async function bootApp() {
   // Recorded events sync (team-wide REC ticks) — fetch on boot + every 60s
   syncRecordedFromWorker({ force: true });
   setInterval(() => syncRecordedFromWorker(), 60 * 1000);
+  syncOverridesFromWorker({ force: true });
+  setInterval(() => syncOverridesFromWorker(), 60 * 1000);
   // News feed — fetch on boot, then auto-poll every 5 min to accumulate
   // a rolling 3-day window. Persisted to localStorage.
   if (typeof fetchNewsFeed === 'function') {

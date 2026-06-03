@@ -10911,9 +10911,13 @@ async function loadAQHistory(code, lat, lng, range, btnEl) {
 //  GO
 // ============================================================
 // ============================================================
-//  PERSONNEL TAB — password-gated country/region browser
+//  PERSONNEL TAB — server-side-gated country/region browser
 // ============================================================
-const PERSONNEL_PASSWORD = 'gsoc'; // Prototype gate only — not real security
+// Authentication is now handled by the Worker (POST /auth/personnel).
+// A successful login returns a session token, stored in sessionStorage and
+// sent on every personnel-data request as X-Session-Token. The token expires
+// after 8 hours or when the browser tab closes.
+const PERSONNEL_SESSION_STORAGE_KEY = 'gsoc_personnel_session_v1';
 let personnelUnlocked = false;
 let personnelPath = []; // breadcrumb path
 
@@ -10952,11 +10956,27 @@ const PERSONNEL_BRIDGE_URL = TELEGRAM_BRIDGE_URL ? TELEGRAM_BRIDGE_URL + '/perso
 // view if it's currently active so changes from other users appear.
 async function fetchPersonnelStateFromBridge() {
   if (!PERSONNEL_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
+  // Server-side auth requires a personnel session token. If the user hasn't
+  // authenticated (or their session expired), skip the fetch silently — the
+  // personnel tab will prompt them on next access.
+  const sessionToken = getPersonnelSessionToken();
+  if (!sessionToken) return false;
   try {
     const r = await fetch(PERSONNEL_BRIDGE_URL, {
       method: 'GET',
-      headers: { 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+      headers: {
+        'X-Auth-Token': TELEGRAM_SHARED_SECRET,
+        'X-Session-Token': sessionToken,
+      },
     });
+    if (r.status === 401) {
+      // Session expired or invalid — kick the user back to the lock screen.
+      console.warn('[personnel-sync] session expired or invalid, re-locking tab');
+      lockPersonnelTab();
+      personnelSyncOk = false;
+      updatePersonnelSyncBadge();
+      return false;
+    }
     if (!r.ok) {
       console.warn('[personnel-sync] GET failed:', r.status);
       personnelSyncOk = false;
@@ -11026,6 +11046,12 @@ async function fetchPersonnelStateFromBridge() {
 // Push a single unit's state to D1
 async function pushPersonnelStateToBridge(unitKey) {
   if (!PERSONNEL_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return false;
+  // Server-side auth requires a personnel session token.
+  const sessionToken = getPersonnelSessionToken();
+  if (!sessionToken) {
+    console.warn('[personnel-sync] no session token — cannot push state');
+    return false;
+  }
   const rec = personnelPresence[unitKey] || {};
   try {
     const r = await fetch(PERSONNEL_BRIDGE_URL, {
@@ -11033,6 +11059,7 @@ async function pushPersonnelStateToBridge(unitKey) {
       headers: {
         'Content-Type': 'application/json',
         'X-Auth-Token': TELEGRAM_SHARED_SECRET,
+        'X-Session-Token': sessionToken,
       },
       body: JSON.stringify({
         unit_key: unitKey,
@@ -11040,6 +11067,13 @@ async function pushPersonnelStateToBridge(unitKey) {
         others: !!rec.others,
       }),
     });
+    if (r.status === 401) {
+      console.warn('[personnel-sync] session expired during POST, re-locking tab');
+      lockPersonnelTab();
+      personnelSyncOk = false;
+      updatePersonnelSyncBadge();
+      return false;
+    }
     if (!r.ok) {
       console.warn('[personnel-sync] POST failed:', r.status);
       personnelSyncOk = false;
@@ -11774,12 +11808,82 @@ function getCountryByISO2(iso2) {
 }
 
 
-function attemptUnlock(event) {
+// Get the current session token from sessionStorage (null if not logged in
+// or if the browser tab was closed since last login). Used as the
+// X-Session-Token header on personnel-data fetches.
+function getPersonnelSessionToken() {
+  try {
+    const raw = sessionStorage.getItem(PERSONNEL_SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || !obj.token) return null;
+    // Client-side expiry check — the Worker will also enforce server-side.
+    if (obj.expires_at && new Date(obj.expires_at).getTime() < Date.now()) {
+      sessionStorage.removeItem(PERSONNEL_SESSION_STORAGE_KEY);
+      return null;
+    }
+    return obj.token;
+  } catch (_) {
+    return null;
+  }
+}
+
+// Lock the personnel tab back to the password prompt (used on session expiry).
+function lockPersonnelTab() {
+  personnelUnlocked = false;
+  sessionStorage.removeItem(PERSONNEL_SESSION_STORAGE_KEY);
+  const gate = document.getElementById('personnel-gate');
+  const content = document.getElementById('personnel-content');
+  if (gate) gate.style.display = 'flex';
+  if (content) content.style.display = 'none';
+  const tabBtn = document.querySelector('.views button[data-view="personnel"]');
+  if (tabBtn) {
+    tabBtn.classList.remove('unlocked');
+    tabBtn.textContent = '🔒 Personnel';
+  }
+}
+
+async function attemptUnlock(event) {
   if (event && event.preventDefault) event.preventDefault();
   const pwEl = document.getElementById('gate-password');
   const errEl = document.getElementById('gate-error');
   const input = (pwEl?.value || '').trim();
-  if (input === PERSONNEL_PASSWORD) {
+  if (!input) {
+    if (errEl) errEl.textContent = '✗ Please enter the access code.';
+    return false;
+  }
+  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) {
+    if (errEl) errEl.textContent = '✗ Auth service not configured.';
+    return false;
+  }
+  // Show a transient "checking…" while we wait for the Worker.
+  if (errEl) errEl.textContent = '… verifying …';
+  try {
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/auth/personnel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: input }),
+    });
+    if (r.status === 401) {
+      if (errEl) errEl.textContent = '✗ Incorrect access code. Try again.';
+      if (pwEl) { pwEl.value = ''; pwEl.focus(); }
+      return false;
+    }
+    if (!r.ok) {
+      const data = await r.json().catch(() => ({}));
+      if (errEl) errEl.textContent = `✗ Auth service error: ${data.error || r.status}`;
+      return false;
+    }
+    const data = await r.json();
+    if (!data?.token) {
+      if (errEl) errEl.textContent = '✗ Auth service returned no token.';
+      return false;
+    }
+    // Persist the session for this browser tab only.
+    sessionStorage.setItem(PERSONNEL_SESSION_STORAGE_KEY, JSON.stringify({
+      token: data.token,
+      expires_at: data.expires_at || null,
+    }));
     personnelUnlocked = true;
     if (errEl) errEl.textContent = '';
     if (pwEl) pwEl.value = '';
@@ -11791,9 +11895,12 @@ function attemptUnlock(event) {
     personnelPath = [];
     renderPersonnelView();
     updatePersonnelSummary();
-  } else {
-    if (errEl) errEl.textContent = '✗ Incorrect access code. Try again.';
-    if (pwEl) { pwEl.value = ''; pwEl.focus(); }
+    // Trigger an initial fetch of personnel state now that we have a token.
+    if (typeof fetchPersonnelStateFromBridge === 'function') {
+      fetchPersonnelStateFromBridge();
+    }
+  } catch (e) {
+    if (errEl) errEl.textContent = `✗ Network error: ${e.message}`;
   }
   return false;
 }

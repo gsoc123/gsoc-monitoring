@@ -1477,8 +1477,6 @@
     border-color: var(--watch);
   }
 
-
-
   /* Air quality history chart */
   .aq-history {
     background: var(--bg);
@@ -2944,7 +2942,7 @@
   }
   .sg-forecast-byday {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 6px;
     margin-top: 8px;
   }
@@ -3100,6 +3098,46 @@
     color: var(--text-mute);
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  /* Prominent overrides when the Watch Officer Assessment lives at the
+     top of the Assessment tab as the primary overall summary. Bumps the
+     title, badge, headline, body type, and overall padding so it reads as
+     the page-level "what you need to know" panel. */
+  .sg-summary-top .sg-assess-box {
+    margin-top: 0;
+    margin-bottom: 18px;
+    padding: 18px 20px;
+    border-left-width: 6px;
+  }
+  .sg-summary-top .sg-assess-head {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+  .sg-summary-top .sg-assess-title {
+    font-size: 14px;
+    letter-spacing: 0.18em;
+  }
+  .sg-summary-top .sg-assess-risk {
+    font-size: 13px;
+    padding: 6px 14px;
+    letter-spacing: 0.14em;
+  }
+  .sg-summary-top .sg-assess-refresh {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  .sg-summary-top .sg-assess-headline {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .sg-summary-top .sg-assess-label {
+    font-size: 11px;
+  }
+  .sg-summary-top ul.sg-assess-list li {
+    font-size: 13px;
+    line-height: 1.55;
   }
 
   @media (max-width: 1000px) and (min-width: 701px) {
@@ -3634,6 +3672,7 @@
     <button data-view="cards">▦ Cards</button>
     <button data-view="news">◰ News</button>
     <button data-view="sg">⬢ SG Focus</button>
+    <button data-view="assessment">◆ Assessment</button>
   </div>
   <div class="filters" id="filters">
     <!-- injected -->
@@ -3901,6 +3940,34 @@
         <svg class="sg-chart" id="sg-chart-temp" viewBox="0 0 600 200" preserveAspectRatio="none"></svg>
         <div class="sg-chart-source" id="sg-chart-source"></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Assessment view  (June 2026)
+       ============================================================
+       Holds the SAF risk-assessment / threshold analysis that used
+       to live at the bottom of SG Focus. Moved to its own tab so
+       SG Focus stays focused on current readings + charts, while
+       Assessment is the "what does it mean" view.
+
+       The same JS that populated #sg-thresholds inside SG Focus
+       still does so — the DOM id is preserved, just relocated. -->
+  <section class="view" id="assessment-view">
+    <div class="sg-wrap">
+      <div class="sg-header">
+        <div>
+          <div class="sg-title">⬢ ASSESSMENT — SAF Risk Analysis</div>
+          <div class="sg-meta">Analysis using NEA readings · <span id="assessment-status">◌ Loading…</span></div>
+        </div>
+      </div>
+
+      <!-- Watch Officer Assessment summary lives at the top of the tab as the
+           primary "what you need to know" view. Populated by
+           renderSGAssessmentBox() from the existing pipeline. The old mount
+           point inside the Risk Assessment HTML is preserved as a no-op so
+           any orphan getElementById call degrades gracefully. -->
+      <div id="sg-summary-mount" class="sg-summary-top"></div>
 
       <div class="sg-section">
         <div class="sg-section-title">Risk Assessment</div>
@@ -3908,12 +3975,12 @@
       </div>
     </div>
   </section>
+
 </main>
 
 <footer>
   <div>Sources: USGS Earthquake Hazards Program · GDACS (EU JRC + UN OCHA) · Open-Meteo CAMS Air Quality · OpenStreetMap / Natural Earth</div>
 </footer>
-
 
 <script>
 // ============================================================
@@ -4648,7 +4715,18 @@ async function fetchUSGS() {
           threshold: mag >= 6.0 ? 'EXCEEDED' : mag >= 5.0 ? 'APPROACHING' : 'BELOW',
           updated: new Date(f.properties.time).toISOString(),
           desc: `Magnitude ${mag.toFixed(1)} earthquake at depth ${depth ? depth.toFixed(0) : '?'} km. ${f.properties.tsunami ? 'Tsunami warning system triggered.' : 'No tsunami warning issued.'}${f.properties.felt ? ' Reported felt by ' + f.properties.felt + ' people.' : ''}`,
-          actions: inSAF ? (mag >= 6 ? ['WELFARE CHECK','MONITOR'] : ['MONITOR']) : ['MONITOR'],
+          // Recommended actions per current doctrine (June 2026):
+          //   crit + personnel in country  → call personnel + welfare check
+          //   warn + personnel in country  → welfare check + advise avoiding incident area
+          //   anything else / no personnel → monitor only
+          // Severity here is the pre-classifier value (M-band heuristic above).
+          // classifySeverityByPersonnelExposure may rewrite d.severity later, but
+          // d.actions is set once at fetch time — same pattern as GDACS/WHO below.
+          actions: inSAF
+            ? (mag >= 7 ? ['CALL PERSONNEL','WELFARE CHECK']
+              : mag >= 6 ? ['WELFARE CHECK','AVOID INCIDENT AREA']
+              : ['MONITOR'])
+            : ['MONITOR'],
           url: f.properties.url
         };
       });
@@ -4738,7 +4816,14 @@ async function fetchGDACS() {
           threshold: p.alertlevel === 'Red' ? 'EXCEEDED' : p.alertlevel === 'Orange' ? 'APPROACHING' : 'BELOW',
           updated: p.todate || p.fromdate || new Date().toISOString(),
           desc: (p.description || p.htmldescription || `${SUBTYPE_MAP[p.eventtype]} event in ${p.country || 'affected area'}. GDACS alert level: ${p.alertlevel || 'unknown'}.`).replace(/<[^>]+>/g,'').substring(0, 300),
-          actions: inSAF ? (sev === 'crit' ? ['WELFARE CHECK','HADR PRELIM'] : sev === 'warn' ? ['WELFARE CHECK','MONITOR'] : ['MONITOR']) : ['MONITOR'],
+          // Recommended actions per current doctrine (June 2026) — see USGS
+          // section above for the rule. `sev` here is the GDACS alert-level
+          // mapping (Red→crit, Orange→warn, Green→watch) set just above.
+          actions: inSAF
+            ? (sev === 'crit' ? ['CALL PERSONNEL','WELFARE CHECK']
+              : sev === 'warn' ? ['WELFARE CHECK','AVOID INCIDENT AREA']
+              : ['MONITOR'])
+            : ['MONITOR'],
           url: p.url?.report || `https://www.gdacs.org/report.aspx?eventtype=${p.eventtype}&eventid=${p.eventid}`
         };
       });
@@ -4914,9 +4999,13 @@ async function fetchWHO_DON() {
           // else fall back to publication time.
           updated: e.LastModified || e.PublicationDateAndTime || e.PublicationDate || new Date().toISOString(),
           desc: summary || 'WHO Disease Outbreak News. See source for full report.',
+          // Recommended actions per current doctrine (June 2026) — see USGS
+          // section above for the rule. For diseases, "avoid incident area"
+          // means avoid the affected region/outbreak zone (e.g. specific
+          // districts WHO identifies as outbreak epicentre).
           actions: inSAF
-            ? (sev === 'crit' ? ['WELFARE CHECK','HEALTH ADVISORY','MONITOR']
-              : sev === 'warn' ? ['HEALTH ADVISORY','MONITOR']
+            ? (sev === 'crit' ? ['CALL PERSONNEL','WELFARE CHECK']
+              : sev === 'warn' ? ['WELFARE CHECK','AVOID INCIDENT AREA']
               : ['MONITOR'])
             : ['MONITOR'],
           url: e.ItemDefaultUrl
@@ -5930,10 +6019,9 @@ function classifyENSO(oni) {
     impact: 'Wetter-than-average conditions; monitor regional flood risks.' };
   if (oni <= -0.5) return { state:'weak_lanina',   label:'Weak La Niña',      color:'watch',
     impact: 'Slight wetting tendency; minor impact on Singapore weather.' };
-  return { state:'neutral', label:'ENSO Neutral', color:'ok',
-    impact: 'No strong ENSO signal; routine seasonal patterns expected.' };
+  return { state:'neutral', label:'Neutral pattern', color:'ok',
+    impact: 'No strong El Niño or La Niña signal; routine seasonal patterns expected.' };
 }
-
 
 // ============================================================
 //  DEDUPLICATION
@@ -6149,8 +6237,6 @@ async function refreshAllLiveData(opts = {}) {
   // don't await them — the UI updates when they arrive.
   if (typeof fetchNewsFeed === 'function')          fetchNewsFeed();
   if (typeof fetchClimateDrivers === 'function')   fetchClimateDrivers();
-  // Telegram alerts (silent if bridge URL is empty)
-  if (typeof maybeSendTelegramAlerts === 'function') maybeSendTelegramAlerts();
 
   // Wait for SG too, then re-render SG view
   await sgFetchPromise;
@@ -6272,8 +6358,10 @@ let sgWeekData = { psi: [], pm25: [], temp: [], lastFetch: null, fetching: false
 async function fetchSingapore7DayHistory() {
   // Don't run two concurrent fetches; reuse the existing promise if one is in-flight.
   if (sgWeekData.fetching) return sgWeekData;
-  // Honor a 1-hour cache — 7 days of data doesn't change quickly.
-  if (sgWeekData.lastFetch && (Date.now() - sgWeekData.lastFetch) < 60 * 60 * 1000) {
+  // 12-hour cache (June 2026, per user request) — NEA per-station readings
+  // update minute-by-minute upstream, but for the daily-statistics table at
+  // day-level resolution, refetching twice a day is plenty. Saves API quota.
+  if (sgWeekData.lastFetch && (Date.now() - sgWeekData.lastFetch) < 12 * 60 * 60 * 1000) {
     return sgWeekData;
   }
   sgWeekData.fetching = true;
@@ -6992,10 +7080,14 @@ function renderSingaporeView() {
   // Build SAF doctrine-driven analysis (Section 9, dated 29 Sep 23).
   // Output is fully deterministic: re-runs on every data refresh.
   threshEl.innerHTML = buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData);
-  // Mount the watch-officer assessment box at the bottom of risk assessment
-  const assessmentMount = document.getElementById('sg-assessment-mount');
-  if (assessmentMount && typeof renderSGAssessmentBox === 'function') {
-    renderSGAssessmentBox(assessmentMount);
+  // Watch officer assessment is the primary overall summary — rendered at
+  // the top of the Assessment tab (#sg-summary-mount), not inside the
+  // Risk Assessment block. Fallback to the legacy #sg-assessment-mount only
+  // if the new top mount is not present (defensive — shouldn't happen).
+  const summaryMount = document.getElementById('sg-summary-mount')
+                    || document.getElementById('sg-assessment-mount');
+  if (summaryMount && typeof renderSGAssessmentBox === 'function') {
+    renderSGAssessmentBox(summaryMount);
   }
   // If map is initialised, re-render with fresh data
   if (sgMap) renderSGMap();
@@ -7091,69 +7183,57 @@ function computeDailyTempStats(temp7d) {
   }).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-// Open-Meteo weather code → short human-readable label.
-// Reference: https://open-meteo.com/en/docs (WMO codes)
-function wmoCodeToText(code) {
-  if (code == null) return '—';
-  if (code === 0) return 'Clear sky';
-  if (code === 1) return 'Mainly clear';
-  if (code === 2) return 'Partly cloudy';
-  if (code === 3) return 'Overcast';
-  if (code === 45 || code === 48) return 'Fog';
-  if (code >= 51 && code <= 57) return 'Drizzle';
-  if (code >= 61 && code <= 67) return 'Rain';
-  if (code >= 71 && code <= 77) return 'Snow';
-  if (code >= 80 && code <= 82) return 'Rain showers';
-  if (code >= 85 && code <= 86) return 'Snow showers';
-  if (code === 95) return 'Thunderstorm';
-  if (code === 96 || code === 99) return 'Thunderstorm with hail';
-  return `Code ${code}`;
-}
-
-// SG forecast cache — Open-Meteo, past 7 + next 7 days daily summary.
-// past_days lets us include past-week rainfall (NEA doesn't expose a 7-day
-// rainfall archive in convenient form), keeping us on a single source for
-// past/future rain consistency.
-let sgForecastData = { days: [], past: [], future: [], lastFetch: null, fetching: false };
+// SG forecast cache — NEA 4-day weather forecast via data.gov.sg v1.
+// Replaced Open-Meteo (June 2026) per user request — NEA is the authoritative
+// source for Singapore (run by Meteorological Service Singapore). Trade-off:
+// we lose past-week rainfall data (NEA doesn't provide past) and per-day
+// precipitation in mm (NEA gives descriptive text only). Downstream rainfall
+// narrative analysis degrades gracefully via optional chaining.
+let sgForecastData = { days: [], future: [], lastFetch: null, fetching: false };
 
 async function fetchSGForecast() {
   if (sgForecastData.fetching) return sgForecastData;
-  // 1-hour cache — forecast doesn't change often
-  if (sgForecastData.lastFetch && (Date.now() - sgForecastData.lastFetch) < 60 * 60 * 1000) {
+  // 12-hour cache (June 2026, per user request). NEA refreshes the 4-day
+  // forecast twice daily upstream, so 12h is matched to the source cadence.
+  if (sgForecastData.lastFetch && (Date.now() - sgForecastData.lastFetch) < 12 * 60 * 60 * 1000) {
     return sgForecastData;
   }
   sgForecastData.fetching = true;
   try {
-    const lat = 1.3521, lng = 103.8198; // Singapore center
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}`
-      + '&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,weather_code,precipitation_sum'
-      + '&past_days=7&forecast_days=7&timezone=Asia%2FSingapore';
+    // NEA 4-day Weather Forecast via data.gov.sg v1 — same v1 family as the
+    // PSI/PM2.5 endpoints already used elsewhere on this dashboard.
+    const url = 'https://api.data.gov.sg/v1/environment/4-day-weather-forecast';
     const resp = await fetchWithCORS(url);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
-    const d = data.daily || {};
-    const all = (d.time || []).map((date, i) => ({
-      date,
-      max: d.temperature_2m_max?.[i] ?? null,
-      min: d.temperature_2m_min?.[i] ?? null,
-      mean: d.temperature_2m_mean?.[i] ?? null,
-      weatherCode: d.weather_code?.[i] ?? null,
-      precip: d.precipitation_sum?.[i] ?? null,
+    // Shape: { items: [{ forecasts: [{date, forecast, temperature{low,high},
+    //         relative_humidity{low,high}, wind{speed{low,high}, direction}}, ...] }] }
+    const item = (data.items && data.items[0]) || {};
+    const forecasts = Array.isArray(item.forecasts) ? item.forecasts : [];
+    const future = forecasts.map(f => ({
+      date: f.date || null,
+      max: typeof f.temperature?.high === 'number' ? f.temperature.high : null,
+      min: typeof f.temperature?.low === 'number' ? f.temperature.low : null,
+      mean: (typeof f.temperature?.high === 'number' && typeof f.temperature?.low === 'number')
+        ? (f.temperature.high + f.temperature.low) / 2
+        : null,
+      forecastText: f.forecast || '—',
+      humidityLow: f.relative_humidity?.low ?? null,
+      humidityHigh: f.relative_humidity?.high ?? null,
+      windLow: f.wind?.speed?.low ?? null,
+      windHigh: f.wind?.speed?.high ?? null,
+      windDir: f.wind?.direction || null,
     }));
-    // Split into past (date < today) and future (date >= today). Open-Meteo
-    // returns SGT-local dates because we passed timezone=Asia/Singapore.
-    const todaySGT = new Date(Date.now() + 8 * 3600 * 1000).toISOString().substring(0, 10);
-    const past   = all.filter(x => x.date <  todaySGT);
-    const future = all.filter(x => x.date >= todaySGT);
-    // Keep `days` populated with the future portion to remain backward-compatible
-    // with the existing forecast strip rendering.
-    sgForecastData = { days: future, past, future, lastFetch: Date.now(), fetching: false };
-    console.log(`[SG forecast] past:${past.length} future:${future.length}`);
+    // Note: NEA doesn't provide past data. `past` is omitted entirely (was
+    // previously populated by Open-Meteo's past_days parameter). Downstream
+    // consumers using facts.rain.past degrade silently via optional chaining.
+    sgForecastData = { days: future, future, lastFetch: Date.now(), fetching: false };
+    console.log(`[SG forecast] NEA: ${future.length} day(s)`);
     if (typeof renderSingaporeView === 'function') {
       try { renderSingaporeView(); } catch (e) {}
     }
   } catch (e) {
-    console.warn('[SG forecast] fetch failed:', e.message);
+    console.warn('[SG forecast] NEA fetch failed:', e.message);
     sgForecastData.fetching = false;
   }
   return sgForecastData;
@@ -7162,13 +7242,14 @@ async function fetchSGForecast() {
 // Heatwave risk assessment based on forecast.
 // Singapore has no official heatwave standard, but Met Service flags
 // "very hot" days at ≥34°C. We use a tiered approach informed by
-// SAF heat-injury training thresholds.
+// SAF heat-injury training thresholds. Re-tuned for NEA's 4-day window
+// (June 2026 — previously calibrated for a 7-day Open-Meteo horizon).
 function assessHeatwaveRisk(forecastDays) {
   if (!forecastDays.length) return null;
   const maxes = forecastDays.map(d => d.max).filter(x => x != null && isFinite(x));
   if (!maxes.length) return null;
   const peakMax = Math.max(...maxes);
-  // Count consecutive days ≥35°C
+  // Count consecutive days ≥35°C (≥2 days in a 4-day window is meaningful)
   let maxStreak = 0, currentStreak = 0;
   for (const m of maxes) {
     if (m >= 35) { currentStreak++; maxStreak = Math.max(maxStreak, currentStreak); }
@@ -7177,21 +7258,21 @@ function assessHeatwaveRisk(forecastDays) {
   // Count days ≥33°C
   const hotDays = maxes.filter(m => m >= 33).length;
   let level, label, color, note;
-  if (maxStreak >= 3) {
+  if (maxStreak >= 2) {
     level = 'critical'; color = 'crit';
     label = `CRITICAL — ${maxStreak} consecutive days forecast ≥35°C`;
     note = 'Sustained extreme heat. Implement Heat Stress Risk Management measures; defer non-essential outdoor activity to early morning / late afternoon.';
   } else if (peakMax >= 35) {
     level = 'high'; color = 'warn';
-    label = `HIGH — peak ${peakMax.toFixed(1)}°C forecast within 7 days`;
+    label = `HIGH — peak ${peakMax.toFixed(1)}°C forecast within 4 days`;
     note = 'At least one very hot day expected. Brief sub-units on heat-injury signs; review training schedules.';
-  } else if (hotDays >= 3 || peakMax >= 34) {
+  } else if (hotDays >= 2 || peakMax >= 34) {
     level = 'moderate'; color = 'watch';
     label = `MODERATE — ${hotDays} day${hotDays === 1 ? '' : 's'} forecast ≥33°C${peakMax >= 34 ? ', peak ' + peakMax.toFixed(1) + '°C' : ''}`;
     note = 'Hot conditions expected. Standard hydration discipline; monitor heat-stress on outdoor exercises.';
   } else {
     level = 'low'; color = 'ok';
-    label = `LOW — peak ${peakMax.toFixed(1)}°C forecast within 7 days`;
+    label = `LOW — peak ${peakMax.toFixed(1)}°C forecast within 4 days`;
     note = 'No elevated heat risk indicated.';
   }
   return { level, label, color, note, peakMax, hotDays, maxStreak };
@@ -7345,7 +7426,14 @@ function buildSGAssessmentFacts() {
     };
   }
 
-  // ----- Rainfall past + future (Open-Meteo, single source for consistency) -----
+  // ----- Rainfall past + future -----
+  // Note: previously sourced from Open-Meteo (past_days + precipitation_sum).
+  // After June 2026 swap to NEA 4-day forecast, neither past data nor per-day
+  // precip in mm is available. These blocks naturally degrade:
+  //   - facts.rain.past: stays undefined because sgForecastData.past is not set
+  //   - facts.rain.future: explicitly guarded below; only set if at least one
+  //     forecast day has a numeric precip value (would only happen if data
+  //     source is switched back to one that provides mm rainfall)
   if (sgForecastData.past && sgForecastData.past.length) {
     const past = sgForecastData.past;
     const rains = past.map(d => d.precip || 0);
@@ -7358,7 +7446,8 @@ function buildSGAssessmentFacts() {
       dryDays: rains.filter(r => r < 1).length,
     };
   }
-  if (sgForecastData.future && sgForecastData.future.length) {
+  if (sgForecastData.future && sgForecastData.future.length
+      && sgForecastData.future.some(d => typeof d.precip === 'number')) {
     const future = sgForecastData.future;
     const rains = future.map(d => d.precip || 0);
     const totalMm = rains.reduce((a,b)=>a+b,0);
@@ -7496,10 +7585,10 @@ function renderSGAssessmentBody(facts) {
   const climateBits = [];
   if (facts.climate) {
     const c = facts.climate;
-    climateBits.push(`Current ENSO state: <b class="risk-${c.color}">${c.label}</b> (ONI ${c.oni >= 0 ? '+' : ''}${c.oni.toFixed(2)} for ${c.season} ${c.year}). Trend: ${c.trend}.`);
+    climateBits.push(`Pacific Ocean climate: <b class="risk-${c.color}">${c.label}</b>. Trend: ${c.trend}.`);
     if (c.impact) climateBits.push(c.impact);
   } else {
-    climateBits.push(`<span style="color:var(--text-mute);font-style:italic">Climate driver data unavailable — check /climate-drivers Worker endpoint.</span>`);
+    climateBits.push(`<span style="color:var(--text-mute);font-style:italic">Climate data unavailable.</span>`);
   }
 
   // ===== Watch For (actionable) =====
@@ -7625,7 +7714,7 @@ function renderSGAssessmentBox(containerEl) {
           <ul class="sg-assess-list">${futureBits.map(b => `<li>${b}</li>`).join('')}</ul>
         </div>
         <div class="sg-assess-section">
-          <div class="sg-assess-label">Climate Drivers (3-month outlook)</div>
+          <div class="sg-assess-label">Climate Drivers</div>
           <ul class="sg-assess-list">${climateBits.map(b => `<li>${b}</li>`).join('')}</ul>
         </div>
         <div class="sg-assess-section">
@@ -7657,7 +7746,8 @@ function renderSGAssessmentBox(containerEl) {
 // Manual refresh — clears the AI cache and re-renders
 function refreshSGAssessment() {
   sgHeadlineCache = { headline: null, factsKey: null, ts: 0 };
-  const box = document.getElementById('sg-assessment-mount');
+  const box = document.getElementById('sg-summary-mount')
+           || document.getElementById('sg-assessment-mount');
   if (box) renderSGAssessmentBox(box);
 }
 
@@ -8065,23 +8155,16 @@ function buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData) {
         </div>`;
     }
 
-    // ===== Forecast (Next 7 Days) =====
+    // ===== Forecast (Next 4 Days · NEA) =====
     const forecast = (sgForecastData.days || []);
     if (forecast.length) {
       const heatRisk = assessHeatwaveRisk(forecast);
       const maxes = forecast.map(d => d.max).filter(v => v != null);
       const minMax = maxes.length ? Math.min(...maxes).toFixed(1) : '—';
       const maxMax = maxes.length ? Math.max(...maxes).toFixed(1) : '—';
-      // Most common weather code over the 7 days
-      const codeCounts = {};
-      forecast.forEach(d => { if (d.weatherCode != null) codeCounts[d.weatherCode] = (codeCounts[d.weatherCode] || 0) + 1; });
-      const sortedCodes = Object.entries(codeCounts).sort((a,b) => b[1] - a[1]);
-      const dominantWeather = sortedCodes.length ? wmoCodeToText(parseInt(sortedCodes[0][0], 10)) : '—';
-      // Total rain expected
-      const totalRain = forecast.reduce((sum, d) => sum + (d.precip || 0), 0);
       tempBlock += `
         <div class="sg-forecast-wrap">
-          <div class="sg-forecast-label">Forecast · Next 7 Days</div>
+          <div class="sg-forecast-label">Forecast · Next 4 Days</div>
           <div class="sg-forecast-grid">
             <div class="sg-forecast-row">
               <div class="sg-forecast-k">Risk of heatwave:</div>
@@ -8094,38 +8177,27 @@ function buildSafRiskAnalysis(psiVal, pmVal, tempVal, sgData) {
               <div class="sg-forecast-k">Daily maximum temperatures range:</div>
               <div class="sg-forecast-v">${minMax}°C – ${maxMax}°C</div>
             </div>
-            <div class="sg-forecast-row">
-              <div class="sg-forecast-k">Weather:</div>
-              <div class="sg-forecast-v">${dominantWeather}${totalRain > 0 ? ` · ${totalRain.toFixed(0)}mm total rain expected` : ''}</div>
-            </div>
           </div>
           <div class="sg-forecast-byday">
             ${forecast.map(d => `
               <div class="sg-fd">
-                <div class="sg-fd-day">${new Date(d.date + 'T00:00:00+08:00').toLocaleDateString('en-GB', { weekday:'short', timeZone:'Asia/Singapore' })}</div>
-                <div class="sg-fd-date">${d.date.slice(5)}</div>
+                <div class="sg-fd-day">${d.date ? new Date(d.date + 'T00:00:00+08:00').toLocaleDateString('en-GB', { weekday:'short', timeZone:'Asia/Singapore' }) : '—'}</div>
+                <div class="sg-fd-date">${d.date ? d.date.slice(5) : '—'}</div>
                 <div class="sg-fd-max">${d.max != null ? d.max.toFixed(0) + '°' : '—'}</div>
                 <div class="sg-fd-min">${d.min != null ? d.min.toFixed(0) + '°' : '—'}</div>
-                <div class="sg-fd-wx">${wmoCodeToText(d.weatherCode).slice(0, 14)}</div>
+                <div class="sg-fd-wx" title="${escHtml(d.forecastText || '')}">${escHtml((d.forecastText || '—').slice(0, 32))}</div>
               </div>
             `).join('')}
           </div>
-          <div class="sg-forecast-src">Source: Open-Meteo (GFS/ECMWF blend)</div>
+          <div class="sg-forecast-src">Source: NEA Meteorological Service Singapore via data.gov.sg</div>
         </div>`;
     }
-
-    tempBlock += `
-        <div class="sg-ra-pop-rule" style="margin-top:10px;color:var(--text-mute);font-size:11px;font-style:italic">
-          Heat-injury guidance is not part of SAF Section 9 (haze doctrine). Bands shown derive from common SAF/MOH heat-injury training guidance for tropical outdoor conditions.
-        </div>
-      </div>`;
   }
 
   return `
     ${psiBlock}
     ${pmBlock}
     ${tempBlock}
-    <div id="sg-assessment-mount"></div>
     <div class="sg-ra-foot">
       Auto-updates on data refresh · Last calculated ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Singapore', hour12: false })} SGT
     </div>
@@ -8807,6 +8879,56 @@ function renderSGMapLegend() {
   el.innerHTML = rows;
 }
 
+// =============================================================
+//  XSS PROTECTION HELPERS  (June 2026)
+// =============================================================
+// Feed-supplied strings (RSS news titles, USGS/GDACS/WHO event names,
+// descriptions, etc.) are injected into innerHTML throughout the dashboard.
+// Without escaping, a malicious or compromised feed could inject script tags.
+// escHtml() escapes the five HTML-significant characters; escUrl() additionally
+// blocks the javascript:/data:/vbscript: pseudo-schemes that escHtml alone
+// cannot defend against (since neither <> nor quotes are needed for those).
+//
+// Usage:
+//   ${escHtml(feedString)}                    — for text content
+//   <a href="${escUrl(feedUrl)}">             — for link URLs
+//   <span title="${escHtml(s)}">              — for HTML attributes (use escHtml)
+//
+// Hard rules:
+//   - Wrap EVERY feed-supplied string before innerHTML.
+//   - Wrap EVERY feed-supplied URL with escUrl, not escHtml.
+//   - Do NOT wrap our own template scaffold or internal-derived values
+//     (severity codes, country codes we computed ourselves, etc.) — that's
+//     noise without benefit.
+function escHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Safe URL for href/src attributes. Returns '#' for any URL that uses a
+// dangerous pseudo-scheme; returns the URL itself (HTML-attribute-escaped)
+// otherwise. Empty/null inputs return '#' as a harmless placeholder.
+function escUrl(u) {
+  if (!u) return '#';
+  const s = String(u).trim();
+  // Block dangerous pseudo-schemes. Match case-insensitively, ignoring
+  // leading whitespace and any control chars that some browsers tolerate.
+  const stripped = s.replace(/[\x00-\x20]/g, '').toLowerCase();
+  if (stripped.startsWith('javascript:') ||
+      stripped.startsWith('vbscript:') ||
+      stripped.startsWith('data:') ||
+      stripped.startsWith('file:')) {
+    return '#';
+  }
+  // Otherwise escape the URL so it can't break out of the attribute.
+  return escHtml(s);
+}
+
 function fmtTime(iso) {
   const d = new Date(iso);
   const diff = Math.floor((NOW - d) / 60000);
@@ -8855,7 +8977,6 @@ function tickClock() {
   document.getElementById('sync').textContent = dateStr;
 }
 setInterval(tickClock, 1000); tickClock();
-
 
 function updateStats() {
   const counts = { crit:0, warn:0, watch:0, info:0 };
@@ -8931,6 +9052,43 @@ document.querySelectorAll('.views button').forEach(b => {
       } else {
         renderNewsFeed();
       }
+    }
+    // Assessment tab — same data source as SG Focus (NEA), so ensure SG data
+    // is loaded and rendered. The risk-assessment DOM (#sg-thresholds and
+    // #sg-assessment-mount) lives inside the Assessment view section since
+    // June 2026, but renderSingaporeView() still finds them by ID and
+    // populates them as before.
+    if (b.dataset.view === 'assessment') {
+      const statusEl = document.getElementById('assessment-status');
+      if (!sgData.lastFetch) {
+        if (statusEl) statusEl.textContent = '◌ Fetching NEA data…';
+        fetchSingaporeData().then(() => {
+          if (statusEl && sgData.lastFetch) {
+            const t = new Date(sgData.lastFetch).toLocaleString('en-GB', { timeZone:'Asia/Singapore', hour12:false });
+            statusEl.innerHTML = sgData.live
+              ? `<span class="live">◉ LIVE</span> · last fetch ${t} SGT`
+              : `<span class="mock">◌ MOCK</span> · last fetch ${t} SGT`;
+          }
+        }).catch(e => {
+          if (statusEl) statusEl.textContent = `✗ NEA fetch failed: ${e.message || 'unknown'}`;
+        });
+      } else {
+        // Data is already loaded — re-render to ensure thresholds reflect
+        // the current sgData (in case the user has been on another tab while
+        // an auto-refresh ran).
+        if (typeof renderSingaporeView === 'function') {
+          try { renderSingaporeView(); } catch (_) {}
+        }
+        if (statusEl && sgData.lastFetch) {
+          const t = new Date(sgData.lastFetch).toLocaleString('en-GB', { timeZone:'Asia/Singapore', hour12:false });
+          statusEl.innerHTML = sgData.live
+            ? `<span class="live">◉ LIVE</span> · last fetch ${t} SGT`
+            : `<span class="mock">◌ MOCK</span> · last fetch ${t} SGT`;
+        }
+      }
+      // Trigger 7-day history fetch for the trend paragraphs inside the
+      // risk assessment (same as SG Focus did).
+      if (typeof fetchSingapore7DayHistory === 'function') fetchSingapore7DayHistory();
     }
     // Personnel tab: focus password input or re-render
     if (b.dataset.view === 'personnel') {
@@ -9124,11 +9282,11 @@ function renderNewsFeed() {
                  onchange="toggleRecorded('${eventId.replace(/'/g, "\\'")}', this.checked)"
                  title="Mark this article as recorded">
         </div>
-        <div class="ni-src ${srcClass}" title="${itemSource}">${srcLabel}</div>
+        <div class="ni-src ${srcClass}" title="${escHtml(itemSource)}">${escHtml(srcLabel)}</div>
         <div class="ni-body">
-          <div class="ni-title"><a href="${item.link || '#'}" target="_blank" rel="noopener">${applyHighlight(item.title || '(no title)')}</a></div>
-          ${desc ? `<div class="ni-desc">${applyHighlight(desc)}</div>` : ''}
-          ${personnelMatch ? `<div class="ni-tags"><span class="ni-tag personnel">⚑ PERSONNEL: ${personnelMatch.toUpperCase()}</span></div>` : ''}
+          <div class="ni-title"><a href="${escUrl(item.link)}" target="_blank" rel="noopener">${applyHighlight(escHtml(item.title || '(no title)'))}</a></div>
+          ${desc ? `<div class="ni-desc">${applyHighlight(escHtml(desc))}</div>` : ''}
+          ${personnelMatch ? `<div class="ni-tags"><span class="ni-tag personnel">⚑ PERSONNEL: ${escHtml(personnelMatch.toUpperCase())}</span></div>` : ''}
         </div>
         <div class="ni-time">${timeStr}</div>
       </div>
@@ -9393,12 +9551,12 @@ function renderRecentPanel() {
       <div class="recent-item" onclick="jumpToCard('${cardKey(d)}')">
         <div class="ri-head">
           <span class="ri-sev" style="color:${color};border-color:${color}">
-            <span class="dot" style="background:${color}"></span>${sevLabel}
+            <span class="dot" style="background:${color}"></span>${escHtml(sevLabel)}
           </span>
           <span class="ri-time">${timeAgo}</span>
         </div>
-        <div class="ri-event">${d.event || d.subtype || 'Event'}</div>
-        <div class="ri-meta">${region ? '📍 ' + region + ' · ' : ''}${country} · ${fullTime}</div>
+        <div class="ri-event">${escHtml(d.event || d.subtype || 'Event')}</div>
+        <div class="ri-meta">${region ? '📍 ' + escHtml(region) + ' · ' : ''}${escHtml(country)} · ${fullTime}</div>
       </div>
     `;
   }).join('');
@@ -9834,21 +9992,21 @@ function showMapPopup(evt, code, hazard, pin) {
           <span class="popup-sev" style="color:${sevColor};border-color:${sevColor}">
             <span class="popup-dot" style="background:${sevColor}"></span>NEWS
           </span>
-          <span class="popup-country">${countryName}${d.code && d.code !== '??' ? ' · ' + d.code : ''}</span>
+          <span class="popup-country">${escHtml(countryName)}${d.code && d.code !== '??' ? ' · ' + escHtml(d.code) : ''}</span>
         </div>
-        <div class="pt">${d.event}</div>
-        <div class="pm">${d.source}</div>
+        <div class="pt">${escHtml(d.event)}</div>
+        <div class="pm">${escHtml(d.source)}</div>
         <div class="popup-timestamp">
           <span class="popup-ts-label">PUBLISHED</span>
           <span class="popup-ts-value">${fullTime}</span>
           <span class="popup-ts-ago">${timeAgo}</span>
         </div>
-        ${descText ? `<div class="popup-desc">${descText}</div>` : ''}
+        ${descText ? `<div class="popup-desc">${escHtml(descText)}</div>` : ''}
         <div class="popup-grid">
           <div><span class="popup-k">Personnel</span><span class="popup-v">Yes (in country)</span></div>
           <div><span class="popup-k">Type</span><span class="popup-v">News headline</span></div>
         </div>
-        ${d.url ? `<button onclick="window.open('${d.url}', '_blank', 'noopener')">Read Article ↗</button>` : ''}
+        ${d.url ? `<button onclick="window.open(${JSON.stringify(escUrl(d.url))}, '_blank', 'noopener')">Read Article ↗</button>` : ''}
       `;
       popup.style.left = Math.min(x, viewRect.width - 340) + 'px';
       popup.style.top = Math.min(y, viewRect.height - 280) + 'px';
@@ -9859,7 +10017,10 @@ function showMapPopup(evt, code, hazard, pin) {
     }
 
     const actionList = (d.actions || []).slice(0, 3).map(a =>
-      `<span class="popup-action ${a.includes('WELFARE') || a.includes('HADR') ? 'on' : ''}">${a}</span>`
+      // Highlight actions that imply active engagement (not passive monitoring).
+      // Includes legacy 'HADR' tag for the mock/preset data, plus the current
+      // doctrine vocabulary: CALL PERSONNEL, WELFARE CHECK, AVOID INCIDENT AREA.
+      `<span class="popup-action ${a.includes('WELFARE') || a.includes('HADR') || a.includes('CALL') || a.includes('AVOID') ? 'on' : ''}">${escHtml(a)}</span>`
     ).join('');
 
     const regionLabel = regionLabelFor(d);
@@ -9869,19 +10030,19 @@ function showMapPopup(evt, code, hazard, pin) {
         <span class="popup-sev" style="color:${sevColor};border-color:${sevColor}">
           <span class="popup-dot" style="background:${sevColor}"></span>${sevLabel}
         </span>
-        <span class="popup-country">${countryName}${d.code && d.code !== '??' ? ' · ' + d.code : ''}</span>
+        <span class="popup-country">${escHtml(countryName)}${d.code && d.code !== '??' ? ' · ' + escHtml(d.code) : ''}</span>
       </div>
-      <div class="pt">${d.event}</div>
-      <div class="pm">${regionLabel ? '📍 ' + regionLabel + ' · ' : ''}${HAZ_LABEL[d.hazard]} / ${d.subtype}</div>
+      <div class="pt">${escHtml(d.event)}</div>
+      <div class="pm">${regionLabel ? '📍 ' + escHtml(regionLabel) + ' · ' : ''}${HAZ_LABEL[d.hazard] || ''} / ${escHtml(d.subtype)}</div>
       <div class="popup-timestamp">
         <span class="popup-ts-label">INCIDENT TIME</span>
         <span class="popup-ts-value">${fullTime}</span>
         <span class="popup-ts-ago">${timeAgo}</span>
       </div>
-      <div class="popup-desc">${descText}</div>
+      <div class="popup-desc">${escHtml(descText)}</div>
       <div class="popup-grid">
         <div><span class="popup-k">Personnel</span><span class="popup-v">${hasPersonnelInCountry(d.code) ? 'Yes' : 'None'}</span></div>
-        <div><span class="popup-k">Source</span><span class="popup-v">${d.source || '—'}</span></div>
+        <div><span class="popup-k">Source</span><span class="popup-v">${escHtml(d.source) || '—'}</span></div>
         <div><span class="popup-k">Age</span><span class="popup-v">${timeAgo}</span></div>
       </div>
       ${actionList ? `<div class="popup-actions">${actionList}</div>` : ''}
@@ -10182,8 +10343,6 @@ async function toggleRecorded(eventId, checked) {
   }
 }
 
-
-
 function updateRecordedCounter() {
   const el = document.getElementById('recorded-counter');
   if (!el) return;
@@ -10248,14 +10407,14 @@ function renderTable() {
                   title="Mark this event as recorded">
          </td>`;
     row.innerHTML = checkboxCell +
-      `<td><div class="country-cell"><div class="flag">${d.code}</div>${d.name}</div></td>
-         <td><div style="font-weight:500">${d.event}</div>
-             <div class="mono" style="font-size:10px;color:var(--text-mute);margin-top:2px">${HAZ_LABEL[d.hazard]} · ${d.subtype}</div></td>
-         <td><span class="sev ${d.severity}"><span class="dot"></span>${SEV_LABEL[d.severity]}</span></td>
+      `<td><div class="country-cell"><div class="flag">${escHtml(d.code)}</div>${escHtml(d.name)}</div></td>
+         <td><div style="font-weight:500">${escHtml(d.event)}</div>
+             <div class="mono" style="font-size:10px;color:var(--text-mute);margin-top:2px">${HAZ_LABEL[d.hazard] || ''} · ${escHtml(d.subtype)}</div></td>
+         <td><span class="sev ${d.severity}"><span class="dot"></span>${SEV_LABEL[d.severity] || ''}</span></td>
          <td class="mono" style="font-size:11px;color:var(--text);font-weight:500">${fmtFullTime(d.updated)}</td>
-         <td class="mono" style="font-size:11px;color:var(--text-dim)">${d.source}</td>
+         <td class="mono" style="font-size:11px;color:var(--text-dim)">${escHtml(d.source)}</td>
          <td class="mono" style="font-size:11px;color:var(--text-dim)">${fmtTime(d.updated)}</td>
-         <td>${d.actions ? d.actions.slice(0,1).map(a=>`<span class="action on">${a}</span>`).join(' ') : ''}</td>`;
+         <td>${d.actions ? d.actions.slice(0,1).map(a=>`<span class="action on">${escHtml(a)}</span>`).join(' ') : ''}</td>`;
     tbody.appendChild(row);
   });
 
@@ -10507,32 +10666,32 @@ function renderCards() {
       null
     );
     const sourceCell = sourceUrl
-      ? `<span>Source: <a href="${sourceUrl}" target="_blank" rel="noopener" class="src-link"><b>${d.source}</b> ↗</a></span>`
-      : `<span>Source: <b>${d.source}</b></span>`;
+      ? `<span>Source: <a href="${escUrl(sourceUrl)}" target="_blank" rel="noopener" class="src-link"><b>${escHtml(d.source)}</b> ↗</a></span>`
+      : `<span>Source: <b>${escHtml(d.source)}</b></span>`;
 
     card.innerHTML = `
       <div class="top">
         <div>
-          <div class="country">${locationLabel}
-            <span class="src-badge ${d.live ? 'live' : 'mock'}">${d.live ? '◉ LIVE · ' + (d.source || 'API') : '◌ MOCK'}</span>
+          <div class="country">${escHtml(locationLabel)}
+            <span class="src-badge ${d.live ? 'live' : 'mock'}">${d.live ? '◉ LIVE · ' + escHtml(d.source || 'API') : '◌ MOCK'}</span>
             ${safBadge}
           </div>
-          <div class="title">${d.event}</div>
+          <div class="title">${escHtml(d.event)}</div>
         </div>
-        <span class="sev ${d.severity}"><span class="dot"></span>${SEV_LABEL[d.severity]}</span>
+        <span class="sev ${d.severity}"><span class="dot"></span>${SEV_LABEL[d.severity] || ''}</span>
       </div>
       <div class="meta">
-        <span>Hazard: <b>${HAZ_LABEL[d.hazard]} / ${d.subtype}</b></span>
+        <span>Hazard: <b>${HAZ_LABEL[d.hazard] || ''} / ${escHtml(d.subtype)}</b></span>
         <span>Incident Time: <b>${fmtFullTime(d.updated)}</b> <span style="color:var(--accent)">(${fmtTime(d.updated)})</span></span>
         ${sourceCell}
-        <span>Personnel: <b>${personnelText}</b></span>
+        <span>Personnel: <b>${escHtml(personnelText)}</b></span>
       </div>
-      <div class="desc">${d.desc}</div>
+      <div class="desc">${escHtml(d.desc)}</div>
       <div class="ai">
         <div class="ai-head">
           <span>⬡ AI STAFF-ASSIST SUMMARY</span>
         </div>
-        <div class="ai-body" id="ai-${cardKey(d)}"><span class="label">Situation</span>${preset.situation}<span class="label">Risk Assessment</span>${preset.threshold}${hasSAF ? `<span class="label">Recommended Actions</span>${preset.actions}` : ''}</div>
+        <div class="ai-body" id="ai-${cardKey(d)}"><span class="label">Situation</span>${escHtml(preset.situation)}<span class="label">Risk Assessment</span>${escHtml(preset.threshold)}${hasSAF ? `<span class="label">Recommended Actions</span>${escHtml(preset.actions)}` : ''}</div>
       </div>
       ${d.hazard === 'haze' ? `
       <div class="aq-history">
@@ -10905,7 +11064,6 @@ async function loadAQHistory(code, lat, lng, range, btnEl) {
   }
   renderAQChart(chartId, statsId, series, isLive);
 }
-
 
 // ============================================================
 //  GO
@@ -11807,7 +11965,6 @@ function getCountryByISO2(iso2) {
   return GEO_COUNTRIES.find(c => c.iso2 === iso2) || null;
 }
 
-
 // Get the current session token from sessionStorage (null if not logged in
 // or if the browser tab was closed since last login). Used as the
 // X-Session-Token header on personnel-data fetches.
@@ -12552,15 +12709,18 @@ const AUTO_REFRESH_HAZARD_MS = 15 * 60 * 1000; //  15 minutes
 const AUTO_REFRESH_SG_MS     = 60 * 60 * 1000; //  1 hour
 const AUTO_REFRESH_TEMP_MS   =  5 * 60 * 1000; //  5 minutes — temperature only
 const AUTO_REFRESH_RAIN_MS   =  5 * 60 * 1000; //  5 minutes — rainfall only
+const AUTO_REFRESH_DAILY_MS  = 12 * 60 * 60 * 1000; // 12 hours — Past 7-day history + 4-day forecast
 
 let autoRefreshHazardTimer = null;
 let autoRefreshSGTimer = null;
 let autoRefreshTempTimer = null;
 let autoRefreshRainTimer = null;
+let autoRefreshDailyTimer = null;
 let lastHazardAutoRefresh = 0;
 let lastSGAutoRefresh = 0;
 let lastTempAutoRefresh = 0;
 let lastRainAutoRefresh = 0;
+let lastDailyAutoRefresh = 0;
 
 // Per-layer "last successful refresh" timestamps so the SG map can show a
 // distinct freshness indicator depending on which layer is active.
@@ -12592,7 +12752,6 @@ async function refreshHazardDataOnly() {
     setSourceStatusUI(false);
     lastHazardAutoRefresh = Date.now();
     updateHazardLastRefreshed(new Date().toISOString());
-    if (typeof maybeSendTelegramAlerts === 'function') maybeSendTelegramAlerts();
     console.log(`[auto-refresh] Hazard data refreshed at ${new Date().toLocaleTimeString('en-GB')}`);
   } catch (e) {
     console.error('[auto-refresh] Hazard refresh failed:', e);
@@ -12631,6 +12790,36 @@ async function refreshSGDataOnly() {
     console.log(`[auto-refresh] SG data refreshed at ${new Date().toLocaleTimeString('en-GB')}`);
   } catch (e) {
     console.error('[auto-refresh] SG refresh failed:', e);
+  }
+}
+
+// Refresh the two daily-cadence SG data sources:
+//   - Past 7 days history (NEA per-station readings, used for the daily-statistics table)
+//   - 4-day forecast (NEA Met Service Singapore, used for the forecast strip)
+//
+// Both cache for 12 hours inside their fetchers. This refresh function bypasses
+// the cache by forcing a fresh fetch (we clear `lastFetch` first). Wired to a
+// 12-hour interval timer and the visibility-change handler so it runs whether
+// the user is actively on the page or comes back after being away.
+async function refreshDailySGDataOnly() {
+  try {
+    // Force a fresh fetch by clearing the cache stamps. Without this, the
+    // fetchers would short-circuit on their own 12-hour cache check.
+    if (typeof sgWeekData !== 'undefined' && sgWeekData) sgWeekData.lastFetch = null;
+    if (typeof sgForecastData !== 'undefined' && sgForecastData) sgForecastData.lastFetch = null;
+    const tasks = [];
+    if (typeof fetchSingapore7DayHistory === 'function') tasks.push(fetchSingapore7DayHistory());
+    if (typeof fetchSGForecast === 'function')          tasks.push(fetchSGForecast());
+    await Promise.all(tasks);
+    // Re-render to pick up the fresh data (fetchers also call this, but
+    // belt-and-braces in case either failed silently).
+    if (typeof renderSingaporeView === 'function') {
+      try { renderSingaporeView(); } catch (_) {}
+    }
+    lastDailyAutoRefresh = Date.now();
+    console.log(`[auto-refresh] Daily SG data (7-day history + 4-day forecast) refreshed at ${new Date().toLocaleTimeString('en-GB')}`);
+  } catch (e) {
+    console.error('[auto-refresh] Daily SG refresh failed:', e);
   }
 }
 
@@ -12708,6 +12897,7 @@ function startAutoRefreshTimers() {
   // Clear any existing timers (in case this runs more than once)
   if (autoRefreshHazardTimer) clearInterval(autoRefreshHazardTimer);
   if (autoRefreshSGTimer)     clearInterval(autoRefreshSGTimer);
+  if (autoRefreshDailyTimer)  clearInterval(autoRefreshDailyTimer);
 
   autoRefreshHazardTimer = setInterval(() => {
     // NOTE: intentionally NOT gated on document.hidden. Telegram alerts must
@@ -12722,6 +12912,16 @@ function startAutoRefreshTimers() {
     if (document.hidden) return;
     refreshSGDataOnly();
   }, AUTO_REFRESH_SG_MS);
+
+  // 12-hour timer for NEA's daily-cadence data (Past 7 days + 4-day forecast).
+  // NOT gated on document.hidden: browsers will throttle/freeze this in the
+  // background anyway (long intervals are unreliable when tab is hidden),
+  // but firing when we can is better than not firing at all. The
+  // visibilitychange catch-up below ensures the data IS refreshed the moment
+  // the user returns to the tab if 12h have passed.
+  autoRefreshDailyTimer = setInterval(() => {
+    refreshDailySGDataOnly();
+  }, AUTO_REFRESH_DAILY_MS);
 
   // Temperature and Rainfall timers are NOT started here.
   // They are started lazily the first time the user opens those layers
@@ -12749,100 +12949,13 @@ function startAutoRefreshTimers() {
       console.log('[auto-refresh] Rainfall refresh overdue on tab focus — running now');
       refreshRainStationsOnly();
     }
+    if (now - lastDailyAutoRefresh > AUTO_REFRESH_DAILY_MS) {
+      console.log('[auto-refresh] Daily SG refresh overdue on tab focus — running now');
+      refreshDailySGDataOnly();
+    }
   });
 
-  console.log(`[auto-refresh] Scheduled — hazards every ${AUTO_REFRESH_HAZARD_MS/60000}min, SG full every ${AUTO_REFRESH_SG_MS/60000}min. Temperature & Rainfall timers start lazily on first layer activation.`);
-}
-
-// ============================================================
-//  TELEGRAM NOTIFIER (v2 — server-side dedup)
-//  After each hazard refresh, find Critical/Warning incidents from
-//  the last 24h and POST them to the Cloudflare Worker. The worker
-//  checks D1 to decide which are actually new before broadcasting.
-//
-//  - Disabled if TELEGRAM_BRIDGE_URL is empty
-//  - Worker handles dedup (multi-browser safe)
-//  - Worker filters by subscriber subscription time (no backlog for new subs)
-//  - Excludes air-quality / haze events
-//  - Silent failure (logs to console only) — never breaks the dashboard
-// ============================================================
-function incidentTelegramId(d) {
-  if (!d) return '';
-  if (d.id) return String(d.id);
-  return [d.code || '?', d.hazard || '?', d.event || '?', d.updated || ''].join('|');
-}
-
-async function maybeSendTelegramAlerts() {
-  // DISABLED May 2026. Telegram broadcasts are now driven by the Worker's
-  // scheduled (cron) handler, which runs every 15 min independent of any
-  // browser. See worker.js → runScheduledTick(). The dashboard no longer
-  // POSTs candidates to the Worker for broadcast; it only displays alerts.
-  //
-  // Why disabled rather than removed: keeping the function (and its single
-  // callsites) lets us re-enable browser sends quickly if cron has issues —
-  // just remove the early return below.
-  return;
-  // eslint-disable-next-line no-unreachable
-  if (!TELEGRAM_BRIDGE_URL || !TELEGRAM_SHARED_SECRET) return;
-  if (typeof DATA === 'undefined' || !Array.isArray(DATA)) return;
-
-  // Find Critical/Warning incidents from the last 24h.
-  // Excludes air-quality / haze events — user opted out of those alerts.
-  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-  const candidates = DATA.filter(d =>
-    !d.nominal &&
-    d.hazard !== 'haze' &&
-    (d.severity === 'crit' || d.severity === 'warn') &&
-    d.updated &&
-    new Date(d.updated).getTime() >= cutoff
-  );
-
-  if (!candidates.length) return;
-
-  console.log(`[telegram] posting ${candidates.length} candidate(s) to worker for dedup + broadcast…`);
-
-  const payload = {
-    incidents: candidates.map(d => ({
-      id:             incidentTelegramId(d),
-      severity:       d.severity,
-      country:        (typeof ISO2_TO_NAME !== 'undefined' && ISO2_TO_NAME[d.code]) || d.name || d.code || 'Unknown',
-      code:           d.code,
-      event:          d.event || d.subtype || 'Incident',
-      desc:           d.desc || '',
-      source:         d.source || '—',
-      updated:        d.updated,
-      threshold:      d.threshold || '—',
-      regionName:     d.regionName || '',
-      lat:            Number.isFinite(d.lat) ? d.lat : null,
-      lng:            Number.isFinite(d.lng) ? d.lng : null,
-      exposureLevel:  d.exposureLevel || 'none',
-    })),
-  };
-
-  try {
-    const r = await fetch(TELEGRAM_BRIDGE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Auth-Token': TELEGRAM_SHARED_SECRET,
-      },
-      body: JSON.stringify(payload),
-    });
-    const result = await r.json();
-    if (r.ok) {
-      const sent    = result?.sent    ?? 0;
-      const skipped = result?.skipped ?? 0;
-      const errors  = result?.errors  ?? 0;
-      console.log(`[telegram] worker response: ${sent} sent, ${skipped} skipped (dedup), ${errors} errors`);
-      if (errors > 0 && result?.errorDetails) {
-        console.warn('[telegram] error details:', result.errorDetails);
-      }
-    } else {
-      console.warn(`[telegram] bridge returned ${r.status}:`, result);
-    }
-  } catch (e) {
-    console.warn('[telegram] bridge unreachable:', e.message);
-  }
+  console.log(`[auto-refresh] Scheduled — hazards every ${AUTO_REFRESH_HAZARD_MS/60000}min, SG full every ${AUTO_REFRESH_SG_MS/60000}min, daily SG (7-day history + 4-day forecast) every ${AUTO_REFRESH_DAILY_MS/3600000}h. Temperature & Rainfall timers start lazily on first layer activation.`);
 }
 
 // Wire up the floating scroll-to-top button. Shows when scrolled >300px,

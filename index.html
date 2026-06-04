@@ -2254,6 +2254,15 @@
     color: var(--crit);
     font-weight: 700;
   }
+  /* AI-rejected items in Full List: faded to indicate the LLM didn't
+     classify them as real disasters. Hover lifts the opacity so they
+     remain readable when targeted. */
+  .news-item.ai-rejected {
+    opacity: 0.5;
+  }
+  .news-item.ai-rejected:hover {
+    opacity: 0.85;
+  }
   .news-item .ni-time {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
@@ -3140,6 +3149,156 @@
     line-height: 1.55;
   }
 
+  /* ===== Narrative Assessment (AI-generated 2x2 panels) ===== */
+  .assess-narrative-section {
+    margin-top: 28px;
+  }
+  .assess-banner-inline {
+    margin-left: 10px;
+    padding: 2px 8px;
+    border: 1px solid var(--line-2);
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: normal;
+  }
+  .assess-panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  /* Single-column override — used when the panel needs full width because
+     it's paired with another sub-section (like the Risk Assessment block
+     under Environmental). */
+  .assess-panel-grid-single {
+    grid-template-columns: 1fr;
+  }
+  .sg-subsection-title {
+    margin-top: 22px;
+    margin-bottom: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+  }
+  .assess-panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    padding: 16px 18px;
+    min-height: 280px;
+  }
+  .assess-panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .assess-panel-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .assess-panel-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-mute);
+    letter-spacing: 0.06em;
+  }
+  .assess-panel-meta.stale {
+    color: var(--warn);
+  }
+  .assess-panel-meta.error {
+    color: var(--crit);
+  }
+  .assess-panel-body {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .assess-panel-body h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 14px 0 6px;
+    font-weight: 700;
+    border: none;
+  }
+  .assess-panel-body h2:first-child {
+    margin-top: 0;
+  }
+  .assess-panel-body h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin: 10px 0 4px;
+    font-weight: 600;
+    border: none;
+  }
+  .assess-panel-body table.assess-risk-matrix {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 12px;
+    font-size: 12px;
+  }
+  .assess-panel-body table.assess-risk-matrix th,
+  .assess-panel-body table.assess-risk-matrix td {
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+    text-align: left;
+  }
+  .assess-panel-body table.assess-risk-matrix th {
+    background: var(--bg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+  .assess-panel-body table.assess-risk-matrix td:nth-child(2),
+  .assess-panel-body table.assess-risk-matrix td:nth-child(3),
+  .assess-panel-body table.assess-risk-matrix td:nth-child(4) {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .assess-panel-body ul {
+    margin: 4px 0 8px;
+    padding-left: 20px;
+  }
+  .assess-panel-body li {
+    margin-bottom: 4px;
+  }
+  .assess-panel-body p {
+    margin: 0 0 8px;
+  }
+  .assess-panel-body.empty {
+    color: var(--text-mute);
+    font-style: italic;
+    text-align: center;
+    padding: 60px 20px;
+  }
+  @media (max-width: 900px) {
+    .assess-panel-grid { grid-template-columns: 1fr; }
+  }
+
   @media (max-width: 1000px) and (min-width: 701px) {
     .sg-current { grid-template-columns: 1fr 1fr; }
   }
@@ -3847,8 +4006,8 @@
         <div class="news-actions">
           <input type="text" id="news-search-input" class="news-search" placeholder="🔍 SEARCH KEYWORDS…" autocomplete="off" spellcheck="false">
           <button class="news-search-clear" id="news-search-clear" title="Clear search">✕</button>
-          <button class="news-filter-btn active" data-filter="all">ALL DISASTERS</button>
-          <button class="news-filter-btn" data-filter="personnel">PERSONNEL LOCATIONS ONLY</button>
+          <button class="news-filter-btn active" data-filter="priority">PRIORITY LIST</button>
+          <button class="news-filter-btn" data-filter="full">FULL LIST</button>
           <button class="news-refresh" onclick="fetchNewsFeed()" title="Force refresh">↻</button>
         </div>
       </div>
@@ -3969,9 +4128,44 @@
            any orphan getElementById call degrades gracefully. -->
       <div id="sg-summary-mount" class="sg-summary-top"></div>
 
-      <div class="sg-section">
-        <div class="sg-section-title">Risk Assessment</div>
+      <!-- ============== ENVIRONMENTAL ============== -->
+      <!-- AI Narrative Assessment — SG-Environmental panel regenerated daily.
+           Followed by the deterministic Risk Assessment block (PSI/PM2.5/Temp
+           bands, 7-day history, 4-day forecast). Both are environmental
+           by nature, so they live together. -->
+      <div class="sg-section assess-narrative-section">
+        <div class="sg-section-title">Environmental Assessment <span class="assess-banner-inline">AI-generated narrative · Cross-check against primary sources</span></div>
+        <div class="assess-panel-grid assess-panel-grid-single">
+          <div class="assess-panel" data-panel="sg-env">
+            <div class="assess-panel-head">
+              <span class="assess-panel-title">Narrative Analysis</span>
+              <span class="assess-panel-meta" id="assess-meta-sg-env">—</span>
+            </div>
+            <div class="assess-panel-body" id="assess-body-sg-env">◌ Loading…</div>
+          </div>
+        </div>
+        <!-- Deterministic risk assessment — PSI/PM2.5/Temp bands, 7-day table,
+             4-day NEA forecast. Populated by buildSafRiskAnalysis() into
+             #sg-thresholds. -->
+        <div class="sg-subsection-title">Doctrinal Risk Bands &amp; Supporting Data</div>
         <div id="sg-thresholds"></div>
+      </div>
+
+      <!-- ============== DISEASES ============== -->
+      <!-- AI Narrative Assessment — global outbreaks of concern with
+           potential SAF personnel impact (returning-personnel screening,
+           deployment risk, overseas-detachment exposure). -->
+      <div class="sg-section assess-narrative-section">
+        <div class="sg-section-title">Diseases Assessment <span class="assess-banner-inline">AI-generated narrative · Cross-check against WHO and MOH</span></div>
+        <div class="assess-panel-grid assess-panel-grid-single">
+          <div class="assess-panel" data-panel="sg-dis">
+            <div class="assess-panel-head">
+              <span class="assess-panel-title">Global Outbreaks &mdash; SAF Personnel Impact</span>
+              <span class="assess-panel-meta" id="assess-meta-sg-dis">—</span>
+            </div>
+            <div class="assess-panel-body" id="assess-body-sg-dis">◌ Loading…</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -4498,6 +4692,35 @@ const NEWS_DISASTER_KEYWORDS = [
   'evacuated','evacuation','evacuations','displaced',
   'state of emergency','emergency declared','disaster declared',
   'natural disaster','natural disasters','disaster relief','disaster zone',
+  // 8) STRUCTURAL FIRES (added June 2026) — bare 'fire' is too noisy
+  //    (matches 'open fire on protesters', 'house fire alarm'), so we use
+  //    compound phrases that strongly imply a destructive fire event.
+  'building fire','factory fire','house fire','apartment fire','hotel fire',
+  'hospital fire','school fire','warehouse fire','industrial fire',
+  'fire kills','fire engulfs','fire breaks out','fire rages','fire sweeps',
+  'killed in fire','dies in fire','died in fire','deadly fire',
+  'inferno','ablaze',
+  // 9) TRANSPORT DISASTERS (added June 2026) — bare 'crash' is too noisy
+  //    (matches stock-market crashes, etc.), so we require compound phrases
+  //    indicating mass-casualty transport incidents.
+  'plane crash','air crash','helicopter crash','jet crash',
+  'train crash','train derailment','train derails','train collision',
+  'ferry sinks','ferry capsizes','ferry collision','ferry disaster',
+  'boat capsizes','boat sinks','vessel sinks',
+  'bus plunges','bus crash kills','bus collision kills',
+  'cruise ship grounded','oil tanker collision','cargo ship sinks',
+  // 10) STRUCTURAL COLLAPSE (added June 2026)
+  'building collapse','building collapses','bridge collapse','bridge collapses',
+  'roof collapse','wall collapse','tunnel collapse',
+  'mine collapse','mine accident','mine disaster',
+  'dam burst','dam collapse','dam fails',
+  // 11) INDUSTRIAL ACCIDENTS (added June 2026)
+  'chemical leak','chemical spill','toxic spill',
+  'gas explosion','gas leak','pipeline explosion','pipeline rupture',
+  'oil spill','radiation leak','radioactive leak',
+  'factory explosion','plant explosion','nuclear incident',
+  // 12) MASS-CASUALTY CROWD INCIDENTS (added June 2026)
+  'stampede','crowd crush','crush kills','pilgrim stampede',
 ];
 
 // =============================================================
@@ -5207,11 +5430,9 @@ async function fetchNewsFeed() {
     // Then new items — they replace existing copies with the same key.
     // Skip anything that doesn't pass the disaster keyword filter.
     let added = 0, skippedNonDisaster = 0;
-    const rejectedSamples = []; // first 10 rejected titles for diagnostics
     for (const it of fresh) {
       if (!newsItemPasses(it)) {
         skippedNonDisaster++;
-        if (rejectedSamples.length < 10) rejectedSamples.push(it.title || '(no title)');
         continue;
       }
       const k = newsItemKey(it);
@@ -5248,12 +5469,65 @@ async function fetchNewsFeed() {
     merged = dedupCrossOutlet(merged);
     const collapsedCount = beforeDedup - merged.length;
 
+    // ===== LLM final-judgment filter (June 2026) =====
+    // After keyword filter + dedup, ask the worker to classify each surviving
+    // item via Gemini (with D1 cache). Items the LLM identifies as
+    // not_disaster are removed. Items flagged is_disaster get aiHazard
+    // attached for richer downstream filtering.
+    //
+    // Graceful degradation: if the worker is unreachable, the call errors,
+    // or the LLM returns is_disaster=null (no key / failure), the item is
+    // KEPT — falling back to the keyword filter's verdict. We never DROP an
+    // item on an LLM failure; only on a confident not_disaster verdict.
+    let llmDropped = 0, llmKeptUnknown = 0, llmCached = 0;
+    try {
+      const itemsForClassify = merged.map(it => ({
+        url: it.link || '',
+        title: it.title || '',
+        description: it.description || '',
+      })).filter(it => it.url);
+      if (itemsForClassify.length) {
+        const r = await fetch(TELEGRAM_BRIDGE_URL + '/classify-news', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': TELEGRAM_SHARED_SECRET,
+          },
+          body: JSON.stringify({ items: itemsForClassify }),
+        });
+        if (r.ok) {
+          const data = await r.json();
+          const verdictByUrl = new Map();
+          for (const v of (data.classifications || [])) {
+            verdictByUrl.set(v.url, v);
+            if (v.cached) llmCached++;
+          }
+          // Attach verdicts to each item; do NOT drop is_disaster=false items
+          // — they're kept so the "Full List" tab can surface them with
+          // visual de-emphasis. The "Priority List" tab filters them out at
+          // render time.
+          let droppedByLlmCount = 0; // counted but not actually dropped
+          for (const it of merged) {
+            const v = verdictByUrl.get(it.link || '');
+            if (v && v.is_disaster === false) droppedByLlmCount++;
+            if (v && v.is_disaster === null) llmKeptUnknown++;
+            if (v) {
+              it.aiIsDisaster = v.is_disaster;
+              it.aiHazard = v.hazard;
+            }
+          }
+          llmDropped = droppedByLlmCount;
+        } else {
+          console.warn(`[news] LLM classify HTTP ${r.status} — keeping all items (fallback to keyword filter only)`);
+        }
+      }
+    } catch (e) {
+      console.warn(`[news] LLM classify request failed (${e.message}) — keeping all items`);
+    }
+
     newsData = { items: merged, lastFetch: Date.now(), fetching: false };
     saveNewsToStorage(merged);
-    console.log(`[news] funnel: ${fresh.length} fresh from worker → ${fresh.length - skippedNonDisaster} passed filter → ${added} new → ${beforeDedup} in 3-day window → ${merged.length} after cross-outlet dedup (${droppedOldCount} aged out, ${skippedNonDisaster} did not match a disaster keyword, ${collapsedCount} cross-outlet duplicates collapsed)`);
-    if (rejectedSamples.length) {
-      console.log('[news] sample of rejected (non-disaster) headlines:', rejectedSamples);
-    }
+    console.log(`[news] funnel: ${fresh.length} fresh from worker → ${fresh.length - skippedNonDisaster} passed filter → ${added} new → ${beforeDedup} in 3-day window → ${merged.length} after dedup (${droppedOldCount} aged out, ${skippedNonDisaster} keyword filter, ${collapsedCount} cross-outlet dedup, ${llmDropped} LLM not_disaster [kept for Full List], ${llmKeptUnknown} LLM unknown, ${llmCached} LLM cached)`);
     if (typeof renderNewsFeed === 'function') {
       try { renderNewsFeed(); } catch (e) {}
     }
@@ -7751,6 +8025,449 @@ function refreshSGAssessment() {
   if (box) renderSGAssessmentBox(box);
 }
 
+// =============================================================
+//  NARRATIVE ASSESSMENT — 4 panels (SG/Global × Env/Diseases)
+// =============================================================
+//
+// Daily Gemini-generated narrative analyses. Cached server-side in D1.
+// - Global panels: regenerated by worker cron at 06:00 SGT (worker has data)
+// - SG panels: regenerated lazily by dashboard (NEA + news data lives here)
+//
+// No manual refresh anywhere. Users see whatever the cache holds.
+
+// Hardcoded event calendar — PLACEHOLDER DATES, to be updated when
+// confirmed. Keep dates in YYYY-MM-DD. The prompt uses these to flag
+// events falling within the 4-day NEA forecast window.
+const ASSESSMENT_EVENTS = [
+  { name: 'F1 Singapore Grand Prix',     date: '2026-10-02' },
+  { name: 'National Day Parade (NDP)',   date: '2026-08-09' },
+  { name: 'Singapore Airshow',           date: '2026-02-20' }, // biennial — next placeholder
+  { name: 'Singapore Maritime Week',     date: '2026-04-21' },
+  { name: 'Christmas Light-Up',          date: '2026-11-15' },
+  { name: 'Shangri-La Dialogue',         date: '2026-05-30' },
+  { name: 'New Year Countdown Event',    date: '2026-12-31' },
+  { name: 'CNY Receptions',              date: '2026-02-17' },
+];
+
+let assessmentPanelData = { panels: {}, lastFetch: 0, fetching: false };
+const ASSESS_REFRESH_MS = 60 * 60 * 1000; // re-read from worker hourly
+
+// Read all cached panel analyses from worker.
+async function fetchAssessmentPanels() {
+  if (assessmentPanelData.fetching) return assessmentPanelData;
+  if (assessmentPanelData.lastFetch && (Date.now() - assessmentPanelData.lastFetch) < ASSESS_REFRESH_MS) {
+    return assessmentPanelData;
+  }
+  assessmentPanelData.fetching = true;
+  try {
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/assessment-read', {
+      headers: { 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    assessmentPanelData = {
+      panels: data.panels || {},
+      lastFetch: Date.now(),
+      fetching: false,
+    };
+    renderAllAssessmentPanels();
+    // After loading, check if SG panels are stale and need regeneration.
+    maybeRegenSGPanels();
+  } catch (e) {
+    console.warn('[assessment] read failed:', e.message);
+    assessmentPanelData.fetching = false;
+  }
+  return assessmentPanelData;
+}
+
+// SG panels regenerate lazily — if the cache is missing or >24h stale,
+// the dashboard pushes facts to the worker for a fresh analysis.
+// One-shot per page load; cron is the primary mechanism for daily refresh.
+//
+// Readiness-gated: data fetchers run concurrently with regen triggers, so
+// we must NOT fire regen until sgData / sgWeekData / newsData are actually
+// populated. Otherwise Gemini sees empty payload and reports "no data".
+// We retry every 3s until data is ready (cap via attempts flag).
+let _sgRegenAttempted = { 'sg-env': false, 'sg-dis': false };
+async function maybeRegenSGPanels() {
+  // Readiness — each kind needs different upstream data.
+  const sgEnvReady = (typeof sgData !== 'undefined' && sgData?.items?.length > 0)
+                  && (typeof sgWeekData !== 'undefined' && sgWeekData?.psi?.length > 0);
+  const sgDisReady = (typeof newsData !== 'undefined' && newsData?.lastFetch);
+
+  for (const kind of ['sg-env', 'sg-dis']) {
+    if (_sgRegenAttempted[kind]) continue;
+    const panel = assessmentPanelData.panels[kind];
+    const isStale = !panel || !panel.generated_at
+      || (Date.now() - new Date(panel.generated_at).getTime()) > 24 * 60 * 60 * 1000;
+    if (!isStale) continue;
+
+    // Gate by readiness — don't regen with empty inputs.
+    // Do NOT mark as attempted yet, so we retry on the next tick.
+    const ready = (kind === 'sg-env') ? sgEnvReady : sgDisReady;
+    if (!ready) continue;
+
+    _sgRegenAttempted[kind] = true;
+    regenerateSGPanel(kind); // fire-and-forget
+  }
+
+  // If anything is still waiting on data, retry in 3 seconds.
+  const stillWaiting = (!_sgRegenAttempted['sg-env'] && !sgEnvReady)
+                    || (!_sgRegenAttempted['sg-dis'] && !sgDisReady);
+  if (stillWaiting) {
+    setTimeout(maybeRegenSGPanels, 3000);
+  }
+}
+
+async function regenerateSGPanel(kind) {
+  try {
+    const facts = (kind === 'sg-env') ? buildSGEnvFacts() : buildSGDiseasesFacts();
+    const r = await fetch(TELEGRAM_BRIDGE_URL + '/assessment-analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': TELEGRAM_SHARED_SECRET },
+      body: JSON.stringify({ kind, facts }),
+    });
+    if (!r.ok) {
+      console.warn(`[assessment] ${kind} regen HTTP ${r.status}`);
+      return;
+    }
+    const data = await r.json();
+    if (data.analysis) {
+      assessmentPanelData.panels[kind] = {
+        analysis: data.analysis,
+        generated_at: data.generated_at,
+        model: data.model,
+        error: null,
+      };
+      renderAssessmentPanel(kind);
+      console.log(`[assessment] ${kind} regenerated (${data.cached ? 'cache hit' : 'fresh'})`);
+    }
+  } catch (e) {
+    console.warn(`[assessment] ${kind} regen failed:`, e.message);
+  }
+}
+
+// Build facts payload for SG Environmental panel.
+function buildSGEnvFacts() {
+  // ===== Current readings — extracted properly from sgData arrays =====
+  // (Pre-Jul 2026 code read sgData.psi/pm25/temp/uvi which don't exist — bug.)
+  let psi = null, pm25 = null, temp = null, uvi = null;
+  let pm25Regional = null;
+  let psiRegional = null;
+  try {
+    if (typeof sgData !== 'undefined' && sgData?.items?.length) {
+      const latest = sgData.items[sgData.items.length - 1];
+      const psiObj = latest?.readings?.psi_twenty_four_hourly || {};
+      psi = (typeof nationalOf === 'function') ? nationalOf(psiObj) : null;
+      if (psiObj.north != null || psiObj.south != null) {
+        psiRegional = {
+          north:   psiObj.north,   south: psiObj.south,
+          east:    psiObj.east,    west:  psiObj.west,
+          central: psiObj.central,
+        };
+      }
+    }
+    if (typeof sgData !== 'undefined' && sgData?.pm25Items?.length) {
+      const latestPM = sgData.pm25Items[sgData.pm25Items.length - 1];
+      const pmObj = latestPM?.readings?.pm25_one_hourly || {};
+      pm25 = (typeof nationalOf === 'function') ? nationalOf(pmObj) : null;
+      if (pmObj.north != null || pmObj.south != null) {
+        pm25Regional = {
+          north:   pmObj.north,   south: pmObj.south,
+          east:    pmObj.east,    west:  pmObj.west,
+          central: pmObj.central,
+        };
+      }
+    }
+    if (typeof sgData !== 'undefined' && sgData?.tempItems?.length) {
+      const latestT = sgData.tempItems[sgData.tempItems.length - 1];
+      temp = latestT?.value;
+    }
+  } catch (_) {}
+
+  // ===== Past 7 days summary statistics =====
+  // Extract per-day max/mean from sgWeekData if available; compute aggregates
+  // so the prompt has actual numbers to cite instead of asking the LLM to do
+  // arithmetic on raw timestamp arrays.
+  let past7d = null;
+  try {
+    if (typeof sgWeekData !== 'undefined' && sgWeekData?.temp?.length) {
+      // Per-day buckets from hourly readings
+      const dayBuckets = {};
+      for (const d of sgWeekData.temp) {
+        const date = (d.timestamp || '').slice(0, 10);
+        if (!date) continue;
+        const vals = (d.readings || []).map(r => r.value).filter(v => v != null && !isNaN(v));
+        if (!vals.length) continue;
+        if (!dayBuckets[date]) dayBuckets[date] = [];
+        dayBuckets[date].push(...vals);
+      }
+      const days = Object.keys(dayBuckets).sort();
+      const dayStats = days.map(date => {
+        const vals = dayBuckets[date];
+        return {
+          date,
+          max:  Math.max(...vals),
+          min:  Math.min(...vals),
+          mean: vals.reduce((a,b)=>a+b,0) / vals.length,
+        };
+      });
+      if (dayStats.length) {
+        const allMax  = dayStats.map(d => d.max);
+        const allMean = dayStats.map(d => d.mean);
+        past7d = past7d || {};
+        past7d.temp = {
+          days: dayStats.length,
+          avgMax:  allMax.reduce((a,b)=>a+b,0) / allMax.length,
+          avgMean: allMean.reduce((a,b)=>a+b,0) / allMean.length,
+          peakMax: Math.max(...allMax),
+          minMin:  Math.min(...dayStats.map(d => d.min)),
+          peakDate: dayStats[allMax.indexOf(Math.max(...allMax))].date,
+        };
+      }
+    }
+    if (typeof sgWeekData !== 'undefined' && sgWeekData?.psi?.length) {
+      const vals = sgWeekData.psi
+        .map(d => (typeof nationalOf === 'function') ? nationalOf(d.readings?.psi_twenty_four_hourly) : null)
+        .filter(v => v != null && isFinite(v));
+      if (vals.length) {
+        past7d = past7d || {};
+        past7d.psi = {
+          samples: vals.length,
+          avg:     vals.reduce((a,b)=>a+b,0) / vals.length,
+          peak:    Math.max(...vals),
+          // Moderate (51-100) and Unhealthy (101+) tallies, hourly samples
+          moderateHours:  vals.filter(v => v >= 51 && v <= 100).length,
+          unhealthyHours: vals.filter(v => v > 100).length,
+        };
+      }
+    }
+    if (typeof sgWeekData !== 'undefined' && sgWeekData?.pm25?.length) {
+      const vals = sgWeekData.pm25
+        .map(d => (typeof nationalOf === 'function') ? nationalOf(d.readings?.pm25_one_hourly) : null)
+        .filter(v => v != null && isFinite(v));
+      if (vals.length) {
+        past7d = past7d || {};
+        past7d.pm25 = {
+          samples: vals.length,
+          avg:     vals.reduce((a,b)=>a+b,0) / vals.length,
+          peak:    Math.max(...vals),
+          // WHO 24h guideline = 15 µg/m³; NEA Moderate band starts at 56
+          hoursAbove55: vals.filter(v => v > 55).length,
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('[assessment] past7d aggregation failed:', e.message);
+  }
+
+  // ===== 4-day NEA forecast =====
+  const forecast = (typeof sgForecastData !== 'undefined' && sgForecastData?.days)
+    ? sgForecastData.days.map(d => ({
+        date: d.date, min: d.min, max: d.max, forecastText: d.forecastText,
+      }))
+    : [];
+
+  // ===== SG-relevant news (past 3 days, environmental keywords) =====
+  const news = ((newsData && newsData.items) || [])
+    .filter(it => {
+      const hay = ((it.title || '') + ' ' + (it.description || '')).toLowerCase();
+      return hay.includes('singapore') || hay.includes('haze') || hay.includes('flood')
+          || hay.includes('storm') || hay.includes('weather');
+    })
+    .slice(0, 10)
+    .map(it => ({ source: it.source, title: it.title, description: it.description }));
+
+  // ===== Event calendar — events within next 90 days =====
+  const now = Date.now();
+  const events = ASSESSMENT_EVENTS.map(e => {
+    const dt = new Date(e.date + 'T00:00:00+08:00').getTime();
+    const daysAway = Math.round((dt - now) / (24 * 60 * 60 * 1000));
+    return { ...e, daysAway };
+  })
+  .filter(e => e.daysAway >= -1 && e.daysAway <= 90)
+  .sort((a, b) => a.daysAway - b.daysAway);
+
+  return {
+    nea: { psi, pm25, temp, uvi, psiRegional, pm25Regional },
+    past7d,        // null if not available; { temp, psi, pm25 } sub-objects
+    forecast,
+    news,
+    events,
+  };
+}
+
+// Build facts payload for SG Diseases panel.
+// June 2026: rescoped from "SG-local diseases" to "global disease outbreaks
+// of SAF-personnel concern" — see worker's buildSGDiseasesPrompt for the
+// full reasoning. We now send global disease news (not regional-only) and
+// include personnelCountries so the LLM can frame impact correctly.
+function buildSGDiseasesFacts() {
+  // Disease news worldwide (not regional-filtered). The LLM does the
+  // operational-relevance judgment from the prompt's framing.
+  const news = ((newsData && newsData.items) || [])
+    .filter(it => {
+      const hay = ((it.title || '') + ' ' + (it.description || '')).toLowerCase();
+      return ['dengue','covid','flu','outbreak','epidemic','disease','virus',
+              'measles','cholera','ebola','mpox','hfmd','hantavirus','marburg',
+              'lassa','nipah','plague','poliovirus','polio','meningitis','botulism'].some(k => hay.includes(k));
+    })
+    .slice(0, 20)
+    .map(it => ({ source: it.source, title: it.title, description: it.description }));
+
+  // WHO outbreaks from existing DATA array (loaded by main hazard pipeline).
+  const who = ((typeof DATA !== 'undefined' && DATA) || [])
+    .filter(d => d.hazard === 'disease')
+    .slice(0, 15)
+    .map(d => ({ disease: d.title, country: d.country, date: d.date }));
+
+  // Personnel countries — pulled from personnelPresence if available so the
+  // LLM can frame impact specifically. Falls back to a sensible default.
+  const personnelCountries = [];
+  try {
+    if (typeof personnelPresence !== 'undefined' && personnelPresence) {
+      const seen = new Set();
+      Object.keys(personnelPresence).forEach(key => {
+        if (!personnelPresence[key]) return;
+        const iso2 = key.split('|')[0];
+        if (iso2 && typeof ISO2_TO_NAME !== 'undefined' && ISO2_TO_NAME[iso2] && !seen.has(iso2)) {
+          seen.add(iso2);
+          personnelCountries.push(ISO2_TO_NAME[iso2]);
+        }
+      });
+    }
+  } catch (_) { /* personnel data optional */ }
+
+  return { news, who, personnelCountries };
+}
+
+// Render a single panel from cached data.
+function renderAssessmentPanel(kind) {
+  const bodyEl = document.getElementById('assess-body-' + kind);
+  const metaEl = document.getElementById('assess-meta-' + kind);
+  if (!bodyEl || !metaEl) return;
+  const panel = assessmentPanelData.panels[kind];
+  if (!panel || !panel.analysis) {
+    bodyEl.className = 'assess-panel-body empty';
+    bodyEl.textContent = panel?.error
+      ? 'Analysis temporarily unavailable. Last error: ' + panel.error
+      : 'No analysis available yet. The next 06:00 SGT regeneration will populate this panel.';
+    metaEl.className = 'assess-panel-meta';
+    metaEl.textContent = '—';
+    return;
+  }
+  bodyEl.className = 'assess-panel-body';
+  bodyEl.innerHTML = formatAssessmentMarkdown(panel.analysis);
+
+  // Freshness indicator.
+  const age = Date.now() - new Date(panel.generated_at).getTime();
+  const hoursOld = Math.floor(age / (60 * 60 * 1000));
+  const stamp = new Date(panel.generated_at).toLocaleString('en-GB', {
+    timeZone: 'Asia/Singapore',
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  metaEl.textContent = `Updated ${stamp} SGT`;
+  if (panel.error) {
+    metaEl.className = 'assess-panel-meta error';
+    metaEl.textContent += ' · last regen failed';
+  } else if (hoursOld > 30) {
+    metaEl.className = 'assess-panel-meta stale';
+    metaEl.textContent += ' · stale';
+  } else {
+    metaEl.className = 'assess-panel-meta';
+  }
+}
+
+function renderAllAssessmentPanels() {
+  ['sg-env', 'sg-dis'].forEach(renderAssessmentPanel);
+}
+
+// Convert Gemini's markdown-ish output to safe HTML.
+// Supports: ## headers, ### subheaders, - bullet lists, blank-line paragraph
+// breaks, pipe-delimited tables. Escapes all input first so injection is
+// impossible.
+function formatAssessmentMarkdown(text) {
+  const escaped = String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Inline markdown transforms applied AFTER HTML-escape so injection is safe.
+  // Bold (**text**) → <strong>. Italic (*text* or _text_) → <em>.
+  // The bold pattern runs first so it doesn't get clobbered by italic.
+  // Non-greedy match prevents runaway across paragraphs.
+  const inline = (s) => s
+    .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(?<!\w)\*([^*\n]+?)\*(?!\w)/g, '<em>$1</em>')
+    .replace(/(?<!\w)_([^_\n]+?)_(?!\w)/g, '<em>$1</em>');
+
+  const lines = escaped.split('\n');
+  const out = [];
+  let inList = false;
+  let inTable = false;
+  let tableHeadDone = false;
+
+  const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+  const closeTable = () => {
+    if (inTable) {
+      out.push('</tbody></table>');
+      inTable = false;
+      tableHeadDone = false;
+    }
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+
+    // Table rows start with | and contain at least one more |
+    const isTableRow = line.trim().startsWith('|') && line.trim().slice(1).includes('|');
+    // Separator row like "|-----|-----|" — skip but mark head done
+    const isTableSep = /^\s*\|[\s|:\-]+\|\s*$/.test(line);
+
+    if (isTableRow) {
+      closeList();
+      const cells = line.trim().slice(1, -1).split('|').map(c => c.trim());
+      if (isTableSep) {
+        if (inTable && !tableHeadDone) {
+          out.push('</thead><tbody>');
+          tableHeadDone = true;
+        }
+        continue;
+      }
+      if (!inTable) {
+        out.push('<table class="assess-risk-matrix"><thead>');
+        out.push('<tr>' + cells.map(c => `<th>${inline(c)}</th>`).join('') + '</tr>');
+        inTable = true;
+      } else {
+        if (!tableHeadDone) { out.push('</thead><tbody>'); tableHeadDone = true; }
+        out.push('<tr>' + cells.map(c => `<td>${inline(c)}</td>`).join('') + '</tr>');
+      }
+      continue;
+    }
+    // Non-table line — close any open table
+    closeTable();
+
+    if (line.startsWith('### ')) {
+      closeList();
+      out.push(`<h3>${inline(line.slice(4).trim())}</h3>`);
+    } else if (line.startsWith('## ')) {
+      closeList();
+      out.push(`<h2>${inline(line.slice(3).trim())}</h2>`);
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      if (!inList) { out.push('<ul>'); inList = true; }
+      out.push(`<li>${inline(line.slice(2).trim())}</li>`);
+    } else if (line.trim() === '') {
+      closeList();
+    } else {
+      closeList();
+      out.push(`<p>${inline(line)}</p>`);
+    }
+  }
+  closeList();
+  closeTable();
+  return out.join('');
+}
+
 function safTempBand(t) {
   if (t == null) return null;
   if (t >= 38) return {
@@ -9089,6 +9806,9 @@ document.querySelectorAll('.views button').forEach(b => {
       // Trigger 7-day history fetch for the trend paragraphs inside the
       // risk assessment (same as SG Focus did).
       if (typeof fetchSingapore7DayHistory === 'function') fetchSingapore7DayHistory();
+      // Fetch cached narrative panels (Gemini-generated). No LLM cost — just
+      // reads D1 cache. SG panels may lazy-regen if stale; cron handles Global.
+      if (typeof fetchAssessmentPanels === 'function') fetchAssessmentPanels();
     }
     // Personnel tab: focus password input or re-render
     if (b.dataset.view === 'personnel') {
@@ -9104,7 +9824,7 @@ document.querySelectorAll('.views button').forEach(b => {
 // ============================================================
 //  News Feed Renderer
 // ============================================================
-let newsActiveFilter = 'all'; // 'all' (all disaster items) | 'personnel' (subset mentioning personnel countries)
+let newsActiveFilter = 'priority'; // 'priority' (LLM-confirmed disasters only) | 'full' (everything that passed keyword filter, including LLM-flagged false positives)
 let newsSearchQuery = '';     // free-text search; space-separated tokens all required (AND)
 
 // Lightweight category classifier — used for diversity-aware ordering only,
@@ -9182,11 +9902,17 @@ function renderNewsFeed() {
     }
   }
 
-  // Apply filter. Everything in storage is already disaster-only, so the
-  // only optional filter is the personnel-location overlay.
+  // Apply Priority/Full filter:
+  //   priority — only items the LLM confirmed as a disaster (aiIsDisaster=true)
+  //              OR items where the LLM verdict is unavailable (null/missing —
+  //              fall back to keyword-filter's verdict). Items the LLM flagged
+  //              as not_disaster are hidden.
+  //   full     — all items that survived the keyword filter, including
+  //              LLM-flagged false positives. Useful for auditing what the
+  //              LLM is excluding.
   let items = newsData.items || [];
-  if (newsActiveFilter === 'personnel') {
-    items = items.filter(item => newsMentionsPersonnelCountry(item) !== null);
+  if (newsActiveFilter === 'priority') {
+    items = items.filter(item => item.aiIsDisaster !== false);
   }
   // Apply free-text search (AND semantics — all tokens must appear in
   // title+description). Case-insensitive substring per token.
@@ -9217,8 +9943,8 @@ function renderNewsFeed() {
     if (searchTokens.length) {
       const safeQ = newsSearchQuery.trim().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       msg = `No headlines match "${safeQ}".`;
-    } else if (newsActiveFilter === 'personnel') {
-      msg = 'No headlines mention any country with personnel ticks.';
+    } else if (newsActiveFilter === 'priority') {
+      msg = newsData.fetching ? 'Loading headlines…' : 'No AI-confirmed disasters in the current feed. Try the Full List tab to see items the AI flagged as non-disasters.';
     } else {
       msg = newsData.fetching ? 'Loading headlines…' : 'No matching headlines yet — the next 10-min poll will populate this.';
     }
@@ -9274,8 +10000,12 @@ function renderNewsFeed() {
     // card IDs like "usgs:..." or "gdacs:...".
     const eventId = 'news:' + ((item.link && item.link.trim()) || ((item.title || '') + '|' + (item.source || '')));
     const isRecorded = recordedEvents.has(eventId);
+    // Items the LLM flagged as not_disaster are visually faded in the
+    // Full List (Priority List filters them out entirely). No badge — the
+    // fade is the only visual signal so the row doesn't get cluttered.
+    const aiRejected = item.aiIsDisaster === false;
     return `
-      <div class="news-item ${personnelMatch ? 'personnel-relevant' : ''}${isRecorded ? ' recorded' : ''}" data-event-id="${eventId.replace(/"/g, '&quot;')}">
+      <div class="news-item ${personnelMatch ? 'personnel-relevant' : ''}${isRecorded ? ' recorded' : ''}${aiRejected ? ' ai-rejected' : ''}" data-event-id="${eventId.replace(/"/g, '&quot;')}">
         <div class="ni-rec" onclick="event.stopPropagation()">
           <input type="checkbox" class="rec-check"
                  ${isRecorded ? 'checked' : ''}

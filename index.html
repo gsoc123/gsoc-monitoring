@@ -4897,7 +4897,11 @@ async function fetchUSGS() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     const events = (data.features || [])
-      .filter(f => f.properties.mag >= 4.0)
+      // M6.0+ floor (June 2026). Drops smaller quakes entirely — they
+      // don't reach the dashboard at all, not even as Advisory. Personnel-
+      // proximity classification still runs on the survivors. See worker.js
+      // for the matching filter on the Telegram alert path.
+      .filter(f => f.properties.mag >= 6.0)
       .slice(0, 500)
       .map(f => {
         const place = f.properties.place || 'Unknown';
@@ -12125,7 +12129,7 @@ function hasPersonnelPresence(incident) {
 //     ≤ 1500 km from the affected country centroid → 'warn'
 //   - else                                          → 'advisory' / 'none'
 // Returns 'crit' | 'warn' | 'advisory' | 'none'.
-const CENTROID_NEAR_KM = 1500;
+const CENTROID_NEAR_KM = 1000;
 function getCentroidExposureLevel(incident) {
   if (!incident || !incident.code) return 'none';
   const iso2 = String(incident.code).toUpperCase();

@@ -4436,7 +4436,7 @@ const SEV_COLOR = { crit:'#ff4d4d', warn:'#ffa336', watch:'#ffd83d', info:'#4fd1
 const SEV_LABEL = { crit:'Critical', warn:'Warning', watch:'Watch', info:'Advisory' };
 const HAZ_LABEL = {
   cyclone: 'Cyclone', haze: 'Air Quality', quake: 'Seismic',
-  flood: 'Flood', wildfire: 'Wildfire', drought: 'Drought',
+  flood: 'Flood', wildfire: 'Wildfire',
   volcano: 'Volcanic', disease: 'Disease'
 };
 
@@ -4659,7 +4659,7 @@ const NEWS_DISASTER_KEYWORDS = [
   'severe storm','thunderstorm','snowstorm','rainstorm','monsoon',
   'torrential rain','torrential rains','deluge','downpour','squall',
   'heatwave','heat wave','heat dome','extreme heat','extreme cold',
-  'cold wave','polar vortex','drought',
+  'cold wave','polar vortex',
   // 2) AIR QUALITY
   'haze','smog','transboundary haze','wildfire smoke','choking smog',
   'air pollution crisis','hazardous air','air quality alert','pm2.5','pm10',
@@ -4851,7 +4851,7 @@ function regionLabelFor(d) {
   }
 
   // GDACS disasters + WHO disease outbreaks
-  if (d.source === 'GDACS' || d.source === 'WHO' || ['cyclone','flood','wildfire','drought','volcano','disease'].includes(d.hazard)) {
+  if (d.source === 'GDACS' || d.source === 'WHO' || ['cyclone','flood','wildfire','volcano','disease'].includes(d.hazard)) {
     let s = String(d.event || d.subtype || '');
     // Try to extract after "in "
     const inMatch = s.match(/\bin\s+(.+?)(?:[,.]|$)/i);
@@ -4860,7 +4860,7 @@ function regionLabelFor(d) {
     const upperMatch = s.match(/\b([A-Z]{3,})\b/);
     if (upperMatch) return upperMatch[1];
     // Strip common prefixes
-    s = s.replace(/^(Tropical Cyclone|Hurricane|Typhoon|Cyclone|Flood|Volcanic Activity|Drought|Wildfire|Tsunami)\s*[—\-:]?\s*/i, '');
+    s = s.replace(/^(Tropical Cyclone|Hurricane|Typhoon|Cyclone|Flood|Volcanic Activity|Wildfire|Tsunami)\s*[—\-:]?\s*/i, '');
     if (s.length > 22) s = s.substring(0, 20) + '…';
     return s || d.subtype || '';
   }
@@ -5006,16 +5006,20 @@ async function fetchGDACS() {
 
     const HAZARD_MAP = {
       'TC':'cyclone', 'EQ':'quake', 'FL':'flood', 'VO':'volcano',
-      'DR':'drought', 'WF':'wildfire', 'TS':'quake'
+      'WF':'wildfire', 'TS':'quake'
     };
     const SUBTYPE_MAP = {
       'TC':'Tropical Cyclone','EQ':'Earthquake','FL':'Flood','VO':'Volcanic Activity',
-      'DR':'Drought','WF':'Wildfire','TS':'Tsunami'
+      'WF':'Wildfire','TS':'Tsunami'
     };
     const ALERT_TO_SEV = { 'Red':'crit', 'Orange':'warn', 'Green':'watch' };
 
     const events = features
-      .filter(f => f.properties && f.properties.eventtype && f.properties.eventtype !== 'EQ') // skip EQ (use USGS)
+      // Skip EQ (USGS is authoritative for quakes) and DR (drought removed
+      // June 2026 — not operationally relevant to current SAF monitoring).
+      .filter(f => f.properties && f.properties.eventtype
+                && f.properties.eventtype !== 'EQ'
+                && f.properties.eventtype !== 'DR')
       .slice(0, 200)
       .map(f => {
         const p = f.properties;
@@ -9719,7 +9723,6 @@ const HAZ_CHIP_COLOR = {
   quake:    '#ff4d4d',  // red
   flood:    '#5ed67b',  // green
   wildfire: '#ff8c42',  // burnt orange
-  drought:  '#d4b072',  // sandy yellow-brown
   volcano:  '#ffd83d',  // yellow
   disease:  '#c58bff',  // purple
 };
@@ -9841,7 +9844,7 @@ const NEWS_CATEGORY_PATTERNS = [
   { name: 'wildfire', patterns: ['wildfire','bushfire','forest fire','blaze','firestorm','wildland fire'] },
   { name: 'flood',    patterns: ['flood','flash flood','landslide','mudslide','avalanche','rockslide','sinkhole','river overflow'] },
   { name: 'weather',  patterns: ['cyclone','typhoon','hurricane','tornado','tropical storm','tropical depression','storm surge','blizzard','ice storm','hailstorm','dust storm','sandstorm','monsoon','torrential','deluge','downpour','squall'] },
-  { name: 'heatcold', patterns: ['heatwave','heat wave','heat dome','extreme heat','cold wave','polar vortex','frost','freeze warning','drought'] },
+  { name: 'heatcold', patterns: ['heatwave','heat wave','heat dome','extreme heat','cold wave','polar vortex','frost','freeze warning'] },
   { name: 'climate',  patterns: ['el niño','el nino','la niña','la nina','enso','oceanic niño','oni index','indian ocean dipole','madden-julian','arctic oscillation','sea surface temperature','marine heatwave','coral bleaching','climate driver'] },
   { name: 'air',      patterns: ['haze','smog','wildfire smoke','choking smog','air pollution','pm2.5','pm10','hazardous air','air quality alert'] },
   { name: 'environ',  patterns: ['oil spill','chemical spill','toxic leak','toxic spill','industrial disaster','environmental disaster','famine','starvation','food crisis'] },
@@ -11188,10 +11191,6 @@ function buildLiveSituation(d) {
       return where
         ? `Wildfire in ${where}: ${descRaw || 'see source for details.'}`
         : descRaw || 'Wildfire reported.';
-    case 'drought':
-      return where
-        ? `Drought conditions in ${where}: ${descRaw || 'see source for details.'}`
-        : descRaw || 'Drought conditions reported.';
     case 'volcano':
       return where
         ? `Volcanic activity in ${where}: ${descRaw || 'see source for details.'}`
@@ -12122,11 +12121,11 @@ function hasPersonnelPresence(incident) {
 }
 
 // Centroid-distance exposure model for NON-QUAKE events (cyclone, flood,
-// volcano, drought, wildfire, haze, disease, news). These have no
+// volcano, wildfire, haze, disease, news). These have no
 // epicentre-to-town distance in their titles, so we band by COUNTRY:
 //   - personnel in the affected country            → 'crit'
 //   - personnel in a country whose centroid is
-//     ≤ 1500 km from the affected country centroid → 'warn'
+//     ≤ 1000 km from the affected country centroid → 'warn'
 //   - else                                          → 'advisory' / 'none'
 // Returns 'crit' | 'warn' | 'advisory' | 'none'.
 const CENTROID_NEAR_KM = 1000;
@@ -12445,7 +12444,7 @@ function getPersonnelIncidentAlerts() {
     'cyclone','typhoon','hurricane','tornado','storm',
     'haze','smog',
     'outbreak','epidemic','pandemic','ebola','dengue','mpox','cholera','hantavirus','covid',
-    'heatwave','drought',
+    'heatwave',
   ];
   function detectHazardTokens(text) {
     if (!text) return [];

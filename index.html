@@ -5017,9 +5017,17 @@ async function fetchGDACS() {
     const events = features
       // Skip EQ (USGS is authoritative for quakes) and DR (drought removed
       // June 2026 — not operationally relevant to current SAF monitoring).
-      .filter(f => f.properties && f.properties.eventtype
-                && f.properties.eventtype !== 'EQ'
-                && f.properties.eventtype !== 'DR')
+      // For wildfires (WF): drop Green alerts — these are small/remote fires
+      // that GDACS itself doesn't consider humanitarian priority. Keep Orange
+      // and Red only. Reduces Telegram noise from routine wildfires while
+      // preserving the significant ones GDACS flags as humanitarian concern.
+      .filter(f => {
+        if (!f.properties || !f.properties.eventtype) return false;
+        if (f.properties.eventtype === 'EQ') return false;
+        if (f.properties.eventtype === 'DR') return false;
+        if (f.properties.eventtype === 'WF' && f.properties.alertlevel === 'Green') return false;
+        return true;
+      })
       .slice(0, 200)
       .map(f => {
         const p = f.properties;
